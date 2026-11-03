@@ -1,4 +1,4 @@
-"""Channel configuration: loads config/channel.yaml plus environment variables."""
+"""Channel configuration: one YAML file per channel in config/channels/, plus environment variables."""
 
 from __future__ import annotations
 
@@ -9,51 +9,61 @@ from pathlib import Path
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+CHANNELS_DIR = ROOT / "config" / "channels"
 
-# Free Microsoft neural voices served by edge-tts. Run `edge-tts --list-voices` for more.
+# Default voices per provider and language.
 DEFAULT_VOICES = {
-    "en": "en-IN-PrabhatNeural",
-    "ta": "ta-IN-ValluvarNeural",
-    "hi": "hi-IN-MadhurNeural",
+    # Free Microsoft neural voices (edge-tts). `edge-tts --list-voices` lists them all.
+    "edge": {"en": "en-IN-PrabhatNeural", "ta": "ta-IN-ValluvarNeural", "hi": "hi-IN-MadhurNeural"},
+    # Sarvam Bulbul v3 speakers (lowercase). Best-rated for Hindi and Tamil.
+    "sarvam": {"en": "shubh", "ta": "shubh", "hi": "shubh"},
+    # ElevenLabs voice id. Replace with the voice you choose in the ElevenLabs voice library.
+    "elevenlabs": {"en": "JBFqnCBsd6RMkjVDRZzb", "ta": "JBFqnCBsd6RMkjVDRZzb", "hi": "JBFqnCBsd6RMkjVDRZzb"},
 }
 
 LANGUAGE_NAMES = {"en": "English", "ta": "Tamil", "hi": "Hindi"}
+LOCALES = {"en": "en-IN", "ta": "ta-IN", "hi": "hi-IN"}
 
-# Fonts libass needs to shape each script. Install the matching Noto font (see README).
+# Fonts libass needs to shape each script. Install the matching Noto font (see assets/fonts).
 DEFAULT_FONTS = {"en": "Noto Sans", "ta": "Noto Sans Tamil", "hi": "Noto Sans Devanagari"}
 
 FORMATS = {
     # name: (width, height, target seconds)
     "short": (1080, 1920, 50),
-    "long": (1920, 1080, 480),
+    "long": (1920, 1080, 540),
 }
 
 
 @dataclass
 class ChannelConfig:
+    slug: str = "default"
     name: str = "My Faceless Channel"
     niche: str = "personal finance tips for young Indians"
     language: str = "hi"
     audience: str = "18-35 year olds in India"
     tone: str = "energetic, simple, trustworthy"
+    voice_provider: str = "edge"
     voice: str | None = None
-    voice_rate: str = "+5%"
+    voice_rate: float = 1.05  # 1.0 = normal speed
     font: str | None = None
     caption_color: str = "&H0000FFFF"  # ASS BGR hex: yellow
     music_volume: float = 0.12
+    footage_dir: str | None = None  # your own clips (screen recordings), used before stock
+    stock_sources: list[str] = field(default_factory=lambda: ["pexels", "pixabay"])
     default_tags: list[str] = field(default_factory=list)
     category_id: str = "27"  # YouTube "Education"
     made_for_kids: bool = False
     claude_model: str = "claude-opus-5-5"
     claude_effort: str = "medium"
-    output_dir: str = "output"
+    output_dir: str | None = None
     music_dir: str = "assets/music"
     publish_times: list[str] = field(default_factory=lambda: ["18:30"])  # local times, daily slots
     timezone: str = "Asia/Kolkata"
+    monthly_target_inr: int = 0
 
     @property
     def voice_name(self) -> str:
-        return self.voice or DEFAULT_VOICES[self.language]
+        return self.voice or DEFAULT_VOICES[self.voice_provider][self.language]
 
     @property
     def font_name(self) -> str:
@@ -64,27 +74,59 @@ class ChannelConfig:
         return LANGUAGE_NAMES[self.language]
 
     @property
+    def locale(self) -> str:
+        return LOCALES[self.language]
+
+    @property
     def output_path(self) -> Path:
-        return ROOT / self.output_dir
+        return ROOT / (self.output_dir or f"output/{self.slug}")
 
     @property
     def music_path(self) -> Path:
         return ROOT / self.music_dir
 
+    @property
+    def footage_path(self) -> Path | None:
+        return ROOT / self.footage_dir if self.footage_dir else None
 
-def load_config(path: str | os.PathLike | None = None, **overrides) -> ChannelConfig:
-    path = Path(path) if path else ROOT / "config" / "channel.yaml"
-    data = {}
-    if path.exists():
+
+def list_channels() -> list[str]:
+    return sorted(p.stem for p in CHANNELS_DIR.glob("*.yaml"))
+
+
+def channel_file(channel: str | None) -> Path:
+    channels = list_channels()
+    if channel is None:
+        channel = os.environ.get("FACEPIPE_CHANNEL")
+    if channel is None:
+        if len(channels) == 1:
+            channel = channels[0]
+        else:
+            raise ValueError(f"Choose a channel with --channel: {', '.join(channels)}")
+    path = Path(channel)
+    if path.suffix in {".yaml", ".yml"} and path.exists():
+        return path
+    path = CHANNELS_DIR / f"{channel}.yaml"
+    if not path.exists():
+        raise ValueError(f"No channel '{channel}'. Available: {', '.join(channels)}")
+    return path
+
+
+def load_config(channel: str | None = None, **overrides) -> ChannelConfig:
+    data: dict = {}
+    if channel is not None or list_channels():
+        path = channel_file(channel)
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        data.setdefault("slug", path.stem)
     data.update({k: v for k, v in overrides.items() if v is not None})
-    known = ChannelConfig.__dataclass_fields__
-    unknown = set(data) - set(known)
+    unknown = set(data) - set(ChannelConfig.__dataclass_fields__)
     if unknown:
-        raise ValueError(f"Unknown keys in {path}: {sorted(unknown)}")
+        raise ValueError(f"Unknown config keys: {sorted(unknown)}")
     cfg = ChannelConfig(**data)
     if cfg.language not in LANGUAGE_NAMES:
         raise ValueError(f"language must be one of {list(LANGUAGE_NAMES)}, got {cfg.language!r}")
+    if cfg.voice_provider not in DEFAULT_VOICES:
+        raise ValueError(f"voice_provider must be one of {list(DEFAULT_VOICES)}, got {cfg.voice_provider!r}")
     return cfg
 
 

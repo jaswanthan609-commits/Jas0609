@@ -1,26 +1,28 @@
-"""Visuals for each scene: Pexels stock video, Pexels photos, or an offline placeholder.
+"""Visuals for each scene, tried in order:
 
-Pexels is free for commercial use without attribution (https://www.pexels.com/license/).
-Get a key at https://www.pexels.com/api/ and set PEXELS_API_KEY.
+1. Your own footage (footage_dir in the channel config), e.g. OBS screen recordings. Name files
+   with the words a scene's visual_query will use ("chatgpt-custom-gpt-settings.mp4"), or put
+   `footage:<file name>` as the scene's visual_query in script.json to pick a file exactly.
+2. Pexels stock video, then photos (PEXELS_API_KEY). Free for commercial use.
+3. Pixabay stock video (PIXABAY_API_KEY). Free for commercial use.
+4. An offline colour placeholder, so dry runs work with no keys.
 """
 
 from __future__ import annotations
 
+import os
 import random
+import re
 from pathlib import Path
 
 import requests
 
-from .config import env
+from .config import ChannelConfig, env
 from .media import run
 
 PEXELS = "https://api.pexels.com"
-
-
-def _get(url: str, params: dict) -> dict:
-    r = requests.get(url, params=params, headers={"Authorization": env("PEXELS_API_KEY")}, timeout=30)
-    r.raise_for_status()
-    return r.json()
+PIXABAY = "https://pixabay.com/api/videos/"
+MEDIA_EXT = {".mp4", ".mov", ".mkv", ".webm", ".jpg", ".jpeg", ".png", ".webp"}
 
 
 def _download(url: str, out: Path) -> Path:
@@ -32,34 +34,89 @@ def _download(url: str, out: Path) -> Path:
     return out
 
 
-def _best_video_file(video: dict, width: int, height: int) -> str | None:
-    files = [f for f in video.get("video_files", []) if f.get("file_type") == "video/mp4" and f.get("width")]
-    if not files:
+def _words(text: str) -> set[str]:
+    return {w for w in re.split(r"[^a-z0-9]+", text.lower()) if len(w) > 2}
+
+
+def own_footage(cfg: ChannelConfig, query: str, used: set) -> Path | None:
+    folder = cfg.footage_path
+    if not folder or not folder.is_dir():
         return None
-    # Smallest file that still covers the target resolution, else the largest available.
-    big_enough = [f for f in files if min(f["width"], f["height"]) >= min(width, height) * 0.7]
-    pick = min(big_enough, key=lambda f: f["width"]) if big_enough else max(files, key=lambda f: f["width"])
-    return pick["link"]
+    files = [p for p in sorted(folder.iterdir()) if p.suffix.lower() in MEDIA_EXT]
+    if query.startswith("footage:"):
+        name = query.split(":", 1)[1].strip()
+        exact = [p for p in files if p.name == name or p.stem == name]
+        if not exact:
+            raise FileNotFoundError(f"Scene asks for footage '{name}', not found in {folder}")
+        return exact[0]
+    wanted = _words(query)
+    scored = [(len(wanted & _words(p.stem)), p) for p in files if p not in used]
+    scored = [(score, p) for score, p in scored if score > 0]
+    if not scored:
+        return None
+    best = max(scored, key=lambda sp: sp[0])[1]
+    used.add(best)
+    return best
 
 
-def fetch_stock(query: str, width: int, height: int, out_stem: Path, used: set[int]) -> Path | None:
-    """Download a stock clip (or photo as fallback) for `query`. Returns None if nothing found."""
+def _pexels(query: str, width: int, height: int, out_stem: Path, used: set) -> Path | None:
+    headers = {"Authorization": env("PEXELS_API_KEY")}
     orientation = "portrait" if height > width else "landscape"
-    data = _get(f"{PEXELS}/videos/search", {"query": query, "orientation": orientation, "per_page": 15})
-    videos = [v for v in data.get("videos", []) if v["id"] not in used]
+    params = {"query": query, "orientation": orientation, "per_page": 15}
+    data = requests.get(f"{PEXELS}/videos/search", params=params, headers=headers, timeout=30).json()
+    videos = [v for v in data.get("videos", []) if ("pexels", v["id"]) not in used]
     random.shuffle(videos)
     for video in videos[:5]:
-        link = _best_video_file(video, width, height)
-        if link:
-            used.add(video["id"])
-            return _download(link, out_stem.with_suffix(".mp4"))
-
-    data = _get(f"{PEXELS}/v1/search", {"query": query, "orientation": orientation, "per_page": 15})
-    photos = [p for p in data.get("photos", []) if p["id"] not in used]
+        files = [f for f in video.get("video_files", []) if f.get("file_type") == "video/mp4" and f.get("width")]
+        big = [f for f in files if min(f["width"], f["height"]) >= min(width, height) * 0.7]
+        pick = min(big, key=lambda f: f["width"]) if big else (max(files, key=lambda f: f["width"]) if files else None)
+        if pick:
+            used.add(("pexels", video["id"]))
+            return _download(pick["link"], out_stem.with_suffix(".mp4"))
+    data = requests.get(f"{PEXELS}/v1/search", params=params, headers=headers, timeout=30).json()
+    photos = [p for p in data.get("photos", []) if ("pexels-photo", p["id"]) not in used]
     if photos:
         photo = random.choice(photos)
-        used.add(photo["id"])
+        used.add(("pexels-photo", photo["id"]))
         return _download(photo["src"]["large2x"], out_stem.with_suffix(".jpg"))
+    return None
+
+
+def _pixabay(query: str, width: int, height: int, out_stem: Path, used: set) -> Path | None:
+    params = {"key": env("PIXABAY_API_KEY"), "q": query[:100], "per_page": 20, "safesearch": "true"}
+    data = requests.get(PIXABAY, params=params, timeout=30).json()
+    vertical = height > width
+    hits = [h for h in data.get("hits", []) if ("pixabay", h["id"]) not in used]
+    # Prefer clips whose orientation matches the frame.
+    hits.sort(key=lambda h: (h["videos"]["large"]["height"] > h["videos"]["large"]["width"]) != vertical)
+    for hit in hits[:5]:
+        for size in ("large", "medium", "small"):
+            v = hit["videos"].get(size) or {}
+            if v.get("url"):
+                used.add(("pixabay", hit["id"]))
+                return _download(v["url"], out_stem.with_suffix(".mp4"))
+    return None
+
+
+STOCK = {"pexels": (_pexels, "PEXELS_API_KEY"), "pixabay": (_pixabay, "PIXABAY_API_KEY")}
+
+
+def fetch(cfg: ChannelConfig, query: str, width: int, height: int, out_stem: Path, used: set) -> Path | None:
+    """Best visual for a scene, or None if every source came back empty."""
+    found = own_footage(cfg, query, used)
+    if found:
+        return found
+    for source in cfg.stock_sources:
+        fn, key = STOCK[source]
+        if not os.environ.get(key):
+            continue
+        try:
+            found = fn(query, width, height, out_stem, used)
+        except requests.RequestException as exc:
+            print(f"  {source} failed for '{query}': {exc}")
+            continue
+        if found:
+            return found
     return None
 
 

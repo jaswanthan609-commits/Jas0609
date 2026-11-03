@@ -23,7 +23,14 @@ class VideoScript(BaseModel):
     description: str = Field(description="YouTube description with a hook line, summary and 3-5 hashtags.")
     tags: list[str] = Field(description="10-15 YouTube search tags, mixing channel language and English.")
     thumbnail_text: str = Field(description="2-4 punchy words for the thumbnail.")
+    facts_to_check: list[str] = Field(
+        description="Every number, rule, date or claim in the narration that a human must verify before publishing."
+    )
     scenes: list[Scene]
+    reviewed: bool = Field(
+        default=False,
+        description="Always false. A human sets it to true after reading and fact-checking the script.",
+    )
 
 
 class TopicIdeas(BaseModel):
@@ -40,7 +47,10 @@ Language: write all narration, the title and the description in {language}. Use 
 (like 'SIP', 'EMI', 'credit card') in English where locals would say them that way.
 Visual queries are always English keywords, because stock libraries are searched in English.
 Facts must be accurate. If a number is uncertain, say it approximately rather than inventing it.
-Never promise guaranteed returns or give personalised financial or medical advice."""
+Never promise guaranteed returns or give personalised financial or medical advice. For Indian
+markets, stay educational: no specific buy or sell calls (SEBI rules for unregistered creators).
+Make each video distinct: a specific angle, concrete examples and numbers, no filler or generic
+intros. YouTube demonetises templated, mass-produced content, so avoid stock phrases."""
 
 FORMAT_BRIEF = {
     "short": (

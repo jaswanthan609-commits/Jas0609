@@ -3,10 +3,13 @@ __pycache__/
 .venv/
 .env
 client_secret*.json
-token.json
+
 output/
-topics.done.txt
+
 assets/music/*
 !assets/music/README.md
 assets/fonts/*
 !assets/fonts/README.md
+tokens/
+footage/
+topics/*.done.txt

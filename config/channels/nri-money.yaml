@@ -1,0 +1,12 @@
+# Channel B: Money for NRIs (English, NRIs in US/UK/Gulf). Education only, no specific buy/sell advice.
+name: "NRI Money Guide"
+niche: "money for Indians living abroad: NRE/NRO accounts, sending money home, taxes in both countries, investing in India from abroad"
+language: en
+audience: "Indians working in the US, UK, Canada, Australia and the Gulf"
+tone: "calm, precise, trustworthy, explains rules step by step"
+voice_provider: elevenlabs
+stock_sources: [pexels, pixabay]
+default_tags: ["nri", "nri finance", "nre account", "send money to india"]
+category_id: "27"              # Education
+publish_times: ["20:30"]
+monthly_target_inr: 110000

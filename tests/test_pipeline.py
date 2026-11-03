@@ -1,54 +1,133 @@
+import base64
+import json
 import shutil
+import subprocess
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
 
+from facepipe import pipeline, visuals, voice
 from facepipe.captions import build_ass
-from facepipe.config import load_config
+from facepipe.config import list_channels, load_config
+from facepipe.stats import report
 from facepipe.upload import next_slot
 
 TZ = ZoneInfo("Asia/Kolkata")
+HAS_FFMPEG = shutil.which("ffmpeg") is not None
 
 
-def test_config_defaults_and_language_override():
-    cfg = load_config(language="ta")
-    assert cfg.voice_name.startswith("ta-IN")
+def test_three_channels_load():
+    assert list_channels() == ["ai-tools", "nri-money", "paisa-simplified"]
+    hindi = load_config("paisa-simplified")
+    assert (hindi.language, hindi.voice_provider, hindi.voice_name) == ("hi", "sarvam", "ritu")
+    assert hindi.output_path.name == "paisa-simplified"
+    assert load_config("ai-tools").footage_path.name == "ai-tools"
+
+
+def test_language_override_picks_matching_font():
+    cfg = load_config("paisa-simplified", language="ta")
     assert cfg.font_name == "Noto Sans Tamil"
+    assert cfg.locale == "ta-IN"
 
 
-def test_config_rejects_unknown_language():
+def test_unknown_channel_and_language_rejected():
     with pytest.raises(ValueError):
-        load_config(language="fr")
+        load_config("nope")
+    with pytest.raises(ValueError):
+        load_config("ai-tools", language="fr")
 
 
 def test_next_slot_skips_taken_and_past_slots():
-    cfg = load_config(publish_times=["12:30", "18:30"], timezone="Asia/Kolkata")
+    cfg = load_config("paisa-simplified")  # 12:30 and 18:30 IST
     now = datetime(2026, 11, 3, 12, 0, tzinfo=TZ)  # 12:30 is under an hour away
     first = next_slot(cfg, [], now=now)
     assert first == datetime(2026, 11, 3, 18, 30, tzinfo=TZ)
-    second = next_slot(cfg, [first], now=now)
-    assert second == datetime(2026, 11, 4, 12, 30, tzinfo=TZ)
+    assert next_slot(cfg, [first], now=now) == datetime(2026, 11, 4, 12, 30, tzinfo=TZ)
 
 
 def test_captions_cover_full_timeline(tmp_path):
-    cfg = load_config(language="hi")
+    cfg = load_config("paisa-simplified")
     out = build_ass(cfg, [("नमस्ते दोस्तों आज हम पैसे की बात करेंगे", 4.0, "पैसा"), ("second scene text", 2.0, "")],
                     1080, 1920, tmp_path / "c.ass")
     text = out.read_text(encoding="utf-8")
     assert "Noto Sans Devanagari" in text
-    assert "0:00:06.00" in text  # last caption ends at total duration
+    assert "0:00:06.00" in text
     assert text.count("Headline,,") == 1
 
 
-@pytest.mark.skipif(not shutil.which("ffmpeg"), reason="ffmpeg not installed")
+def test_split_keeps_pieces_under_limit():
+    text = "पहला वाक्य है। " * 200
+    pieces = voice._split(text, 300)
+    assert all(len(p) <= 300 for p in pieces)
+    assert "".join(pieces).replace(" ", "") == text.replace(" ", "")
+
+
+def test_own_footage_matches_by_keywords(tmp_path):
+    folder = tmp_path / "footage"
+    folder.mkdir()
+    for name in ["chatgpt-custom-gpt-settings.mp4", "notion-ai-summary.mp4", "notes.txt"]:
+        (folder / name).write_bytes(b"x")
+    cfg = load_config("ai-tools", footage_dir=str(folder))
+    used = set()
+    assert visuals.own_footage(cfg, "ChatGPT custom GPT settings page", used).name.startswith("chatgpt")
+    assert visuals.own_footage(cfg, "footage:notion-ai-summary", used).name == "notion-ai-summary.mp4"
+    assert visuals.own_footage(cfg, "sunset beach", used) is None
+
+
+@pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg not installed")
+def test_sarvam_request_shape(tmp_path, monkeypatch):
+    wav = tmp_path / "s.wav"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "anullsrc=r=22050:cl=mono",
+                    "-t", "0.5", str(wav)], check=True)
+    sent = []
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"request_id": "r", "audios": [base64.b64encode(wav.read_bytes()).decode()]}
+
+    def fake_post(url, headers, json, timeout):
+        sent.append((url, headers, json))
+        return Resp()
+
+    monkeypatch.setenv("SARVAM_API_KEY", "k")
+    monkeypatch.setattr(voice.requests, "post", fake_post)
+    seconds = voice.synthesize(load_config("paisa-simplified"), "नमस्ते दोस्तों।", tmp_path / "v.mp3")
+    url, headers, body = sent[0]
+    assert url == "https://api.sarvam.ai/text-to-speech"
+    assert headers == {"api-subscription-key": "k"}
+    assert body["language_code"] == "hi-IN" and body["model"] == "bulbul:v3" and body["speaker"] == "ritu"
+    assert 0.3 < seconds < 1.0
+
+
+def test_stats_report_against_target():
+    cfg = load_config("nri-money")  # target Rs 110,000
+    text = report(cfg, {"start": "2026-10-01", "end": "2026-10-28", "views": 100000,
+                        "estimatedMinutesWatched": 600000, "subscribersGained": 900, "subscribersLost": 100,
+                        "estimatedRevenue": 55000.0})
+    assert "RPM Rs 550" in text and "50% of target" in text and "200,000 a month" in text
+    assert "not monetised" in report(cfg, {"start": "a", "end": "b", "views": 10})
+
+
+@pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg not installed")
+def test_render_refuses_unreviewed_script(tmp_path):
+    data = json.loads(pipeline.SAMPLE_SCRIPT.read_text(encoding="utf-8"))
+    data["reviewed"] = False
+    path = tmp_path / "script.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(pipeline.NotReviewed):
+        pipeline.render(load_config("paisa-simplified"), path, "short", offline=True)
+
+
+@pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg not installed")
 @pytest.mark.parametrize("fmt,size", [("short", (1080, 1920)), ("long", (1920, 1080))])
 def test_offline_end_to_end(tmp_path, fmt, size):
-    import json, subprocess
-    from facepipe.pipeline import make_video
-
-    cfg = load_config(output_dir=str(tmp_path), music_dir=str(tmp_path / "nomusic"))
-    result = make_video(cfg, None, fmt, offline=True, log=lambda *_: None)
+    cfg = load_config("paisa-simplified", output_dir=str(tmp_path), music_dir=str(tmp_path / "nomusic"))
+    result = pipeline.make_offline(cfg, fmt, log=lambda *_: None)
     info = json.loads(subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height", "-of", "json", str(result.video)],
         capture_output=True, text=True, check=True).stdout)
@@ -56,3 +135,5 @@ def test_offline_end_to_end(tmp_path, fmt, size):
     assert (video["width"], video["height"]) == size
     assert any(s["codec_type"] == "audio" for s in info["streams"])
     assert result.thumbnail.exists()
+    with pytest.raises(RuntimeError, match="offline"):
+        pipeline.publish(cfg, result, None)

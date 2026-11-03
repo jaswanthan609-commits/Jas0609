@@ -4,7 +4,8 @@ Setup (one time):
 1. In Google Cloud Console, create a project and enable "YouTube Data API v3".
 2. Create an OAuth client ID of type "Desktop app" and download it as client_secret.json
    into the repo root (or set YOUTUBE_CLIENT_SECRETS to its path).
-3. Run `python -m facepipe auth` once; it opens a browser and stores token.json.
+3. Run `python -m facepipe --channel <name> auth` once per channel. It opens a browser: sign in and
+   pick that channel's YouTube account (brand account). The token is saved as tokens/<name>.json.
 
 Note: until your Google Cloud project passes YouTube's API audit, videos uploaded through the
 API by unverified projects are locked to private. Apply for the audit early.
@@ -22,21 +23,24 @@ from .config import ROOT, ChannelConfig
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
+    "https://www.googleapis.com/auth/yt-analytics-monetary.readonly",
 ]
 
 
-def _paths() -> tuple[Path, Path]:
+def _paths(cfg: ChannelConfig) -> tuple[Path, Path]:
     secrets = Path(os.environ.get("YOUTUBE_CLIENT_SECRETS", ROOT / "client_secret.json"))
-    token = Path(os.environ.get("YOUTUBE_TOKEN", ROOT / "token.json"))
+    token = ROOT / "tokens" / f"{cfg.slug}.json"
+    token.parent.mkdir(exist_ok=True)
     return secrets, token
 
 
-def credentials():
+def credentials(cfg: ChannelConfig):
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from google_auth_oauthlib.flow import InstalledAppFlow
 
-    secrets, token = _paths()
+    secrets, token = _paths(cfg)
     creds = Credentials.from_authorized_user_file(str(token), SCOPES) if token.exists() else None
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
@@ -78,7 +82,7 @@ def upload(
     from googleapiclient.discovery import build
     from googleapiclient.http import MediaFileUpload
 
-    youtube = build("youtube", "v3", credentials=credentials())
+    youtube = build("youtube", "v3", credentials=credentials(cfg))
     if is_short and "#shorts" not in description.lower():
         description = f"{description}\n\n#shorts"
     all_tags = list(dict.fromkeys([*tags, *cfg.default_tags]))

@@ -1,112 +1,117 @@
-# facepipe: faceless YouTube video pipeline
+# facepipe: faceless YouTube pipeline for three channels
 
-Turns a topic into a finished, captioned YouTube Short or long-form video and uploads it on a
-schedule. English, Tamil and Hindi are supported.
+Turns a topic into a finished, captioned YouTube video (long-form or Short), with a review step
+before anything is rendered, then uploads it on a schedule and tracks each channel against its
+monthly income target.
 
 ```
-topic ──► Claude writes script ──► neural voiceover ──► stock footage per scene
-      ──► ffmpeg: clips + voice + burned captions + ducked music ──► thumbnail
-      ──► YouTube upload (title, description, tags, scheduled publish)
+ideas ──► Claude script ──► YOU review + fact-check ──► voice ──► footage per scene
+      ──► ffmpeg: clips + voice + captions + ducked music ──► thumbnail
+      ──► YouTube upload (title, tags, scheduled slot) ──► stats vs target
 ```
+
+## The three channels
+
+One YAML file per channel in [`config/channels/`](config/channels):
+
+| Channel | Config | Language | Voice | Footage | Target (base case, month 18) |
+|---|---|---|---|---|---|
+| AI Tools Explained | `ai-tools` | English, global | ElevenLabs | your screen recordings first, then stock | Rs 1.27 lakh/month |
+| NRI Money Guide | `nri-money` | English, NRIs abroad | ElevenLabs | stock + charts | Rs 1.10 lakh/month |
+| Paisa Simplified | `paisa-simplified` | Hindi, India | Sarvam Bulbul v3 | stock | Rs 0.80 lakh/month |
+
+Change names, niches, voices, publish times and targets in those files. Add a channel by adding a
+file. Tamil works too: set `language: ta`.
+
+## Tools used
 
 | Step | Tool | Cost |
 |---|---|---|
-| Script, title, tags, topic ideas | Claude API (`claude-opus-5-5`) | a few rupees per script |
-| Voiceover | [edge-tts](https://github.com/rany2/edge-tts) Microsoft neural voices | free |
-| Visuals | [Pexels API](https://www.pexels.com/api/) stock video, photo fallback | free |
-| Assembly, captions, music | ffmpeg + libass | free |
-| Upload and scheduling | YouTube Data API v3 | free (quota: about 6 uploads/day by default) |
+| Script, title, tags, facts to check, topic ideas | Claude API (`claude-opus-5-5`) | about Rs 10-25 per script |
+| Hindi/Tamil voice | [Sarvam Bulbul v3](https://docs.sarvam.ai/api-reference/text-to-speech/convert) | Rs 30 per 10,000 characters |
+| English voice | [ElevenLabs](https://elevenlabs.io) | from $5/month |
+| Free voice for testing | edge-tts (Microsoft neural voices) | free |
+| Footage | your own clips, then [Pexels](https://www.pexels.com/api/), then [Pixabay](https://pixabay.com/api/docs/) | free |
+| Assembly, captions, music ducking, loudness | ffmpeg + libass | free |
+| Upload, scheduling, analytics | YouTube Data API v3 + YouTube Analytics API | free |
+
+Ideas borrowed from [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) (several
+stock and voice providers), [OpenMontage](https://github.com/calesthio/OpenMontage) (approval
+gates) and [youtube-automation-agent](https://github.com/darkzOGx/youtube-automation-agent)
+(analytics feedback, fact checks).
 
 ## Setup
 
-1. Install Python 3.11+ and ffmpeg (`sudo apt install ffmpeg fonts-noto-core`, or `brew install ffmpeg`).
+1. Install Python 3.11+ and ffmpeg with Noto fonts (`sudo apt install ffmpeg fonts-noto-core`,
+   or `brew install ffmpeg` plus the fonts in [`assets/fonts`](assets/fonts/README.md)).
 2. `pip install -r requirements.txt`
-3. `cp .env.example .env` and add your `ANTHROPIC_API_KEY` ([console](https://platform.claude.com/))
-   and `PEXELS_API_KEY`.
-4. Edit [`config/channel.yaml`](config/channel.yaml): channel name, niche, language (`en`, `ta`,
-   `hi`), tone, publish times.
-5. Add a few royalty-free music tracks to `assets/music/` (YouTube Audio Library is safest).
-6. Tamil/Hindi captions need Noto fonts; see [`assets/fonts/README.md`](assets/fonts/README.md).
-
-Check everything works without any keys:
+3. `cp .env.example .env` and add your keys. Only `ANTHROPIC_API_KEY` is needed to write scripts;
+   the others switch on voice and footage.
+4. Add royalty-free music to `assets/music/` (YouTube Audio Library is safest).
+5. Check everything works with no keys at all:
 
 ```bash
-python -m facepipe make --offline            # Short, 1080x1920
-python -m facepipe make --offline --format long
+python -m facepipe channels
+python -m facepipe --channel paisa-simplified make --offline              # Short
+python -m facepipe --channel paisa-simplified make --offline --format long
 ```
 
-Output lands in `output/<timestamp>-<format>-<slug>/` with `video.mp4`, `thumbnail.jpg`,
-`script.json` and `metadata.json`.
-
-## Making videos
+## Weekly workflow (per channel)
 
 ```bash
-# 20 topic ideas for your niche, appended to topics.txt
-python -m facepipe ideas --count 20 --save
-
-# One Short from a topic
-python -m facepipe make "SIP vs FD: which is better in 2026?"
-
-# Same topic, Tamil long-form
-python -m facepipe make "SIP vs FD" --format long --language ta
-
-# Edit output/<folder>/script.json by hand, then re-render from it
-python -m facepipe make --script output/<folder>/script.json
-
-# Work through topics.txt, 5 at a time (finished topics go to topics.done.txt)
-python -m facepipe batch --limit 5
+C="--channel nri-money"
+python -m facepipe $C ideas --count 20 --save    # topic ideas -> topics/nri-money.txt
+python -m facepipe $C batch --limit 3             # scripts for the next 3 topics (long-form)
+python -m facepipe $C drafts                      # what's waiting for review
+#   open each output/nri-money/<folder>/script.json, edit the narration, check every item in
+#   facts_to_check, swap any visual_query, then set "reviewed": true
+python -m facepipe $C render --reviewed --upload --schedule
+python -m facepipe stats --all                    # last 28 days vs each channel's target
 ```
 
-## Uploading to YouTube
+Other commands: `script "<topic>"` for one script, `render <script.json>` for one video,
+`upload <folder> --publish-at 2026-11-08T18:30`, `make "<topic>" --no-review` to skip the review
+(not recommended).
 
-One-time setup:
+**Screen recordings (AI Tools channel):** save OBS recordings in `footage/ai-tools/` with
+descriptive names (`chatgpt-custom-gpt-settings.mp4`). Scenes whose `visual_query` shares words
+with a file name use that file; or set `"visual_query": "footage:chatgpt-custom-gpt-settings"` to
+pick it exactly.
+
+## YouTube setup
 
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable
-   **YouTube Data API v3**.
-2. Configure the OAuth consent screen (External, add yourself as a test user).
-3. Create an OAuth client ID of type **Desktop app**, download it as `client_secret.json` into
-   this folder.
-4. `python -m facepipe auth` opens a browser; sign in with the channel's Google account.
+   **YouTube Data API v3** and **YouTube Analytics API**.
+2. Configure the OAuth consent screen (External; add yourself as a test user).
+3. Create an OAuth client ID of type **Desktop app** and save it as `client_secret.json` here.
+4. For each channel: `python -m facepipe --channel <name> auth` and pick that channel's account.
 
-Then:
+Until your Google Cloud project passes YouTube's
+[API audit](https://support.google.com/youtube/contact/yt_api_form), uploads from it stay private.
+Apply early; meanwhile upload `video.mp4` through YouTube Studio. The default quota allows about
+6 uploads a day across all channels.
 
-```bash
-python -m facepipe make "Credit card mistakes" --upload --schedule   # next free slot from publish_times
-python -m facepipe batch --limit 3 --upload --schedule              # fills the next 3 slots
-python -m facepipe upload output/<folder> --publish-at 2026-11-08T18:30
-```
+## Staying monetised
 
-Scheduled videos upload as private and go public at the slot time. Videos are marked as
-containing synthetic media (AI voice), which YouTube requires for realistic AI content.
-
-**Important:** until your Google Cloud project passes YouTube's
-[API compliance audit](https://support.google.com/youtube/contact/yt_api_form), uploads from an
-unverified project are locked to private. Apply as soon as the channel is set up, or upload the
-rendered `video.mp4` through YouTube Studio meanwhile.
-
-## Staying monetisable
-
-YouTube's Partner Program demonetises "inauthentic" and "reused" content: mass-produced videos
-that differ only slightly, or stock clips with a robotic voice and no added value. To stay safe:
-
-- Review and edit every script (`script.json`) before rendering; add your own angle or examples.
-- Keep topics specific and useful; don't publish near-duplicate videos.
-- Swap stock clips that don't match the narration (rerun with an edited `visual_query`).
-- Use a consistent voice, style and intro so the channel has an identity.
+YouTube demonetises "inauthentic", mass-produced content and judges the whole channel by its
+recent uploads. That is why `render` refuses scripts that are not marked reviewed. Edit every
+script, check its facts, use your own recordings and examples where you can, and never publish
+near-duplicates. Uploads are marked as containing synthetic (AI) voice.
 
 ## Layout
 
 ```
-config/channel.yaml     channel settings
-facepipe/script.py      Claude: topic ideas, structured scripts (title, tags, scenes)
-facepipe/voice.py       edge-tts voiceover (en/ta/hi voices)
-facepipe/visuals.py     Pexels stock video/photo download, offline placeholders
-facepipe/captions.py    timed ASS captions, any script
+config/channels/*.yaml  one file per channel
+facepipe/script.py      Claude: ideas and structured scripts (title, tags, facts_to_check, scenes)
+facepipe/voice.py       Sarvam, ElevenLabs and edge-tts voiceover
+facepipe/visuals.py     own footage, Pexels, Pixabay, offline placeholders
+facepipe/captions.py    timed ASS captions for any script
 facepipe/assemble.py    ffmpeg scene clips, concat, music ducking, loudness, thumbnail
-facepipe/upload.py      YouTube OAuth, resumable upload, scheduling
-facepipe/pipeline.py    end-to-end orchestration
+facepipe/upload.py      YouTube OAuth per channel, resumable upload, scheduling
+facepipe/stats.py       YouTube Analytics: views, watch hours, revenue, RPM vs target
+facepipe/pipeline.py    draft -> review gate -> render -> publish
 facepipe/__main__.py    CLI
-tests/                  pytest (offline end-to-end render included)
+tests/                  pytest, including an offline end-to-end render
 ```
 
 Run tests with `pip install -r requirements-dev.txt && pytest`.
