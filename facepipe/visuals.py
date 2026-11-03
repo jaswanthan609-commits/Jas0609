@@ -166,6 +166,9 @@ def ai_image(cfg: ChannelConfig, prompt: str, width: int, height: int, out_stem:
         GEMINI_INTERACTIONS, json=body, headers={"x-goog-api-key": env("GEMINI_API_KEY")}, timeout=300
     )
     r.raise_for_status()
+    from . import budget
+
+    budget.record("image", cfg.slug, budget.image_cost(), model=cfg.image_model)
     images = _image_blocks(r.json())
     if not images:
         raise RuntimeError(f"Image model returned no image for: {prompt[:80]}")

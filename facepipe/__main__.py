@@ -167,10 +167,55 @@ def cmd_daily(cfg, args):
     todo = _remaining_topics(cfg)[:need]
     done_file = path.with_suffix(".done.txt")
     for i, topic in enumerate(todo):
-        fmt = "long" if i < args.long else "short"
+        fmt = cfg.long_format if i < args.long else "short"
         draft_script(cfg, topic, fmt)
         with open(done_file, "a", encoding="utf-8") as f:
             f.write(topic + "\n")
+
+
+def cmd_autopilot(cfg, args):
+    """Unattended daily run: decide what today's budget allows, then draft it."""
+    import os
+
+    from . import budget
+
+    ap = budget.load()
+    today = budget.plan(ap)
+    lines = ["Budget:"] + [f"  {n}" for n in today.notes]
+    lines.append("Today: " + (", ".join(f"{s} ({l} long, {sh} short)" for s, l, sh in today.jobs) or "nothing"))
+    print("\n".join(lines))
+    failed = 0
+    if not args.dry_run:
+        for slug, n_long, n_short in today.jobs:
+            c = load_config(slug)
+            try:
+                cmd_daily(c, argparse.Namespace(long=n_long, short=n_short))
+            except Exception as exc:  # one channel failing shouldn't stop the others
+                failed += 1
+                print(f"FAILED {slug}: {exc}", file=sys.stderr)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write("```\n" + "\n".join(lines) + "\n```\n")
+    if failed:
+        sys.exit(f"{failed} channel(s) failed")
+
+
+def cmd_budget(cfg, args):
+    from . import budget
+
+    ap = budget.load()
+    by_channel: dict[str, float] = {}
+    for e in budget.spend_entries():
+        by_channel[e["channel"]] = by_channel.get(e["channel"], 0) + e["usd"]
+    print(f"Started {ap.started}: ${ap.starting_budget_usd:.2f}")
+    print(f"Spent ${budget.spent():.2f}: " + ", ".join(f"{k} ${v:.2f}" for k, v in sorted(by_channel.items())))
+    earned = budget.earned_inr()
+    print(f"Earned Rs {sum(earned.values()):,.0f} (${budget.earned_usd(ap):.2f}): "
+          + ", ".join(f"{k} Rs {v:,.0f}" for k, v in sorted(earned.items())))
+    print(f"Available ${budget.available(ap):.2f}")
+    for note in budget.plan(ap).notes:
+        print(f"  {note}")
 
 
 def cmd_publish_approved(cfg, args):
@@ -218,7 +263,18 @@ def cmd_stats(cfg, args):
     slugs = list_channels() if args.all else [cfg.slug]
     for slug in slugs:
         c = load_config(slug)
+        if not (ROOT / "tokens" / f"{slug}.json").exists() and args.all:
+            print(f"{slug}: no YouTube token yet, skipped\n")
+            continue
         print(report(c, last_28_days(c)))
+        if args.save_revenue:
+            from . import budget
+            from .stats import revenue_since
+
+            since = budget.load().started
+            inr, until = revenue_since(c, since)
+            budget.save_revenue(slug, inr, since.isoformat(), until)
+            print(f"  earned since {since}: Rs {inr:,.0f} (saved for the budget)")
         print()
 
 
@@ -243,12 +299,12 @@ def main(argv=None):
 
     s = sub.add_parser("script", help="Write one script for review")
     s.add_argument("topic")
-    s.add_argument("--format", choices=["short", "long"], default="long")
+    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
     s.set_defaults(func=cmd_script)
 
     s = sub.add_parser("batch", help="Write scripts for the next topics in topics/<channel>.txt")
     s.add_argument("topics", nargs="?", help="Topics file (default topics/<channel>.txt)")
-    s.add_argument("--format", choices=["short", "long"], default="long")
+    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
     s.add_argument("--limit", type=int, default=7)
     s.set_defaults(func=cmd_batch)
 
@@ -263,7 +319,7 @@ def main(argv=None):
 
     s = sub.add_parser("make", help="Script and stop for review; or render straight away with --no-review")
     s.add_argument("topic", nargs="?")
-    s.add_argument("--format", choices=["short", "long"], default="short")
+    s.add_argument("--format", choices=["short", "long", "deep"], default="short")
     s.add_argument("--offline", action="store_true", help="Dry run: sample script, silent voice, colour frames")
     s.add_argument("--no-review", action="store_true", help="Render without stopping for review")
     add_publish(s)
@@ -273,6 +329,12 @@ def main(argv=None):
     s.add_argument("--long", type=int, default=1, help="Long-form scripts to draft")
     s.add_argument("--short", type=int, default=1, help="Shorts scripts to draft")
     s.set_defaults(func=cmd_daily)
+
+    s = sub.add_parser("autopilot", help="Unattended: draft whatever today's budget allows, across all channels")
+    s.add_argument("--dry-run", action="store_true", help="Show the plan without drafting")
+    s.set_defaults(func=cmd_autopilot)
+
+    sub.add_parser("budget", help="Money spent, earned and left").set_defaults(func=cmd_budget)
 
     s = sub.add_parser("publish-approved", help="Render (and upload) every approved, unpublished script")
     s.add_argument("--all", action="store_true", help="All channels")
@@ -288,10 +350,11 @@ def main(argv=None):
 
     s = sub.add_parser("stats", help="Last 28 days against the monthly target")
     s.add_argument("--all", action="store_true", help="All channels")
+    s.add_argument("--save-revenue", action="store_true", help="Save earnings since the autopilot start for the budget")
     s.set_defaults(func=cmd_stats)
 
     args = p.parse_args(argv)
-    needs_channel = args.command not in {"channels"} and not (
+    needs_channel = args.command not in {"channels", "autopilot", "budget"} and not (
         args.command in {"stats", "publish-approved"} and args.all
     )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None

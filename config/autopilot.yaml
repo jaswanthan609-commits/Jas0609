@@ -1,0 +1,38 @@
+# The self-funding autopilot. GitHub runs `python -m facepipe autopilot` every morning: it works out
+# how much money is left, keeps a steady pace, and drafts only what today's budget allows.
+#
+# Money left = starting_budget_usd + reinvest_share x ad revenue earned since `started` - money spent.
+# Spending is logged in ledger/spend.jsonl; earnings come from YouTube Analytics every Monday.
+# Also set a hard monthly spend limit in the Anthropic Console as a safety net.
+
+started: 2026-11-04
+starting_budget_usd: 70        # the one-time budget (about Rs 7,000)
+reinvest_share: 1.0            # share of earnings the autopilot may spend (1.0 = all of it)
+runway_days: 60                # spread the money left over this many days, so it never runs out at once
+usd_inr: 88
+image_usd: 0.07                # estimated cost of one AI illustration (kids channel)
+
+# Order matters: when money is tight, channels lower in the list are skipped first,
+# and a channel's long video is dropped before its Short.
+channels:
+  - slug: ai-tools             # best ad rates; goes first
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  - slug: nri-money
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  - slug: kids-stories         # illustrated, so far more expensive per video
+    long_days: [mon]
+    short_days: [mon, wed, fri]
+    est_long_usd: 2.20         # ~30 illustrations
+    est_short_usd: 0.45        # ~6 illustrations
+
+  # Opens once the channels above have earned $50 in total. Proven faceless format:
+  # long, calm history videos people play while falling asleep.
+  - slug: sleepy-history
+    long_days: [tue, fri]
+    short_days: []
+    est_long_usd: 0.30
+    unlock_at_usd: 50

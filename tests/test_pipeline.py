@@ -18,8 +18,17 @@ TZ = ZoneInfo("Asia/Kolkata")
 HAS_FFMPEG = shutil.which("ffmpeg") is not None
 
 
-def test_three_english_channels_load():
-    assert list_channels() == ["ai-tools", "kids-stories", "nri-money"]
+@pytest.fixture(autouse=True)
+def isolated_ledger(tmp_path, monkeypatch):
+    """Keep test spending out of the real ledger/."""
+    from facepipe import budget
+
+    monkeypatch.setattr(budget, "LEDGER_DIR", tmp_path / "ledger")
+
+
+def test_english_channels_load():
+    assert list_channels() == ["ai-tools", "kids-stories", "nri-money", "sleepy-history"]
+    assert load_config("sleepy-history").long_format == "deep"
     assert {load_config(c).language for c in list_channels()} == {"en"}
     kids = load_config("kids-stories")
     assert kids.made_for_kids and kids.visual_mode == "ai_images" and "Pip" in kids.characters
@@ -62,6 +71,9 @@ def test_ai_image_request_and_response(tmp_path, monkeypatch):
     assert sent["body"]["response_format"]["aspect_ratio"] == "16:9"
     assert [i["type"] for i in sent["body"]["input"]] == ["image", "text"]
     assert "watercolour" in sent["body"]["input"][-1]["text"]
+    from facepipe import budget
+
+    assert [e["kind"] for e in budget.spend_entries()] == ["image"]
 
 
 def test_language_override_picks_matching_font():
@@ -207,3 +219,67 @@ def test_daily_tops_up_ideas_and_drafts(tmp_path, monkeypatch):
     cli.main(["--channel", "ai-tools", "daily", "--long", "1", "--short", "1"])
     assert drafted == [("Topic 0", "long"), ("Topic 1", "short")]
     assert (tmp_path / "topics" / "ai-tools.done.txt").read_text().split("\n")[:2] == ["Topic 0", "Topic 1"]
+
+
+def _autopilot(**kw):
+    from facepipe import budget
+
+    ap = budget.load()
+    for k, v in kw.items():
+        setattr(ap, k, v)
+    return ap
+
+
+def test_budget_plan_by_weekday_and_unlock():
+    from datetime import date
+
+    from facepipe import budget
+
+    ap = _autopilot()
+    monday = budget.plan(ap, today=date(2026, 11, 9))
+    assert monday.jobs == [("ai-tools", 1, 1), ("nri-money", 1, 1), ("kids-stories", 1, 1)]
+    tuesday = budget.plan(ap, today=date(2026, 11, 10))
+    assert [j[0] for j in tuesday.jobs] == ["ai-tools", "nri-money"]
+    assert any("sleepy-history: locked" in n for n in tuesday.notes)
+
+    budget.save_revenue("ai-tools", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
+    unlocked = budget.plan(ap, today=date(2026, 11, 10))
+    assert ("sleepy-history", 1, 0) in unlocked.jobs
+    assert budget.available(ap) == pytest.approx(130)
+
+
+def test_budget_slows_down_and_stops():
+    from datetime import date
+
+    from facepipe import budget
+
+    ap = _autopilot()
+    from datetime import timedelta, timezone
+
+    later = datetime.now(timezone.utc) + timedelta(days=10)  # the big spend was over a week ago
+    budget.record("claude", "ai-tools", 66.0)  # $4 left -> about $0.47 a week
+    tight = budget.plan(ap, today=date(2026, 11, 9), now=later)
+    assert ("ai-tools", 1, 1) in tight.jobs
+    assert all(slug != "kids-stories" or n_long == 0 for slug, n_long, _ in tight.jobs)
+    budget.record("claude", "ai-tools", 5.0)
+    broke = budget.plan(ap, today=date(2026, 11, 9), now=later)
+    assert broke.jobs == [] and "out of money" in broke.notes[-1]
+
+
+def test_claude_cost_from_usage():
+    from types import SimpleNamespace
+
+    from facepipe import budget
+
+    usage = SimpleNamespace(input_tokens=1_000_000, output_tokens=100_000)
+    assert budget.claude_cost("claude-sonnet-5-5", usage) == pytest.approx(3.0)
+    assert budget.claude_cost("claude-haiku-5-5", usage) == pytest.approx(0.15)
+
+
+def test_ci_writes_token_per_channel(tmp_path, monkeypatch):
+    import facepipe.ci as ci
+
+    monkeypatch.setattr(ci, "ROOT", tmp_path)
+    monkeypatch.setenv("SECRETS_JSON", json.dumps({"YT_TOKEN_SLEEPY_HISTORY": "{}", "YOUTUBE_CLIENT_SECRET_JSON": "{}"}))
+    ci.main()
+    assert (tmp_path / "tokens" / "sleepy-history.json").exists() and (tmp_path / "client_secret.json").exists()

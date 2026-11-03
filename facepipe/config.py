@@ -31,6 +31,7 @@ FORMATS = {
     # name: (width, height, target seconds)
     "short": (1080, 1920, 50),
     "long": (1920, 1080, 540),
+    "deep": (1920, 1080, 1800),  # 30-minute calm videos (sleep / background listening)
 }
 
 
@@ -67,6 +68,7 @@ class ChannelConfig:
     publish_times: list[str] = field(default_factory=lambda: ["18:30"])  # local times, daily slots
     timezone: str = "Asia/Kolkata"
     monthly_target_inr: int = 0
+    long_format: str = "long"  # format used for this channel's long videos: long (9 min) or deep (30 min)
 
     @property
     def voice_name(self) -> str:

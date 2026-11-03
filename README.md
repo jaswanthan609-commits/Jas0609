@@ -1,4 +1,4 @@
-# facepipe: faceless YouTube pipeline for three channels
+# facepipe: self-funding faceless YouTube pipeline
 
 Turns a topic into a finished, captioned English YouTube video (long-form or Short), with a review step
 before anything is rendered, then uploads it on a schedule and tracks each channel against its
@@ -10,7 +10,7 @@ ideas ──► Claude script ──► YOU review + fact-check ──► voice 
       ──► YouTube upload (title, tags, scheduled slot) ──► stats vs target
 ```
 
-## The three channels (all English)
+## The channels (all English)
 
 One YAML file per channel in [`config/channels/`](config/channels):
 
@@ -19,6 +19,7 @@ One YAML file per channel in [`config/channels/`](config/channels):
 | AI Tools Explained | `ai-tools` | global, aim 30%+ US/UK | your screen recordings, then stock | ads + AI-tool affiliates | Rs 1.27 lakh/month |
 | NRI Money Guide | `nri-money` | Indians abroad + global | stock footage + charts | ads + referrals | Rs 1.10 lakh/month |
 | Moonlit Story Garden | `kids-stories` | children 3-7 (US/UK/global), Made for Kids | AI illustrations with recurring characters | ads (low RPM) + later licensing, books | Rs 0.60 lakh/month |
+| Slow History for Sleep | `sleepy-history` | adults who fall asleep to calm videos (US/UK) | stock footage, 30-minute videos | ads (long watch time) | opens after $50 earned |
 
 Change names, niches, voices, characters, publish times and targets in those files. Add a channel
 by adding a file. Hindi and Tamil still work (`language: hi` / `ta`, `voice_provider: sarvam`).
@@ -92,9 +93,9 @@ Three workflows in [`.github/workflows`](.github/workflows) run everything witho
 
 | Workflow | When | What it does |
 |---|---|---|
-| `drafts.yml` | daily 06:00 IST | Tops up topic ideas, drafts today's scripts (AI tools and NRI money: 1 long + 1 Short each; kids: 1 story on Monday, Shorts Mon/Wed/Fri) and opens a "Drafts for <date>" pull request listing each title and the facts to check |
+| `drafts.yml` | daily 06:00 IST | Runs `autopilot`: works out the money left, drafts only what today's budget allows (see below), saves the spending ledger, and opens a "Drafts for <date>" pull request listing each title and the facts to check |
 | `publish.yml` | when you merge a drafts PR | Renders every merged script, uploads it into the next free slot (once `UPLOAD_ENABLED` is on), keeps the videos as a 7-day download, and records the video ids |
-| `stats.yml` | Mondays | Views, watch hours, revenue and RPM against each channel's target, on the run's summary page |
+| `stats.yml` | Mondays | Views, watch hours and revenue per channel; saves earnings since the start to `ledger/revenue.json`, which tops up the budget |
 
 Your daily job: open the drafts PR in the GitHub app, delete any script folder you would not
 publish, tick the facts, merge. Merging is the approval.
@@ -103,14 +104,33 @@ One-time setup (repository Settings):
 
 1. **Secrets and variables > Actions > Secrets:** `ANTHROPIC_API_KEY`, `PEXELS_API_KEY`,
    `PIXABAY_API_KEY`, `GEMINI_API_KEY` (kids illustrations); later `YOUTUBE_CLIENT_SECRET_JSON`
-   (the contents of client_secret.json) and `YT_TOKEN_AI_TOOLS`, `YT_TOKEN_NRI_MONEY`,
-   `YT_TOKEN_KIDS_STORIES` (the contents of tokens/<channel>.json after `auth` on your computer).
+   (the contents of client_secret.json) and one `YT_TOKEN_<CHANNEL>` per channel, e.g.
+   `YT_TOKEN_AI_TOOLS`, `YT_TOKEN_SLEEPY_HISTORY` (the contents of tokens/<channel>.json after
+   `auth` on your computer). A new channel needs only its secret, not a workflow change.
 2. **Variables:** `UPLOAD_ENABLED` = `true` once the YouTube secrets are in.
 3. **Actions > General:** allow GitHub Actions to create pull requests.
+4. **Anthropic Console > Limits:** set a monthly spend limit as a safety net.
+
+## Self-funding budget
+
+[`config/autopilot.yaml`](config/autopilot.yaml) holds the one-time budget ($70) and the
+channel plan. Each morning `autopilot`:
+
+1. adds up money left = budget + earnings reinvested - money spent (every Claude call and AI
+   image is logged with its cost in `ledger/spend.jsonl`; earnings come from YouTube Analytics);
+2. spreads that over `runway_days`, so it never spends it all at once, and compares it with the
+   last 7 days of spending;
+3. drafts channels in order of priority, dropping a long video before a Short, and skipping
+   channels that don't fit today;
+4. opens a channel listed with `unlock_at_usd` once lifetime earnings pass that level.
+
+When earnings stop, it slows down; when the money is gone, it stops until earnings come in.
+Check it any time with `python -m facepipe budget`, or preview today's plan with
+`python -m facepipe autopilot --dry-run`.
 
 Budget profile: the channel configs use `claude-sonnet-5-5` for long scripts, `claude-haiku-5-5`
-for Shorts and free edge-tts voices, which keeps the whole run near $40 for 90 days. Switch
-`voice_provider` to `elevenlabs` and `claude_model` to `claude-opus-5-5` once the channels earn.
+for Shorts and free edge-tts voices. Switch `voice_provider` to `elevenlabs` and `claude_model` to
+`claude-opus-5-5` once the channels earn.
 
 ## YouTube setup
 
@@ -143,6 +163,10 @@ facepipe/captions.py    timed ASS captions for any script
 facepipe/assemble.py    ffmpeg scene clips, concat, music ducking, loudness, thumbnail
 facepipe/upload.py      YouTube OAuth per channel, resumable upload, scheduling
 facepipe/stats.py       YouTube Analytics: views, watch hours, revenue, RPM vs target
+facepipe/budget.py      spend ledger, earnings, daily plan that keeps within the money left
+facepipe/ci.py          writes YouTube secrets for every channel in GitHub Actions
+config/autopilot.yaml   budget, reinvestment and which channel drafts on which day
+ledger/                 spending and earnings, committed by the workflows
 facepipe/pipeline.py    draft -> review gate -> render -> publish
 facepipe/__main__.py    CLI
 tests/                  pytest, including an offline end-to-end render

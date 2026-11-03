@@ -67,9 +67,16 @@ FORMAT_BRIEF = {
         "Open with a 15 second hook that promises the payoff, then deliver it in clear sections. "
         "Use 25-45 scenes of 10-20 seconds each. Ask viewers to subscribe once, mid-video."
     ),
+    "deep": (
+        "a calm, slow long-form YouTube video of about {minutes} minutes (roughly {words} spoken words) "
+        "for people listening while falling asleep or relaxing. No hook, no cliffhangers, no calls to "
+        "action except one gentle line at the start. Use 50-70 scenes of 25-40 seconds each, "
+        "flowing chronologically, in a soft, even, descriptive tone."
+    ),
 }
 
 WORDS_PER_SECOND = {"en": 2.5, "hi": 2.4, "ta": 2.0}
+DEEP_PACE = 0.8  # deep videos are read slower
 
 
 def _client():
@@ -117,8 +124,16 @@ def _parse(cfg: ChannelConfig, prompt: str, schema: type[BaseModel], max_tokens:
         messages=[{"role": "user", "content": prompt}],
         output_config={"effort": cfg.claude_effort},
         output_format=schema,
+        # Long outputs exceed the SDK's default non-streaming limit; an explicit timeout allows them.
+        timeout=1800 if max_tokens > 16000 else 600,
         **extra,
     )
+    from . import budget
+
+    served = getattr(response, "model", None) or model
+    budget.record("claude", cfg.slug, budget.claude_cost(served, response.usage), model=served,
+                  schema=schema.__name__, tokens_in=response.usage.input_tokens,
+                  tokens_out=response.usage.output_tokens)
     if response.stop_reason == "refusal":
         raise RuntimeError(f"Claude declined this request: {response.stop_details}")
     if response.stop_reason == "max_tokens":
@@ -140,11 +155,12 @@ def generate_ideas(cfg: ChannelConfig, count: int = 20, avoid: list[str] | None 
 
 def write_script(cfg: ChannelConfig, topic: str, fmt: str = "short") -> VideoScript:
     _, _, seconds = FORMATS[fmt]
-    words = int(seconds * WORDS_PER_SECOND[cfg.language])
+    words = int(seconds * WORDS_PER_SECOND[cfg.language] * (DEEP_PACE if fmt == "deep" else 1))
     brief = FORMAT_BRIEF[fmt].format(seconds=seconds, minutes=round(seconds / 60), words=words)
     prompt = f"Write {brief}\n\nTopic: {topic}"
     model = (cfg.claude_model_short or cfg.claude_model) if fmt == "short" else cfg.claude_model
-    return _parse(cfg, prompt, VideoScript, model=model)
+    max_tokens = 32000 if fmt == "deep" else 16000
+    return _parse(cfg, prompt, VideoScript, model=model, max_tokens=max_tokens)
 
 
 def save_script(script: VideoScript, path: Path) -> None:

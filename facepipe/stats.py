@@ -53,3 +53,25 @@ def report(cfg: ChannelConfig, data: dict) -> str:
     else:
         lines.append("  not monetised yet: aim for 1,000 subscribers and 4,000 watch hours in 12 months")
     return "\n".join(lines)
+
+
+def revenue_since(cfg: ChannelConfig, start: date) -> tuple[float, str]:
+    """Estimated ad revenue in rupees from `start` until the latest day with data. 0 if not monetised."""
+    from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
+
+    from .upload import credentials
+
+    end = date.today() - timedelta(days=2)
+    if end < start:
+        return 0.0, end.isoformat()
+    analytics = build("youtubeAnalytics", "v2", credentials=credentials(cfg))
+    try:
+        resp = analytics.reports().query(
+            ids="channel==MINE", startDate=start.isoformat(), endDate=end.isoformat(),
+            metrics=MONEY, currency="INR",
+        ).execute()
+    except HttpError:
+        return 0.0, end.isoformat()
+    rows = resp.get("rows") or [[0]]
+    return float(rows[0][0]), end.isoformat()

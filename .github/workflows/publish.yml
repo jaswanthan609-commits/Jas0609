@@ -32,17 +32,8 @@ jobs:
 
       - name: Write YouTube credentials
         env:
-          CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET_JSON }}
-          TOKEN_AI_TOOLS: ${{ secrets.YT_TOKEN_AI_TOOLS }}
-          TOKEN_NRI_MONEY: ${{ secrets.YT_TOKEN_NRI_MONEY }}
-          TOKEN_KIDS_STORIES: ${{ secrets.YT_TOKEN_KIDS_STORIES }}
-        run: |
-          mkdir -p tokens
-          [ -n "$CLIENT_SECRET" ] && printf '%s' "$CLIENT_SECRET" > client_secret.json
-          [ -n "$TOKEN_AI_TOOLS" ] && printf '%s' "$TOKEN_AI_TOOLS" > tokens/ai-tools.json
-          [ -n "$TOKEN_NRI_MONEY" ] && printf '%s' "$TOKEN_NRI_MONEY" > tokens/nri-money.json
-          [ -n "$TOKEN_KIDS_STORIES" ] && printf '%s' "$TOKEN_KIDS_STORIES" > tokens/kids-stories.json
-          true
+          SECRETS_JSON: ${{ toJSON(secrets) }}
+        run: python -m facepipe.ci
 
       - name: Render and upload approved scripts
         env:
@@ -77,4 +68,5 @@ jobs:
           git config user.name "facepipe-bot"
           git config user.email "facepipe-bot@users.noreply.github.com"
           git add -f output/*/*/metadata.json 2>/dev/null || true
+          git add ledger/ 2>/dev/null || true
           git diff --cached --quiet || { git commit -m "Record published videos [skip ci]" && git push; }

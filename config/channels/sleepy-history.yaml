@@ -1,0 +1,22 @@
+# Channel D: calm 30-minute history videos to fall asleep to (English, global). Opens automatically
+# once the other channels have earned $50 (see config/autopilot.yaml).
+name: "Slow History for Sleep"
+niche: "gentle, detailed walk-throughs of everyday life in history: a day in ancient Rome, medieval villages, the Silk Road, old lighthouses"
+language: en
+audience: "adults in the US, UK, Canada and Australia who listen to calm long videos to fall asleep or relax"
+tone: "soft, slow, warm, descriptive, never dramatic"
+voice_provider: edge       # free; a calm ElevenLabs voice is the first upgrade once it earns
+voice: en-GB-RyanNeural
+voice_rate: 0.85
+long_format: deep          # 30-minute videos
+stock_sources: [pexels, pixabay]
+music_volume: 0.18
+default_tags: ["history for sleep", "sleep story", "boring history", "relaxing history", "fall asleep"]
+category_id: "27"          # Education
+publish_times: ["21:30"]   # IST; evening in Europe, afternoon in the US
+extra_guidelines: |
+  Every fact must be well established; add each date, number and claim to facts_to_check.
+  Describe sights, sounds and routines so listeners can picture them. No violence in detail.
+  Pick visual_query terms that stock libraries have: landscapes, candles, old streets, ruins, rivers.
+
+claude_model: claude-sonnet-5-5
