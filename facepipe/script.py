@@ -16,6 +16,10 @@ class Scene(BaseModel):
         description="2-5 English keywords for stock footage search, e.g. 'indian rupee coins close up'."
     )
     on_screen_text: str = Field(default="", description="Optional short headline shown on screen.")
+    image_prompt: str = Field(
+        default="",
+        description="Only for illustrated channels: a full English prompt for this scene's illustration.",
+    )
 
 
 class VideoScript(BaseModel):
@@ -74,18 +78,33 @@ def _client():
     return anthropic.Anthropic()
 
 
+ILLUSTRATED = """
+Every scene is shown as one illustration, so fill image_prompt for every scene: a complete,
+self-contained English prompt describing the shot (who, what they are doing, setting, camera
+angle, mood). Describe recurring characters exactly as in the character list every time they
+appear, so they look the same in every image. No text or letters inside the images.
+Art style for every image: {style}
+Recurring characters:
+{characters}"""
+
+
+def system_prompt(cfg: ChannelConfig) -> str:
+    text = SYSTEM.format(
+        name=cfg.name, niche=cfg.niche, audience=cfg.audience, tone=cfg.tone, language=cfg.language_name
+    )
+    if cfg.visual_mode == "ai_images":
+        text += ILLUSTRATED.format(style=cfg.image_style or "consistent", characters=cfg.characters or "none")
+    if cfg.extra_guidelines:
+        text += "\n\nChannel rules:\n" + cfg.extra_guidelines.strip()
+    return text
+
+
 def _parse(cfg: ChannelConfig, prompt: str, schema: type[BaseModel], max_tokens: int = 16000):
     client = _client()
     response = client.beta.messages.parse(
         model=cfg.claude_model,
         max_tokens=max_tokens,
-        system=SYSTEM.format(
-            name=cfg.name,
-            niche=cfg.niche,
-            audience=cfg.audience,
-            tone=cfg.tone,
-            language=cfg.language_name,
-        ),
+        system=system_prompt(cfg),
         messages=[{"role": "user", "content": prompt}],
         output_config={"effort": cfg.claude_effort},
         output_format=schema,

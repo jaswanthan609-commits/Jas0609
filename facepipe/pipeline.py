@@ -94,7 +94,12 @@ def render(
         voice_parts.append(audio)
 
         stem = work / f"visual_{i:03d}"
-        visual = None if offline else visuals.fetch(cfg, scene.visual_query, width, height, stem, used)
+        if offline:
+            visual = None
+        elif cfg.visual_mode == "ai_images":
+            visual = visuals.ai_image(cfg, scene.image_prompt or scene.visual_query, width, height, stem)
+        else:
+            visual = visuals.fetch(cfg, scene.visual_query, width, height, stem, used)
         if visual is None:
             if not offline:
                 log(f"  no footage for '{scene.visual_query}', using placeholder; fix before publishing")

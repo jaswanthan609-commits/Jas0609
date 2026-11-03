@@ -1,0 +1,32 @@
+# Channel C: illustrated bedtime and learning stories for kids 3-7 (English, global).
+# Made for Kids: no personalised ads (lower RPM), comments off, COPPA rules apply.
+# YouTube demonetises low-quality kids content, so every story must teach something real.
+name: "Moonlit Story Garden"
+niche: "original illustrated bedtime stories for children aged 3-7 that each teach one kindness, feeling or simple science idea"
+language: en
+audience: "children aged 3-7 and the parents who choose videos for them, mostly US, UK, Canada, Australia"
+tone: "warm, calm, gentle humour, simple words, slow pace, never scary"
+voice_provider: elevenlabs
+# voice: <ElevenLabs id of a warm storyteller voice>; keep the same voice forever
+voice_rate: 0.92
+visual_mode: ai_images
+image_style: "soft watercolour picture-book illustration, warm pastel colours, rounded shapes, gentle lighting, cosy and calm"
+characters: |
+  Pip: a small round orange fox cub with a cream belly, big brown eyes and a green scarf.
+  Luna: a tiny grey owl with large round glasses and a lavender nightcap.
+  Benny: a shy blue bunny with one floppy ear and a yellow backpack.
+# character_refs: [assets/characters/pip.png, assets/characters/luna.png, assets/characters/benny.png]
+extra_guidelines: |
+  Follow YouTube's quality principles for kids content:
+  - Teach one clear idea (sharing, naming feelings, why the moon changes shape) and say it plainly at the end.
+  - Model kindness, honesty and curiosity; no bullying, pranks, dangerous acts, sensational or scary scenes.
+  - No product pushing, no "buy" or "subscribe" calls aimed at children, no famous characters you don't own.
+  - Simple sentences a 4-year-old understands; repeat key words; end calmly for bedtime.
+  - Each story is original: new situation, new lesson. Never re-skin an earlier story.
+made_for_kids: true
+music_volume: 0.18
+stock_sources: []
+default_tags: ["bedtime stories for kids", "kids stories", "preschool learning", "stories for toddlers"]
+category_id: "27"
+publish_times: ["18:30"]   # IST; US morning
+monthly_target_inr: 60000

@@ -50,6 +50,12 @@ class ChannelConfig:
     music_volume: float = 0.12
     footage_dir: str | None = None  # your own clips (screen recordings), used before stock
     stock_sources: list[str] = field(default_factory=lambda: ["pexels", "pixabay"])
+    visual_mode: str = "stock"  # stock: footage per scene | ai_images: one illustration per scene
+    image_model: str = "gemini-nano-banana-2.1"
+    image_style: str = ""  # art direction added to every image prompt
+    characters: str = ""  # recurring characters, described the same way every time
+    character_refs: list[str] = field(default_factory=list)  # reference images of the characters
+    extra_guidelines: str = ""  # channel-specific rules added to Claude's instructions
     default_tags: list[str] = field(default_factory=list)
     category_id: str = "27"  # YouTube "Education"
     made_for_kids: bool = False
@@ -125,6 +131,8 @@ def load_config(channel: str | None = None, **overrides) -> ChannelConfig:
     cfg = ChannelConfig(**data)
     if cfg.language not in LANGUAGE_NAMES:
         raise ValueError(f"language must be one of {list(LANGUAGE_NAMES)}, got {cfg.language!r}")
+    if cfg.visual_mode not in {"stock", "ai_images"}:
+        raise ValueError(f"visual_mode must be stock or ai_images, got {cfg.visual_mode!r}")
     if cfg.voice_provider not in DEFAULT_VOICES:
         raise ValueError(f"voice_provider must be one of {list(DEFAULT_VOICES)}, got {cfg.voice_provider!r}")
     return cfg

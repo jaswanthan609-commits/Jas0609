@@ -1,6 +1,6 @@
 # facepipe: faceless YouTube pipeline for three channels
 
-Turns a topic into a finished, captioned YouTube video (long-form or Short), with a review step
+Turns a topic into a finished, captioned English YouTube video (long-form or Short), with a review step
 before anything is rendered, then uploads it on a schedule and tracks each channel against its
 monthly income target.
 
@@ -10,18 +10,25 @@ ideas ──► Claude script ──► YOU review + fact-check ──► voice 
       ──► YouTube upload (title, tags, scheduled slot) ──► stats vs target
 ```
 
-## The three channels
+## The three channels (all English)
 
 One YAML file per channel in [`config/channels/`](config/channels):
 
-| Channel | Config | Language | Voice | Footage | Target (base case, month 18) |
+| Channel | Config | Viewers | Visuals | Main income | Target (base case, month 18) |
 |---|---|---|---|---|---|
-| AI Tools Explained | `ai-tools` | English, global | ElevenLabs | your screen recordings first, then stock | Rs 1.27 lakh/month |
-| NRI Money Guide | `nri-money` | English, NRIs abroad | ElevenLabs | stock + charts | Rs 1.10 lakh/month |
-| Paisa Simplified | `paisa-simplified` | Hindi, India | Sarvam Bulbul v3 | stock | Rs 0.80 lakh/month |
+| AI Tools Explained | `ai-tools` | global, aim 30%+ US/UK | your screen recordings, then stock | ads + AI-tool affiliates | Rs 1.27 lakh/month |
+| NRI Money Guide | `nri-money` | Indians abroad + global | stock footage + charts | ads + referrals | Rs 1.10 lakh/month |
+| Moonlit Story Garden | `kids-stories` | children 3-7 (US/UK/global), Made for Kids | AI illustrations with recurring characters | ads (low RPM) + later licensing, books | Rs 0.60 lakh/month |
 
-Change names, niches, voices, publish times and targets in those files. Add a channel by adding a
-file. Tamil works too: set `language: ta`.
+Change names, niches, voices, characters, publish times and targets in those files. Add a channel
+by adding a file. Hindi and Tamil still work (`language: hi` / `ta`, `voice_provider: sarvam`).
+
+**Kids channel rules:** it is marked Made for Kids (required by law for content aimed at
+children: no personalised ads, comments off). YouTube removes low-quality kids channels from the
+Partner Program, so its config tells Claude to follow YouTube's quality principles: one real lesson
+per story, kindness, no pranks or scary scenes, no product pushing, original stories only.
+Generate one reference picture per character once, save it in `assets/characters/`, and list it
+under `character_refs` so the characters look the same in every video.
 
 ## Tools used
 
@@ -32,6 +39,7 @@ file. Tamil works too: set `language: ta`.
 | English voice | [ElevenLabs](https://elevenlabs.io) | from $5/month |
 | Free voice for testing | edge-tts (Microsoft neural voices) | free |
 | Footage | your own clips, then [Pexels](https://www.pexels.com/api/), then [Pixabay](https://pixabay.com/api/docs/) | free |
+| Illustrations (kids channel) | [Google Nano Banana](https://ai.google.dev/gemini-api/docs/image-generation) image model, with character reference images | a few rupees per image |
 | Assembly, captions, music ducking, loudness | ffmpeg + libass | free |
 | Upload, scheduling, analytics | YouTube Data API v3 + YouTube Analytics API | free |
 
@@ -52,19 +60,19 @@ gates) and [youtube-automation-agent](https://github.com/darkzOGx/youtube-automa
 
 ```bash
 python -m facepipe channels
-python -m facepipe --channel paisa-simplified make --offline              # Short
-python -m facepipe --channel paisa-simplified make --offline --format long
+python -m facepipe --channel kids-stories make --offline                  # Short
+python -m facepipe --channel kids-stories make --offline --format long
 ```
 
 ## Weekly workflow (per channel)
 
 ```bash
-C="--channel nri-money"
-python -m facepipe $C ideas --count 20 --save    # topic ideas -> topics/nri-money.txt
+C="--channel kids-stories"
+python -m facepipe $C ideas --count 20 --save    # topic ideas -> topics/kids-stories.txt
 python -m facepipe $C batch --limit 3             # scripts for the next 3 topics (long-form)
 python -m facepipe $C drafts                      # what's waiting for review
-#   open each output/nri-money/<folder>/script.json, edit the narration, check every item in
-#   facts_to_check, swap any visual_query, then set "reviewed": true
+#   open each output/kids-stories/<folder>/script.json, edit the narration, check every item in
+#   facts_to_check, adjust any image_prompt or visual_query, then set "reviewed": true
 python -m facepipe $C render --reviewed --upload --schedule
 python -m facepipe stats --all                    # last 28 days vs each channel's target
 ```
@@ -104,7 +112,7 @@ near-duplicates. Uploads are marked as containing synthetic (AI) voice.
 config/channels/*.yaml  one file per channel
 facepipe/script.py      Claude: ideas and structured scripts (title, tags, facts_to_check, scenes)
 facepipe/voice.py       Sarvam, ElevenLabs and edge-tts voiceover
-facepipe/visuals.py     own footage, Pexels, Pixabay, offline placeholders
+facepipe/visuals.py     own footage, Pexels, Pixabay, AI illustrations, offline placeholders
 facepipe/captions.py    timed ASS captions for any script
 facepipe/assemble.py    ffmpeg scene clips, concat, music ducking, loudness, thumbnail
 facepipe/upload.py      YouTube OAuth per channel, resumable upload, scheduling

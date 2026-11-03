@@ -18,16 +18,54 @@ TZ = ZoneInfo("Asia/Kolkata")
 HAS_FFMPEG = shutil.which("ffmpeg") is not None
 
 
-def test_three_channels_load():
-    assert list_channels() == ["ai-tools", "nri-money", "paisa-simplified"]
-    hindi = load_config("paisa-simplified")
-    assert (hindi.language, hindi.voice_provider, hindi.voice_name) == ("hi", "sarvam", "ritu")
-    assert hindi.output_path.name == "paisa-simplified"
+def test_three_english_channels_load():
+    assert list_channels() == ["ai-tools", "kids-stories", "nri-money"]
+    assert {load_config(c).language for c in list_channels()} == {"en"}
+    kids = load_config("kids-stories")
+    assert kids.made_for_kids and kids.visual_mode == "ai_images" and "Pip" in kids.characters
+    assert kids.output_path.name == "kids-stories"
     assert load_config("ai-tools").footage_path.name == "ai-tools"
 
 
+def test_kids_system_prompt_carries_characters_and_quality_rules():
+    from facepipe.script import system_prompt
+
+    text = system_prompt(load_config("kids-stories"))
+    assert "image_prompt" in text and "orange fox cub" in text and "quality principles" in text
+    assert "image_prompt" not in system_prompt(load_config("nri-money"))
+
+
+def test_ai_image_request_and_response(tmp_path, monkeypatch):
+    png = b"\x89PNG fake"
+    sent = {}
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"outputs": [{"type": "text", "text": "ok"},
+                                {"type": "image", "mime_type": "image/png", "data": base64.b64encode(png).decode()}]}
+
+    def fake_post(url, json, headers, timeout):
+        sent.update(url=url, body=json, headers=headers)
+        return Resp()
+
+    ref = tmp_path / "pip.png"
+    ref.write_bytes(b"ref")
+    monkeypatch.setenv("GEMINI_API_KEY", "g")
+    monkeypatch.setattr(visuals.requests, "post", fake_post)
+    cfg = load_config("kids-stories", character_refs=[str(ref)])
+    out = visuals.ai_image(cfg, "Pip shares an apple", 1920, 1080, tmp_path / "scene")
+    assert out.read_bytes() == png
+    assert sent["headers"] == {"x-goog-api-key": "g"}
+    assert sent["body"]["response_format"]["aspect_ratio"] == "16:9"
+    assert [i["type"] for i in sent["body"]["input"]] == ["image", "text"]
+    assert "watercolour" in sent["body"]["input"][-1]["text"]
+
+
 def test_language_override_picks_matching_font():
-    cfg = load_config("paisa-simplified", language="ta")
+    cfg = load_config("nri-money", language="ta")
     assert cfg.font_name == "Noto Sans Tamil"
     assert cfg.locale == "ta-IN"
 
@@ -40,7 +78,7 @@ def test_unknown_channel_and_language_rejected():
 
 
 def test_next_slot_skips_taken_and_past_slots():
-    cfg = load_config("paisa-simplified")  # 12:30 and 18:30 IST
+    cfg = load_config("nri-money", publish_times=["12:30", "18:30"])
     now = datetime(2026, 11, 3, 12, 0, tzinfo=TZ)  # 12:30 is under an hour away
     first = next_slot(cfg, [], now=now)
     assert first == datetime(2026, 11, 3, 18, 30, tzinfo=TZ)
@@ -48,7 +86,7 @@ def test_next_slot_skips_taken_and_past_slots():
 
 
 def test_captions_cover_full_timeline(tmp_path):
-    cfg = load_config("paisa-simplified")
+    cfg = load_config("nri-money", language="hi")
     out = build_ass(cfg, [("नमस्ते दोस्तों आज हम पैसे की बात करेंगे", 4.0, "पैसा"), ("second scene text", 2.0, "")],
                     1080, 1920, tmp_path / "c.ass")
     text = out.read_text(encoding="utf-8")
@@ -96,7 +134,8 @@ def test_sarvam_request_shape(tmp_path, monkeypatch):
 
     monkeypatch.setenv("SARVAM_API_KEY", "k")
     monkeypatch.setattr(voice.requests, "post", fake_post)
-    seconds = voice.synthesize(load_config("paisa-simplified"), "नमस्ते दोस्तों।", tmp_path / "v.mp3")
+    cfg = load_config("nri-money", language="hi", voice_provider="sarvam", voice="ritu")
+    seconds = voice.synthesize(cfg, "नमस्ते दोस्तों।", tmp_path / "v.mp3")
     url, headers, body = sent[0]
     assert url == "https://api.sarvam.ai/text-to-speech"
     assert headers == {"api-subscription-key": "k"}
@@ -120,13 +159,13 @@ def test_render_refuses_unreviewed_script(tmp_path):
     path = tmp_path / "script.json"
     path.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(pipeline.NotReviewed):
-        pipeline.render(load_config("paisa-simplified"), path, "short", offline=True)
+        pipeline.render(load_config("nri-money"), path, "short", offline=True)
 
 
 @pytest.mark.skipif(not HAS_FFMPEG, reason="ffmpeg not installed")
 @pytest.mark.parametrize("fmt,size", [("short", (1080, 1920)), ("long", (1920, 1080))])
 def test_offline_end_to_end(tmp_path, fmt, size):
-    cfg = load_config("paisa-simplified", output_dir=str(tmp_path), music_dir=str(tmp_path / "nomusic"))
+    cfg = load_config("kids-stories", output_dir=str(tmp_path), music_dir=str(tmp_path / "nomusic"))
     result = pipeline.make_offline(cfg, fmt, log=lambda *_: None)
     info = json.loads(subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,width,height", "-of", "json", str(result.video)],

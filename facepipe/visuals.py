@@ -6,10 +6,16 @@
 2. Pexels stock video, then photos (PEXELS_API_KEY). Free for commercial use.
 3. Pixabay stock video (PIXABAY_API_KEY). Free for commercial use.
 4. An offline colour placeholder, so dry runs work with no keys.
+
+Illustrated channels (visual_mode: ai_images, e.g. kids stories) instead generate one picture per
+scene with Google's Nano Banana image model (GEMINI_API_KEY), passing the character reference
+images each time so characters stay consistent.
 """
 
 from __future__ import annotations
 
+import base64
+import mimetypes
 import os
 import random
 import re
@@ -17,7 +23,7 @@ from pathlib import Path
 
 import requests
 
-from .config import ChannelConfig, env
+from .config import ROOT, ChannelConfig, env
 from .media import run
 
 PEXELS = "https://api.pexels.com"
@@ -118,6 +124,54 @@ def fetch(cfg: ChannelConfig, query: str, width: int, height: int, out_stem: Pat
         if found:
             return found
     return None
+
+
+GEMINI_INTERACTIONS = "https://generativelanguage.googleapis.com/v1beta/interactions"
+
+
+def _image_blocks(node) -> list[dict]:
+    """Every {"type": "image", "data": ...} block anywhere in the API response, in order."""
+    found = []
+    if isinstance(node, dict):
+        if node.get("type") == "image" and isinstance(node.get("data"), str):
+            found.append(node)
+        for value in node.values():
+            found += _image_blocks(value)
+    elif isinstance(node, list):
+        for value in node:
+            found += _image_blocks(value)
+    return found
+
+
+def ai_image(cfg: ChannelConfig, prompt: str, width: int, height: int, out_stem: Path) -> Path:
+    """Generate one illustration for a scene. Character reference images keep characters consistent."""
+    inputs = []
+    for ref in cfg.character_refs[:4]:
+        path = Path(ref) if Path(ref).is_absolute() else ROOT / ref
+        mime = mimetypes.guess_type(path.name)[0] or "image/png"
+        inputs.append({"type": "image", "mime_type": mime, "data": base64.b64encode(path.read_bytes()).decode()})
+    style = f" Art style: {cfg.image_style}." if cfg.image_style else ""
+    inputs.append({"type": "text", "text": f"{prompt}{style} No text, letters or watermarks in the image."})
+    body = {
+        "model": cfg.image_model,
+        "input": inputs,
+        "response_format": {
+            "type": "image",
+            "mime_type": "image/png",
+            "aspect_ratio": "9:16" if height > width else "16:9",
+            "image_size": "2K",
+        },
+    }
+    r = requests.post(
+        GEMINI_INTERACTIONS, json=body, headers={"x-goog-api-key": env("GEMINI_API_KEY")}, timeout=300
+    )
+    r.raise_for_status()
+    images = _image_blocks(r.json())
+    if not images:
+        raise RuntimeError(f"Image model returned no image for: {prompt[:80]}")
+    out = out_stem.with_suffix(".png")
+    out.write_bytes(base64.b64decode(images[-1]["data"]))
+    return out
 
 
 PLACEHOLDER_COLORS = ["0x1f3b73", "0x5b2a86", "0x0f6e5a", "0x8a3b12", "0x2d2d2d", "0x6b1b3a"]
