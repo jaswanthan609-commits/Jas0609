@@ -45,6 +45,8 @@ def credentials(cfg: ChannelConfig):
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
     elif not creds or not creds.valid:
+        if os.environ.get("CI"):
+            raise RuntimeError(f"No valid YouTube token for {cfg.slug} in CI. Add the YT_TOKEN secret (see README).")
         if not secrets.exists():
             raise RuntimeError(f"Missing {secrets}. See the YouTube setup steps in README.md.")
         creds = InstalledAppFlow.from_client_secrets_file(str(secrets), SCOPES).run_local_server(port=0)

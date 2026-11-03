@@ -99,18 +99,25 @@ def system_prompt(cfg: ChannelConfig) -> str:
     return text
 
 
-def _parse(cfg: ChannelConfig, prompt: str, schema: type[BaseModel], max_tokens: int = 16000):
+# Models that accept the server-side refusal fallback (`fallbacks: "default"`).
+FALLBACK_MODELS = {"claude-fable-5-1", "claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5"}
+
+
+def _parse(cfg: ChannelConfig, prompt: str, schema: type[BaseModel], max_tokens: int = 16000, model: str | None = None):
     client = _client()
+    model = model or cfg.claude_model
+    extra = {}
+    if model in FALLBACK_MODELS:
+        # Server-side fallback: if a safety classifier declines, the API retries on a suitable model.
+        extra = {"betas": ["server-side-fallback-2026-07-01"], "fallbacks": "default"}
     response = client.beta.messages.parse(
-        model=cfg.claude_model,
+        model=model,
         max_tokens=max_tokens,
         system=system_prompt(cfg),
         messages=[{"role": "user", "content": prompt}],
         output_config={"effort": cfg.claude_effort},
         output_format=schema,
-        # Server-side fallback: if a safety classifier declines, the API retries on a suitable model.
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
+        **extra,
     )
     if response.stop_reason == "refusal":
         raise RuntimeError(f"Claude declined this request: {response.stop_details}")
@@ -136,7 +143,8 @@ def write_script(cfg: ChannelConfig, topic: str, fmt: str = "short") -> VideoScr
     words = int(seconds * WORDS_PER_SECOND[cfg.language])
     brief = FORMAT_BRIEF[fmt].format(seconds=seconds, minutes=round(seconds / 60), words=words)
     prompt = f"Write {brief}\n\nTopic: {topic}"
-    return _parse(cfg, prompt, VideoScript)
+    model = (cfg.claude_model_short or cfg.claude_model) if fmt == "short" else cfg.claude_model
+    return _parse(cfg, prompt, VideoScript, model=model)
 
 
 def save_script(script: VideoScript, path: Path) -> None:

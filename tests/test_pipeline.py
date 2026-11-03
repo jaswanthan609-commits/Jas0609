@@ -176,3 +176,34 @@ def test_offline_end_to_end(tmp_path, fmt, size):
     assert result.thumbnail.exists()
     with pytest.raises(RuntimeError, match="offline"):
         pipeline.publish(cfg, result, None)
+
+
+def test_publish_approved_skips_already_published(tmp_path, monkeypatch):
+    import facepipe.__main__ as cli
+
+    out = tmp_path / "out"
+    for name, meta in [("a", {"video_id": "abc"}), ("b", None)]:
+        folder = out / name
+        folder.mkdir(parents=True)
+        shutil.copy(pipeline.SAMPLE_SCRIPT, folder / "script.json")
+        if meta:
+            (folder / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
+    rendered = []
+    monkeypatch.setattr(pipeline, "render", lambda cfg, path, require_review=True: rendered.append(path.parent.name))
+    real_load = cli.load_config
+    monkeypatch.setattr(cli, "load_config", lambda slug=None, **kw: real_load(slug, output_dir=str(out), **kw))
+    cli.main(["--channel", "nri-money", "publish-approved"])
+    assert rendered == ["b"]
+
+
+def test_daily_tops_up_ideas_and_drafts(tmp_path, monkeypatch):
+    import facepipe.__main__ as cli
+    from facepipe import script as scriptmod
+
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(scriptmod, "generate_ideas", lambda cfg, n, avoid=None: [f"Topic {i}" for i in range(n)])
+    drafted = []
+    monkeypatch.setattr(pipeline, "draft_script", lambda cfg, topic, fmt: drafted.append((topic, fmt)))
+    cli.main(["--channel", "ai-tools", "daily", "--long", "1", "--short", "1"])
+    assert drafted == [("Topic 0", "long"), ("Topic 1", "short")]
+    assert (tmp_path / "topics" / "ai-tools.done.txt").read_text().split("\n")[:2] == ["Topic 0", "Topic 1"]

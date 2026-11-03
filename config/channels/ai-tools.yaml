@@ -4,11 +4,15 @@ niche: "practical tutorials and honest reviews of AI tools and software for work
 language: en
 audience: "working professionals and freelancers in the US, UK and India who want to save time with AI"
 tone: "clear, practical, no hype, shows exactly where to click"
-voice_provider: elevenlabs     # edge | sarvam | elevenlabs
-# voice: <ElevenLabs voice id>  # pick one voice and keep it for the channel's identity
+voice_provider: edge       # free; switch to elevenlabs when income covers it
+voice: en-US-AndrewNeural
 footage_dir: footage/ai-tools  # put your OBS screen recordings here; used before stock footage
 stock_sources: [pexels, pixabay]
 default_tags: ["ai tools", "chatgpt", "productivity", "tutorial"]
 category_id: "28"              # Science & Technology
 publish_times: ["19:30"]       # IST; lands in US morning
 monthly_target_inr: 127000
+
+# --- $50 fast-track budget profile (switch back to elevenlabs / claude-opus-5-5 once it earns) ---
+claude_model: claude-sonnet-5-5
+claude_model_short: claude-haiku-5-5

@@ -143,6 +143,62 @@ def cmd_render(cfg, args):
         sys.exit(f"{failed} of {len(paths)} failed")
 
 
+def _remaining_topics(cfg) -> list[str]:
+    path = _topics_file(cfg)
+    topics = [t.strip() for t in path.read_text(encoding="utf-8").splitlines() if t.strip()] if path.exists() else []
+    done_file = path.with_suffix(".done.txt")
+    done = set(done_file.read_text(encoding="utf-8").splitlines()) if done_file.exists() else set()
+    return [t for t in topics if t not in done]
+
+
+def cmd_daily(cfg, args):
+    """Unattended daily run (GitHub Actions): top up topic ideas, then draft today's scripts."""
+    from .pipeline import draft_script
+    from .script import generate_ideas
+
+    path = _topics_file(cfg)
+    need = args.long + args.short
+    if len(_remaining_topics(cfg)) < need * 3:
+        existing = [t for t in path.read_text(encoding="utf-8").splitlines() if t.strip()] if path.exists() else []
+        ideas = generate_ideas(cfg, 20, avoid=existing)
+        with open(path, "a", encoding="utf-8") as f:
+            f.write("\n".join(ideas) + "\n")
+        print(f"[{cfg.slug}] added {len(ideas)} topic ideas")
+    todo = _remaining_topics(cfg)[:need]
+    done_file = path.with_suffix(".done.txt")
+    for i, topic in enumerate(todo):
+        fmt = "long" if i < args.long else "short"
+        draft_script(cfg, topic, fmt)
+        with open(done_file, "a", encoding="utf-8") as f:
+            f.write(topic + "\n")
+
+
+def cmd_publish_approved(cfg, args):
+    """Render and upload every script that reached main (merging the drafts PR = approval)."""
+    import json
+
+    from .pipeline import publish, render
+
+    slugs = list_channels() if args.all else [cfg.slug]
+    failed = 0
+    for slug in slugs:
+        c = load_config(slug)
+        for path in sorted(c.output_path.glob("*/script.json")):
+            meta_path = path.parent / "metadata.json"
+            meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+            if meta.get("video_id") or (meta.get("rendered_at") and not args.upload):
+                continue
+            try:
+                result = render(c, path, require_review=False)
+                if args.upload:
+                    publish(c, result, _schedule(c, args))
+            except Exception as exc:  # keep going; the summary shows what failed
+                failed += 1
+                print(f"FAILED {path}: {exc}", file=sys.stderr)
+    if failed:
+        sys.exit(f"{failed} video(s) failed")
+
+
 def cmd_upload(cfg, args):
     from .pipeline import load_result, publish
 
@@ -213,6 +269,16 @@ def main(argv=None):
     add_publish(s)
     s.set_defaults(func=cmd_make)
 
+    s = sub.add_parser("daily", help="Unattended: top up ideas and draft today's scripts")
+    s.add_argument("--long", type=int, default=1, help="Long-form scripts to draft")
+    s.add_argument("--short", type=int, default=1, help="Shorts scripts to draft")
+    s.set_defaults(func=cmd_daily)
+
+    s = sub.add_parser("publish-approved", help="Render (and upload) every approved, unpublished script")
+    s.add_argument("--all", action="store_true", help="All channels")
+    add_publish(s)
+    s.set_defaults(func=cmd_publish_approved)
+
     s = sub.add_parser("upload", help="Upload an already-rendered output folder")
     s.add_argument("folder")
     add_publish(s)
@@ -225,7 +291,9 @@ def main(argv=None):
     s.set_defaults(func=cmd_stats)
 
     args = p.parse_args(argv)
-    needs_channel = args.command not in {"channels"} and not (args.command == "stats" and args.all)
+    needs_channel = args.command not in {"channels"} and not (
+        args.command in {"stats", "publish-approved"} and args.all
+    )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None
     args.func(cfg, args)
 

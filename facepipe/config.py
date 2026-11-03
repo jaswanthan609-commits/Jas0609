@@ -60,6 +60,7 @@ class ChannelConfig:
     category_id: str = "27"  # YouTube "Education"
     made_for_kids: bool = False
     claude_model: str = "claude-opus-5-5"
+    claude_model_short: str | None = None  # cheaper model for Shorts scripts; defaults to claude_model
     claude_effort: str = "medium"
     output_dir: str | None = None
     music_dir: str = "assets/music"

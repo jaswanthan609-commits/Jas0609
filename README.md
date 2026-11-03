@@ -86,6 +86,32 @@ descriptive names (`chatgpt-custom-gpt-settings.mp4`). Scenes whose `visual_quer
 with a file name use that file; or set `"visual_query": "footage:chatgpt-custom-gpt-settings"` to
 pick it exactly.
 
+## Autopilot on GitHub (5 minutes a day from your phone)
+
+Three workflows in [`.github/workflows`](.github/workflows) run everything without your computer:
+
+| Workflow | When | What it does |
+|---|---|---|
+| `drafts.yml` | daily 06:00 IST | Tops up topic ideas, drafts today's scripts (AI tools and NRI money: 1 long + 1 Short each; kids: 1 story on Monday, Shorts Mon/Wed/Fri) and opens a "Drafts for <date>" pull request listing each title and the facts to check |
+| `publish.yml` | when you merge a drafts PR | Renders every merged script, uploads it into the next free slot (once `UPLOAD_ENABLED` is on), keeps the videos as a 7-day download, and records the video ids |
+| `stats.yml` | Mondays | Views, watch hours, revenue and RPM against each channel's target, on the run's summary page |
+
+Your daily job: open the drafts PR in the GitHub app, delete any script folder you would not
+publish, tick the facts, merge. Merging is the approval.
+
+One-time setup (repository Settings):
+
+1. **Secrets and variables > Actions > Secrets:** `ANTHROPIC_API_KEY`, `PEXELS_API_KEY`,
+   `PIXABAY_API_KEY`, `GEMINI_API_KEY` (kids illustrations); later `YOUTUBE_CLIENT_SECRET_JSON`
+   (the contents of client_secret.json) and `YT_TOKEN_AI_TOOLS`, `YT_TOKEN_NRI_MONEY`,
+   `YT_TOKEN_KIDS_STORIES` (the contents of tokens/<channel>.json after `auth` on your computer).
+2. **Variables:** `UPLOAD_ENABLED` = `true` once the YouTube secrets are in.
+3. **Actions > General:** allow GitHub Actions to create pull requests.
+
+Budget profile: the channel configs use `claude-sonnet-5-5` for long scripts, `claude-haiku-5-5`
+for Shorts and free edge-tts voices, which keeps the whole run near $40 for 90 days. Switch
+`voice_provider` to `elevenlabs` and `claude_model` to `claude-opus-5-5` once the channels earn.
+
 ## YouTube setup
 
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable

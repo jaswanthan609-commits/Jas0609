@@ -6,8 +6,8 @@ niche: "original illustrated bedtime stories for children aged 3-7 that each tea
 language: en
 audience: "children aged 3-7 and the parents who choose videos for them, mostly US, UK, Canada, Australia"
 tone: "warm, calm, gentle humour, simple words, slow pace, never scary"
-voice_provider: elevenlabs
-# voice: <ElevenLabs id of a warm storyteller voice>; keep the same voice forever
+voice_provider: edge       # free; switch to elevenlabs when income covers it
+voice: en-US-EmmaNeural
 voice_rate: 0.92
 visual_mode: ai_images
 image_style: "soft watercolour picture-book illustration, warm pastel colours, rounded shapes, gentle lighting, cosy and calm"
@@ -30,3 +30,7 @@ default_tags: ["bedtime stories for kids", "kids stories", "preschool learning",
 category_id: "27"
 publish_times: ["18:30"]   # IST; US morning
 monthly_target_inr: 60000
+
+# --- $50 fast-track budget profile (switch back to elevenlabs / claude-opus-5-5 once it earns) ---
+claude_model: claude-sonnet-5-5
+claude_model_short: claude-haiku-5-5
