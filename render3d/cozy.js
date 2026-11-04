@@ -122,11 +122,11 @@ const outsideMat = new THREE.ShaderMaterial({
         c+=vec3(.9)*smoothstep(.09/L,.0,length(f))*.6/L; } }
       // autumn leaves tumbling past (sparse, swaying, whole cells per loop so it is seamless)
       if(uLeaves>0.){ for(int l=0;l<2;l++){ float L=float(l)+1.; vec2 g=uv*vec2(7.,4.)*L; g.y+=uPh*L*2.; vec2 id=floor(g);
-        if(h(id+L*3.)<.55) continue;
+        if(h(id+L*3.)<.3) continue;
         vec2 f=fract(g)-.5; f.x+=.25*sin(6.2831*(uPh*L+h(id))); float a=6.2831*(uPh*L+h(id+1.));
         vec2 r=vec2(cos(a)*f.x-sin(a)*f.y, sin(a)*f.x+cos(a)*f.y);
-        float leaf=smoothstep(.06/L,.0,length(r*vec2(1.,2.2)));
-        c=mix(c, mix(vec3(.75,.32,.08),vec3(.85,.55,.12),h(id+7.))*(.55+.25*L), leaf*.9); } }
+        float leaf=smoothstep(.1/L,.02/L,length(r*vec2(1.,2.2)));
+        c=mix(c, mix(vec3(.82,.3,.06),vec3(.95,.6,.14),h(id+7.))*(.7+.25*L), leaf); } }
       // far rain streaks
       if(uRain>0.){ vec2 g=vec2(uv.x*320., uv.y*30.+uPh*90.); float r=h(floor(g)); c+=vec3(.25,.3,.4)*step(.985,r)*fract(g.y)*.12; }
       gl_FragColor=vec4(c,1.);
@@ -232,7 +232,7 @@ scene.add(new THREE.AmbientLight(0x1a1a2a, .35));
 const moon = new THREE.DirectionalLight(spec.time === 'night' ? 0x6070a0 : 0xd09070, spec.time === 'night' ? .35 : .6);
 moon.position.set(.5, 3, -4); moon.target.position.set(0, .8, .8); moon.castShadow = true; moon.shadow.mapSize.set(1024, 1024);
 scene.add(moon, moon.target);
-const fire = new THREE.PointLight(0xff7a30, 0, 6, 1.5); fire.position.set(-2.4, .5, 1.6); scene.add(fire);
+const fire = new THREE.PointLight(0xff7a30, 0, 9, 1.2); fire.position.set(-2.4, .5, 1.6); scene.add(fire);
 
 // ---------- post ----------
 const composer = new EffectComposer(renderer); composer.setPixelRatio(1); composer.setSize(W, H);
@@ -241,12 +241,15 @@ composer.addPass(new BokehPass(scene, camera, { focus: 2.15, aperture: .0035, ma
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), .5, .7, .78));
 composer.addPass(new OutputPass());
 const grade = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uF: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uF: { value: 0 }, uFire: { value: 0 } },
   vertexShader: `varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uF; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uF, uFire; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))+uF*.618)*43758.5453); }
     void main(){ vec3 c=texture2D(tDiffuse,vUv).rgb; c=pow(c, vec3(.96,.98,1.04)); c+=vec3(.012,.006,0.);
-      float v=smoothstep(1.05,.35,length((vUv-.5)*vec2(1.1,1.))); c*=mix(.62,1.,v); c+=(h(vUv*1000.)-.5)*.018;
+      float v=smoothstep(1.05,.35,length((vUv-.5)*vec2(1.1,1.))); c*=mix(.62,1.,v);
+      // fireplace just out of frame on the left: a warm, breathing spill across the lower left of the room
+      c+=vec3(.55,.2,.04)*uFire*smoothstep(.75,.0,length((vUv-vec2(-.08,.18))*vec2(1.,1.3)))*.42;
+      c+=(h(vUv*1000.)-.5)*.018;
       gl_FragColor=vec4(c,1.); }`,
 });
 composer.addPass(grade);
@@ -261,7 +264,8 @@ function render(t) {
   const fl = flick(ph, 1);
   warm.position.copy(FLAME).add(new THREE.Vector3(.01 * fl, .03, .02));
   warm.intensity = spec.light === 'candle' ? 2.2 + .35 * fl : 3.2 + .05 * fl;
-  fire.intensity = spec.fire ? 2.6 + .9 * flick(ph, 5) : 0;
+  fire.intensity = spec.fire ? 6.5 + 2.2 * flick(ph, 5) : 0;
+  grade.uniforms.uFire.value = spec.fire ? .75 + .25 * flick(ph, 7) : 0;
   if (flame) { flame.position.copy(FLAME); flame.quaternion.copy(camera.quaternion); flame.scale.set(1, 1 + .06 * fl, 1); }
   for (const sp of steam) { const u = sp.userData, life = (u.o + ph * u.k) % 1;
     sp.position.set(u.x + .02 * Math.sin(TAU * (ph * u.k + u.w)) + life * .03, DESK + .16 + life * .32, u.z);
