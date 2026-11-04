@@ -5,8 +5,10 @@ plus a script.json (title, description, tags) for the review PR. Render: render3
 seamless 3D loop in headless Chromium, facepipe.music writes an original seamless piece, and ffmpeg
 repeats both to full length without re-encoding the picture.
 
-Why this shape (2026-11-04 scan): cozy ambience / relaxing music had the most breakout videos from
-young channels (65 long outliers, 37 from channels under a year old), with median length near 2 hours.
+Why this shape (2026-11-04 scan, 44 breakout scene/instrumental ambience videos from channels under
+100K subscribers, 21 of them from channels under a year old): median length 129 minutes (middle half
+117-192), median 661K views on a median 6.6K-subscriber channel. Their titles: autumn 66%, emoji 61%,
+cozy 57%, jazz 52%, a "|" separator 52%, a use (study/sleep/relax) 50%, fire 32%, rain 18%.
 YouTube demonetises reused or repetitive ambience, so every upload gets its own scene and its own music.
 """
 
@@ -28,14 +30,16 @@ RENDER3D = ROOT / "render3d"
 
 
 class AmbienceSpec(BaseModel):
-    title: str = Field(description="YouTube title under 100 characters in the style of top ambience videos, "
-                       "e.g. 'Rainy Night by the Window 🌧️ Soft Piano & Gentle Rain for Sleep, Study | 1.5 Hours'.")
+    title: str = Field(description="YouTube title, 60-95 characters, in the shape of breakout ambience titles: "
+                       "season + place + music + '|' + mood/use, with one or two emoji, e.g. 'Autumn Fireplace Jazz | "
+                       "Cozy Crackling Fire Ambience' or 'Rainy Autumn Night by the Window 🍂 Soft Jazz for Sleep & Study'.")
     description: str = Field(description="Calm description: what the viewer will see and hear, what it is good for "
                              "(sleep, study, reading), and 3-5 hashtags. Mention the music is original.")
     tags: list[str] = Field(description="10-15 YouTube search tags.")
     title_options: list[str] = Field(default_factory=list, description="3 other titles, each a different angle.")
     thumbnail_text: str = Field(description="0-3 words for the thumbnail, often empty for ambience; e.g. 'RAINY NIGHT'.")
-    weather: Literal["rain", "snow", "clear"]
+    weather: Literal["rain", "snow", "clear", "autumn", "autumn_rain"] = Field(
+        description="autumn = falling leaves outside; autumn_rain = leaves and rain.")
     time: Literal["night", "dusk", "dawn"]
     light: Literal["candle", "lamp"]
     fire: bool = Field(description="A warm fireplace glow from the side of the room.")
@@ -48,6 +52,8 @@ class AmbienceSpec(BaseModel):
     mode: Literal["major", "minor", "dorian"]
     bpm: int = Field(description="56-76: slow and calm.")
     texture: Literal["rain", "fire", "rain_fire", "none"] = Field(description="Sound bed under the music; match the scene.")
+    style: Literal["jazz", "piano"] = Field(description="jazz = brushed drums, walking bass, jazz piano (52% of breakout "
+                                            "scene ambience titles say jazz); piano = solo soft piano.")
 
 
 def draft(cfg: ChannelConfig, topic: str, folder: Path, seed: int, notes: str = "") -> AmbienceSpec:
@@ -91,7 +97,8 @@ def render(cfg: ChannelConfig, folder: Path, seconds: int | None = None, log=pri
     log(f"[{cfg.slug}] Ambience: 3D loop ({spec['weather']}, {spec['time']}, {spec['light']}, {spec['outside']})")
     loop = render_loop(spec, work / "loop.mp4")
     log(f"  music: {spec['key']} {spec['mode']} {spec['bpm']} bpm, {spec['texture']}")
-    track = music.compose(spec["key"], spec["mode"], spec["bpm"], bars=72, texture=spec["texture"], seed=spec["seed"])
+    track = music.compose(spec["key"], spec["mode"], spec["bpm"], bars=72, texture=spec["texture"], seed=spec["seed"],
+                          style=spec.get("style", "jazz"))
     wav = music.write_wav(track, work / "music.wav")
     video = folder / "video.mp4"
     run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(loop), "-stream_loop", "-1", "-i", str(wav),

@@ -37,7 +37,7 @@ FORMATS = {
     "deep": (1920, 1080, 1800),  # 30-minute calm videos (sleep / background listening)
     "story": (1920, 1080, 900),  # 15-minute "what really happened" stories (cold open, open loops)
     "sleep": (1920, 1080, 7200),  # 2-hour sleep videos, written chapter by chapter
-    "ambience": (1920, 1080, 5400),  # 90-minute cozy scene + original music, no narration
+    "ambience": (1920, 1080, 7800),  # 130-minute cozy scene + original music (breakout median: 129 min)
 }
 VISUAL_MODES = {"stock", "ai_images", "public_art", "ambience"}
 LONG_FORMATS = [f for f in FORMATS if f != "short"]

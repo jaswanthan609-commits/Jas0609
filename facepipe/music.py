@@ -73,8 +73,31 @@ def _reverb(x: np.ndarray, seconds: float, rng: np.random.Generator) -> np.ndarr
     return np.fft.irfft(np.fft.rfft(x) * np.fft.rfft(pad), n=n)  # circular: the tail wraps to the start
 
 
+def _brush(dur: float, vel: float, rng: np.random.Generator) -> np.ndarray:
+    """Brush swish on the snare: band-limited noise with a soft attack."""
+    t = np.arange(int(dur * SR)) / SR
+    env = (1 - np.exp(-t * 60)) * np.exp(-t * 9)
+    return _lowpass(rng.standard_normal(len(t)), 6000) * env * vel
+
+
+def _ride(dur: float, vel: float) -> np.ndarray:
+    """Soft ride cymbal: inharmonic FM partials with a long tail."""
+    t = np.arange(int(dur * SR)) / SR
+    tone = sum(np.sin(2 * np.pi * f * t + 2 * np.sin(2 * np.pi * f * 1.41 * t)) for f in (3100, 4270, 5930))
+    return tone * np.exp(-t * 3.5) * (1 - np.exp(-t * 800)) * vel / 3
+
+
+def _walk(chord: list[int], nxt: list[int], scale_notes: list[int], rng: np.random.Generator) -> list[int]:
+    """Four walking-bass notes: root, chord tones, then a step into the next chord's root."""
+    root, target = chord[0] - 12, nxt[0] - 12
+    second = chord[rng.integers(1, 3)] - 12
+    third = chord[2] - 12 if rng.random() < .5 else chord[1] - 12
+    approach = target + (1 if rng.random() < .5 else -1)
+    return [root, second, third, approach]
+
+
 def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, texture: str = "rain",
-            seed: int = 1) -> np.ndarray:
+            seed: int = 1, style: str = "jazz") -> np.ndarray:
     """Return a stereo float array (n, 2) in [-1, 1] that loops seamlessly."""
     rng = np.random.default_rng(seed)
     root = 48 + NOTES.get(key, 2)
@@ -96,9 +119,32 @@ def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, 
 
     melody_scale = [root + 12 + s for s in scale] + [root + 24 + s for s in scale[:5]]
     last = len(melody_scale) // 2
+    swing = beat * 2 / 3  # the "and" of each beat lands two thirds through it (swung eighths)
     for bar in range(bars):
         start = bar * 4 * beat
         chord = _chord(root, scale, prog[bar % len(prog)])
+        nxt = _chord(root, scale, prog[(bar + 1) % len(prog)])
+        if style == "jazz":
+            add(_pad([_hz(m) for m in chord], 4 * beat + 1.5, 0.10), start, 0.5)
+            for b, m in enumerate(_walk(chord, nxt, scale, rng)):  # walking upright-ish bass
+                add(_epiano(_hz(m - 12), beat * 1.1, 0.42), start + b * beat, 0.45)
+            for b in range(4):  # brushes on every beat, ride on 1-2-and-3-4-and
+                add(_brush(beat * .9, 0.035 if b % 2 else 0.02, rng), start + b * beat, 0.4)
+                add(_ride(1.2, 0.012), start + b * beat, 0.7)
+                if b % 2 == 1:
+                    add(_ride(0.8, 0.008), start + b * beat + swing, 0.7)
+            # rootless comping (3rd, 5th, 7th, 9th) on the "and" of 2 or on 4
+            voicing = [chord[1], chord[2], chord[3], chord[0] + 14]
+            hit = start + (beat + swing if rng.random() < .5 else 3 * beat)
+            for k, m in enumerate(voicing):
+                add(_epiano(_hz(m), 2.0, 0.07), hit + k * 0.012, 0.35 + 0.08 * k)
+            if bar % 8 >= 2:  # sparse swung melody
+                for b in range(8):
+                    if rng.random() < 0.22:
+                        last = int(np.clip(last + rng.choice([-2, -1, -1, 0, 1, 1, 2]), 0, len(melody_scale) - 1))
+                        at = start + (b // 2) * beat + (swing if b % 2 else 0)
+                        add(_epiano(_hz(melody_scale[last]), 1.6, 0.12), at, 0.3 + 0.4 * rng.random())
+            continue
         add(_pad([_hz(m) for m in chord], 4 * beat + 1.5, 0.22), start, 0.5)
         add(_epiano(_hz(chord[0] - 12), 4 * beat, 0.30), start, 0.45)  # bass
         # soft rolled chord on beat 1, sometimes again on beat 3

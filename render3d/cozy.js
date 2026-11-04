@@ -12,7 +12,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 const q = new URLSearchParams(location.search);
 const W = +(q.get('w') || 1920), H = +(q.get('h') || 1080);
 const spec = Object.assign({
-  weather: 'rain',        // rain | snow | clear
+  weather: 'rain',        // rain | snow | clear | autumn | autumn_rain
   time: 'night',          // night | dusk | dawn
   light: 'candle',        // candle | lamp
   fire: true,             // warm fireplace glow from the left
@@ -98,10 +98,11 @@ const SKY = {
 }[spec.time];
 const outsideMat = new THREE.ShaderMaterial({
   uniforms: { uPh: { value: 0 }, uTop: { value: col(SKY[0]) }, uLow: { value: col(SKY[1]) }, uLamp: { value: col(SKY[2]) },
-    uSeed: { value: spec.seed }, uSnow: { value: spec.weather === 'snow' ? 1 : 0 }, uRain: { value: spec.weather === 'rain' ? 1 : 0 },
+    uSeed: { value: spec.seed }, uSnow: { value: spec.weather === 'snow' ? 1 : 0 }, uRain: { value: spec.weather.includes('rain') ? 1 : 0 },
+    uLeaves: { value: spec.weather.startsWith('autumn') ? 1 : 0 },
     uKind: { value: ['city', 'forest', 'sea', 'village'].indexOf(spec.outside) } },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-  fragmentShader: `varying vec2 vUv; uniform float uPh,uSeed,uSnow,uRain,uKind; uniform vec3 uTop,uLow,uLamp;
+  fragmentShader: `varying vec2 vUv; uniform float uPh,uSeed,uSnow,uRain,uKind,uLeaves; uniform vec3 uTop,uLow,uLamp;
     float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)) + uSeed*1.7)*43758.5453); }
     float n(float x){ float i=floor(x), f=fract(x); f=f*f*(3.-2.*f); return mix(h(vec2(i,0.)), h(vec2(i+1.,0.)), f); }
     void main(){
@@ -119,6 +120,13 @@ const outsideMat = new THREE.ShaderMaterial({
       if(uSnow>0.){ for(int l=0;l<3;l++){ float L=float(l)+1.; vec2 g=uv*vec2(18.,10.)*L; vec2 id=floor(g);
         float off=h(id+L); vec2 f=fract(vec2(g.x+.3*sin(6.2831*(uPh+off)), g.y+uPh*L*2.+off*10.))-.5;
         c+=vec3(.9)*smoothstep(.09/L,.0,length(f))*.6/L; } }
+      // autumn leaves tumbling past (sparse, swaying, whole cells per loop so it is seamless)
+      if(uLeaves>0.){ for(int l=0;l<2;l++){ float L=float(l)+1.; vec2 g=uv*vec2(7.,4.)*L; g.y+=uPh*L*2.; vec2 id=floor(g);
+        if(h(id+L*3.)<.55) continue;
+        vec2 f=fract(g)-.5; f.x+=.25*sin(6.2831*(uPh*L+h(id))); float a=6.2831*(uPh*L+h(id+1.));
+        vec2 r=vec2(cos(a)*f.x-sin(a)*f.y, sin(a)*f.x+cos(a)*f.y);
+        float leaf=smoothstep(.06/L,.0,length(r*vec2(1.,2.2)));
+        c=mix(c, mix(vec3(.75,.32,.08),vec3(.85,.55,.12),h(id+7.))*(.55+.25*L), leaf*.9); } }
       // far rain streaks
       if(uRain>0.){ vec2 g=vec2(uv.x*320., uv.y*30.+uPh*90.); float r=h(floor(g)); c+=vec3(.25,.3,.4)*step(.985,r)*fract(g.y)*.12; }
       gl_FragColor=vec4(c,1.);
@@ -129,7 +137,7 @@ const outside = new THREE.Mesh(new THREE.PlaneGeometry(9, 5), outsideMat); outsi
 // ---------- rain on the glass ----------
 const glassMat = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false,
-  uniforms: { uPh: { value: 0 }, uOn: { value: spec.weather === 'rain' ? 1 : 0 }, uFrost: { value: spec.weather === 'snow' ? 1 : 0 } },
+  uniforms: { uPh: { value: 0 }, uOn: { value: spec.weather.includes('rain') ? 1 : 0 }, uFrost: { value: spec.weather === 'snow' ? 1 : 0 } },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
   fragmentShader: `varying vec2 vUv; uniform float uPh,uOn,uFrost;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }

@@ -90,7 +90,7 @@ def scan(days: int | None = None, seeds: list[str] | None = None) -> dict:
           "top": v[0]["title"], "top_views": v[0]["views"]} for s, v in by_seed.items()),
         key=lambda x: (x["young"] + x["long"], x["outliers"]), reverse=True)
     return {"updated": datetime.now(timezone.utc).date().isoformat(), "days": days, "videos_checked": len(rows),
-            "ranking": ranking, "outliers": outliers[:300]}
+            "ranking": ranking, "outliers": [o for v in by_seed.values() for o in v[:40]]}
 
 
 def save(result: dict) -> None:

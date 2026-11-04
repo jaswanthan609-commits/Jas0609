@@ -19,7 +19,12 @@ category_id: "10"          # Music
 publish_times: ["23:30"]   # IST; evening in the US, late night in Europe
 extra_guidelines: |
   Ideas are seasonal and specific: a rainy autumn night in a city flat, first snow at a forest cabin at
-  dusk, a seaside window at dawn. Titles follow top ambience channels: scene + emoji + sounds + use + length.
+  dusk, a seaside window at dawn. Follow the season of the upload date (autumn until early December,
+  then winter and Christmas).
+  Titles copy the shape of the 44 breakout ambience titles in research/scan.json (2026-11-04): season
+  word 66%, emoji 61%, "cozy" 57%, "jazz" 52%, a "|" separator 52%, a use (study, sleep, relax) 50%,
+  fire 32%; 60-95 characters. Example: "Autumn Fireplace Jazz | Cozy Crackling Fire Ambience" (3.3M views
+  on a 5.6K-subscriber channel). Prefer style jazz unless the idea is clearly solo piano.
   The music is original and made for this video; say so in the description. No claims about health,
   cures or "sleep in 5 minutes".
 
