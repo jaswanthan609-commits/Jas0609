@@ -100,6 +100,10 @@ Three workflows in [`.github/workflows`](.github/workflows) run everything witho
 Your daily job: open the drafts PR in the GitHub app, delete any script folder you would not
 publish, tick the facts, merge. Merging is the approval.
 
+After adding the secrets, run **Actions > Smoke test > Run workflow** once: it makes one real Short
+without uploading (about $0.02) and checks YouTube and market data access. Download the video from
+the run to judge the quality before the autopilot starts.
+
 One-time setup (repository Settings):
 
 1. **Secrets and variables > Actions > Secrets:** `ANTHROPIC_API_KEY`, `YOUTUBE_API_KEY`, `PEXELS_API_KEY`,
@@ -128,7 +132,12 @@ runs every morning before drafting:
    to the front of the topic queue.
 
 Needs a free `YOUTUBE_API_KEY` secret (Google Cloud > APIs > Credentials > API key, with YouTube
-Data API v3 enabled). Search uses about 1,400 of the free 10,000 daily quota units once a week.
+Data API v3 enabled). Create the key in a **separate Google Cloud project** from the upload OAuth
+client: quota is per project, uploads use most of it, and search uses about 1,400 units on Mondays.
+
+Every script also passes a critic before it reaches you (`facepipe/critic.py`): a title too close
+to an earlier video, or a Claude Haiku score under 7/10 for hook, specificity, originality or
+policy risk, gets one rewrite with the critic's notes, then is dropped. Scores show in the drafts PR.
 
 ## Self-funding budget
 
@@ -156,7 +165,7 @@ for Shorts and free edge-tts voices. Switch `voice_provider` to `elevenlabs` and
 [`trader/`](trader) is a separate test of whether an AI trading bot is worth real money. On
 weekdays after the NSE close (`trade.yml`), Claude Haiku gets the day's prices and simple signals
 for 14 cheap, liquid NSE stocks and ETFs ([`config/trader.yaml`](config/trader.yaml)), decides
-orders, and they are filled at the close with fake money (Rs 7,000) and realistic Zerodha delivery
+orders, and they are filled at the next trading day's close (never the close Claude just saw) with fake money (Rs 7,000) and realistic Zerodha delivery
 fees. Delivery only: no F&O, intraday, shorting or leverage.
 
 It is scored against buying and holding the Nifty 50 ETF with the same Rs 7,000. After 30 days the

@@ -48,9 +48,10 @@ jobs:
           git config user.name "facepipe-bot"
           git config user.email "facepipe-bot@users.noreply.github.com"
           git add ledger/ research/ 2>/dev/null || true
-          git add -f output/*/*/metadata.json topics/*.txt 2>/dev/null || true
-          git reset -q -- topics/*.done.txt 2>/dev/null || true
-          git diff --cached --quiet || { git commit -m "Ledger and research $(date -u +%Y-%m-%d) [skip ci]" && git push origin HEAD:main; }
+          # Topic queues (and which topics are used) go straight to main, so an unmerged drafts PR
+          # never makes tomorrow's run draft the same topics again.
+          git add -f output/*/*/metadata.json topics/ 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "Ledger and research $(date -u +%Y-%m-%d) [skip ci]" && git pull --rebase -q origin main && git push origin HEAD:main; }
 
       - name: Open the review pull request
         env:
@@ -59,7 +60,9 @@ jobs:
           set -e
           branch="drafts/$(date -u +%Y-%m-%d)"
           git checkout -b "$branch"
-          git add -f output/*/*/script.json output/*/*/topic.txt topics/
+          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json; do
+            [ -e "$f" ] && git add -f "$f"
+          done
           if git diff --cached --quiet; then echo "Nothing drafted today"; exit 0; fi
           git commit -m "Drafts for $(date -u +%Y-%m-%d)"
           git push -u origin "$branch"
@@ -70,6 +73,10 @@ jobs:
           for f in sorted(f for f in files if f.endswith("script.json")):
               s = json.loads(pathlib.Path(f).read_text(encoding="utf-8"))
               print(f"### {s['title']}\n`{f}`\n")
+              c = pathlib.Path(f).with_name("critic.json")
+              if c.exists():
+                  r = json.loads(c.read_text(encoding="utf-8"))
+                  print(f"Critic: hook {r['hook']}/10, specific {r['specificity']}/10, original {r['originality']}/10, policy {r['policy_risk']}/10\n")
               if s.get("title_options"):
                   print("Other titles (swap one in by editing the script before merging):")
                   for t in s["title_options"]:

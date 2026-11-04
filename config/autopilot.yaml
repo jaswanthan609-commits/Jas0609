@@ -24,6 +24,9 @@ channels:
     est_short_usd: 0.01
 
   - slug: kids-stories         # illustrated, so far more expensive per video
+    # Locked until the other channels earn $30: it would take about two thirds of the $70 for
+    # the lowest ad rates (Made for Kids). Set to 0 to start it on day 1.
+    unlock_at_usd: 30
     long_days: [mon]
     short_days: [mon, wed, fri]
     est_long_usd: 2.20         # ~30 illustrations

@@ -188,11 +188,11 @@ def follow_up_topics(cfg: ChannelConfig, title: str, views: int, median: float, 
     return _parse(cfg, prompt, TopicIdeas, max_tokens=4000).topics
 
 
-def write_script(cfg: ChannelConfig, topic: str, fmt: str = "short") -> VideoScript:
+def write_script(cfg: ChannelConfig, topic: str, fmt: str = "short", notes: str = "") -> VideoScript:
     _, _, seconds = FORMATS[fmt]
     words = int(seconds * WORDS_PER_SECOND[cfg.language] * (DEEP_PACE if fmt == "deep" else 1))
     brief = FORMAT_BRIEF[fmt].format(seconds=seconds, minutes=round(seconds / 60), words=words)
-    prompt = f"Write {brief}\n\nTopic: {topic}"
+    prompt = f"Write {brief}\n\nTopic: {topic}" + (f"\n\n{notes}" if notes else "")
     model = (cfg.claude_model_short or cfg.claude_model) if fmt == "short" else cfg.claude_model
     max_tokens = 32000 if fmt == "deep" else 16000
     return _parse(cfg, prompt, VideoScript, model=model, max_tokens=max_tokens)

@@ -166,11 +166,16 @@ def cmd_daily(cfg, args):
         with open(path, "a", encoding="utf-8") as f:
             f.write("\n".join(ideas) + "\n")
         print(f"[{cfg.slug}] added {len(ideas)} topic ideas")
+    from .pipeline import Rejected
+
     todo = _remaining_topics(cfg)[:need]
     done_file = path.with_suffix(".done.txt")
     for i, topic in enumerate(todo):
         fmt = cfg.long_format if i < args.long else "short"
-        draft_script(cfg, topic, fmt)
+        try:
+            draft_script(cfg, topic, fmt)
+        except Rejected as exc:  # the topic is used up either way; tomorrow brings a new one
+            print(f"[{cfg.slug}] REJECTED {topic}: {exc}")
         with open(done_file, "a", encoding="utf-8") as f:
             f.write(topic + "\n")
 

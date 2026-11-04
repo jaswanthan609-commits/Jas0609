@@ -240,7 +240,8 @@ def test_budget_plan_by_weekday_and_unlock():
 
     ap = _autopilot()
     monday = budget.plan(ap, today=date(2026, 11, 9))
-    assert monday.jobs == [("ai-tools", 1, 1), ("nri-money", 1, 1), ("kids-stories", 1, 1)]
+    assert monday.jobs == [("ai-tools", 1, 1), ("nri-money", 1, 1)]
+    assert any("kids-stories: locked until earnings reach $30" in n for n in monday.notes)
     tuesday = budget.plan(ap, today=date(2026, 11, 10))
     assert [j[0] for j in tuesday.jobs] == ["ai-tools", "nri-money"]
     assert any("sleepy-history: locked" in n for n in tuesday.notes)
@@ -248,6 +249,7 @@ def test_budget_plan_by_weekday_and_unlock():
     budget.save_revenue("ai-tools", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
     unlocked = budget.plan(ap, today=date(2026, 11, 10))
     assert ("sleepy-history", 1, 0) in unlocked.jobs
+    assert ("kids-stories", 1, 1) in budget.plan(ap, today=date(2026, 11, 9)).jobs
     assert budget.available(ap) == pytest.approx(130)
 
 
@@ -380,15 +382,19 @@ def test_trader_fills_with_fees_and_refuses_bad_orders(tmp_path, monkeypatch):
         bot.Order(ticker="TSLA", action="buy", shares=1, reason="x"),            # not in universe
         bot.Order(ticker="SBIN.NS", action="sell", shares=1, reason="x"),        # not held
     ]
-    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=orders),
-                        today=cfg.started)
+    from datetime import timedelta
+
+    first = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=orders), today=cfg.started)
+    assert first["fills"] == [] and len(first["orders_for_next_day"]) == 4  # no look-ahead fills
+    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=[]),
+                        today=cfg.started + timedelta(days=1))
     status = [f["status"].split(":")[0] for f in entry["fills"]]
     assert status == ["rejected", "filled", "rejected", "rejected"]  # sells first, then buys in order
     state = json.loads((tmp_path / "trading" / "state.json").read_text())
     assert state["positions"]["ITC.NS"]["shares"] == 5
     assert state["cash"] == pytest.approx(7000 - 2100 * 1.0012, abs=0.01)
     assert state["benchmark"]["units"] == 24
-    again = bot.run_day(cfg, hist, decide=lambda *a: 1 / 0, today=cfg.started)
+    again = bot.run_day(cfg, hist, decide=lambda *a: 1 / 0, today=cfg.started + timedelta(days=1))
     assert again == {"skipped": "already ran today"}
 
 
@@ -398,11 +404,40 @@ def test_trader_sell_pays_flat_fee_and_verdict(tmp_path, monkeypatch):
     bot, cfg = _trader(tmp_path, monkeypatch)
     hist = _history({"NIFTYBEES.NS": 280, "ITC.NS": 420})
     buy = [bot.Order(ticker="ITC.NS", action="buy", shares=5, reason="b")]
-    bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=buy), today=cfg.started)
     sell = [bot.Order(ticker="ITC.NS", action="sell", shares=5, reason="s")]
+    bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=buy), today=cfg.started)
+    bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=sell), today=cfg.started + timedelta(days=1))
     later = cfg.started + timedelta(days=31)
-    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=sell), today=later)
+    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=[]), today=later)
     assert entry["fills"][0]["fee"] == pytest.approx(2100 * 0.00105 + 15.93, abs=0.01)
     report = (tmp_path / "trading" / "report.md").read_text()
     assert "FAILED" in report  # round trip at the same price only loses fees
     assert bot.features(hist)["ITC.NS"]["rsi_14"] == 100.0
+
+
+def test_critic_rewrites_then_drops_weak_scripts(tmp_path, monkeypatch):
+    from facepipe import critic, script as scriptmod
+
+    sample = scriptmod.load_script(pipeline.SAMPLE_SCRIPT)
+    cfg = load_config("ai-tools", output_dir=str(tmp_path / "out"))
+    writes = []
+    monkeypatch.setattr(scriptmod, "write_script", lambda c, t, f, notes="": writes.append(notes) or sample)
+    weak = critic.Critique(hook=4, specificity=8, originality=8, policy_risk=9, fixes=["Stronger first line"])
+    strong = critic.Critique(hook=8, specificity=8, originality=8, policy_risk=9, fixes=[])
+    verdicts = [weak, strong]
+    monkeypatch.setattr(critic, "critique", lambda c, s: verdicts.pop(0))
+    path = pipeline.draft_script(cfg, "topic", "short", log=lambda *a: None)
+    assert writes == ["", critic.notes_for_rewrite(weak)]
+    assert json.loads((path.parent / "critic.json").read_text())["hook"] == 8
+
+    # Same title again: duplicate, rewrite still duplicate -> dropped without spending on the critic.
+    monkeypatch.setattr(critic, "critique", lambda c, s: 1 / 0)
+    with pytest.raises(pipeline.Rejected):
+        pipeline.draft_script(cfg, "topic", "short", log=lambda *a: None)
+
+
+def test_duplicate_titles_detected():
+    from facepipe.critic import duplicate_of
+
+    assert duplicate_of("5 Free AI Tools That Save Hours!", ["5 free AI tools that save hours"])
+    assert duplicate_of("How NRIs pay less tax in 2027", ["5 free AI tools that save hours"]) is None

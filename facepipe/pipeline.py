@@ -20,6 +20,10 @@ class NotReviewed(RuntimeError):
     pass
 
 
+class Rejected(RuntimeError):
+    """The critic or the duplicate check stopped a script before it reached review."""
+
+
 @dataclass
 class Result:
     folder: Path
@@ -42,14 +46,40 @@ def _new_folder(cfg: ChannelConfig, fmt: str, name: str) -> Path:
     return folder
 
 
-def draft_script(cfg: ChannelConfig, topic: str, fmt: str = "short", log=print) -> Path:
-    """Step 1: Claude writes the script into a new folder. Returns the script.json path for review."""
+def draft_script(cfg: ChannelConfig, topic: str, fmt: str = "short", log=print, use_critic: bool = True) -> Path:
+    """Step 1: Claude writes the script into a new folder. Returns the script.json path for review.
+
+    With use_critic, a near-duplicate title or a weak script is rewritten once, then dropped
+    (raises Rejected) rather than sent for approval.
+    """
+    from . import critic
+
     log(f"[{cfg.slug}] Writing {fmt} script with {cfg.claude_model}: {topic}")
     vs = scriptmod.write_script(cfg, topic, fmt)
+    review = None
+    if use_critic:
+        previous = critic.previous_titles(cfg)
+        for attempt in (1, 2):
+            dup = critic.duplicate_of(vs.title, previous)
+            if dup:
+                notes = f"The title is too close to an earlier video, \"{dup}\". Take a clearly different angle."
+            else:
+                review = critic.critique(cfg, vs)
+                log(f"  critic: hook {review.hook}, specific {review.specificity}, original {review.originality}, "
+                    f"policy {review.policy_risk}")
+                if review.score >= critic.PASS_SCORE:
+                    break
+                notes = critic.notes_for_rewrite(review)
+            if attempt == 2:
+                raise Rejected(f"dropped after rewrite: {dup and 'duplicate of ' + dup or review.fixes}")
+            log("  rewriting with the critic's notes")
+            vs = scriptmod.write_script(cfg, topic, fmt, notes=notes)
     folder = _new_folder(cfg, fmt, topic)
     path = folder / "script.json"
     scriptmod.save_script(vs, path)
     (folder / "topic.txt").write_text(f"{fmt}\n{topic}\n", encoding="utf-8")
+    if review:
+        (folder / "critic.json").write_text(review.model_dump_json(indent=2), encoding="utf-8")
     log(f"  Title: {vs.title}  ({len(vs.scenes)} scenes)")
     log(f"  Facts to check: {len(vs.facts_to_check)}")
     log(f"  Review it, set \"reviewed\": true, then: python -m facepipe --channel {cfg.slug} render {path}")

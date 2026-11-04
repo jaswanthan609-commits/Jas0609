@@ -220,6 +220,7 @@ def ask_claude(cfg: Config, state: dict, feats: dict[str, dict], prices: dict[st
         f"Date: {date.today().isoformat()}\n"
         f"Cash: Rs {state['cash']:.2f}\nPortfolio value: Rs {value(state, prices):.2f}\n"
         f"Holdings: {json.dumps(holdings)}\n"
+        f"Orders you place now are filled at the next trading day's close, not today's.\n"
         f"Market data per ticker (price in Rs; returns, distance from 50-day average, RSI, annual volatility):\n"
         f"{json.dumps(feats, indent=1)}\n\nDecide today's orders."
     )
@@ -246,6 +247,11 @@ def ask_claude(cfg: Config, state: dict, feats: dict[str, dict], prices: dict[st
 # ---------- one day ----------
 
 def run_day(cfg: Config, history: dict[str, list[float]], decide=ask_claude, today: date | None = None) -> dict:
+    """Fill yesterday's orders at today's close, then decide new orders for tomorrow.
+
+    Orders are never filled at the same close Claude just saw: that would be look-ahead, a common
+    reason backtests look better than real trading.
+    """
     today = today or date.today()
     prices = {t: s[-1] for t, s in history.items()}
     if cfg.benchmark not in prices:
@@ -253,14 +259,17 @@ def run_day(cfg: Config, history: dict[str, list[float]], decide=ask_claude, tod
     state = load_state(cfg, prices)
     if state.get("last_day") == today.isoformat():
         return {"skipped": "already ran today"}
+    pending = [Order(**o) for o in state.pop("pending", [])]
+    fills = execute(cfg, state, pending, prices)
     decision = decide(cfg, state, features(history), prices)
-    fills = execute(cfg, state, decision.orders, prices)
+    state["pending"] = [o.model_dump() for o in decision.orders]
     total = value(state, prices)
     state["peak"] = max(state["peak"], total)
     state["max_drawdown_pct"] = round(max(state["max_drawdown_pct"], (1 - total / state["peak"]) * 100), 2)
     state["last_day"] = today.isoformat()
     save_state(state)
     entry = {"day": today.isoformat(), "view": decision.view, "fills": fills,
+             "orders_for_next_day": state["pending"],
              "value": round(total, 2), "benchmark_value": round(benchmark_value(state, prices, cfg), 2),
              "cash": state["cash"]}
     with open(_path("journal.jsonl"), "a", encoding="utf-8") as f:
