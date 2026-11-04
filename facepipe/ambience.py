@@ -63,9 +63,10 @@ def draft(cfg: ChannelConfig, topic: str, folder: Path, seed: int, notes: str = 
               f"Idea: {topic}\nMake the scene, weather, light and music fit the idea and each other."
               + (f"\n\n{notes}" if notes else ""))
     spec = _parse(cfg, prompt, AmbienceSpec, max_tokens=3000)
-    from . import samples  # CC BY needs the credit in the description; CC0 credited as thanks
+    from . import beds, samples  # CC BY needs the credit in the description; CC0 credited as thanks
     spec.description = spec.description.rstrip() + "\n\nMusic: an original composition for this video. Instrument samples:\n" \
-        + "\n".join(f"- {c}" for c in samples.credits(samples.JAZZ if spec.style == "jazz" else samples.PIANO))
+        + "\n".join(f"- {c}" for c in samples.credits(samples.JAZZ if spec.style == "jazz" else samples.PIANO)
+                     + beds.credits(spec.texture))
     data = spec.model_dump() | {"seed": seed}
     (folder / "ambience.json").write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     save_script(VideoScript(title=spec.title, description=spec.description, tags=spec.tags,
@@ -102,6 +103,8 @@ def render(cfg: ChannelConfig, folder: Path, seconds: int | None = None, log=pri
     log(f"  music: {spec['key']} {spec['mode']} {spec['bpm']} bpm, {spec['texture']}")
     from . import samples
     samples.fetch(list(samples.JAZZ if spec.get("style", "jazz") == "jazz" else samples.PIANO), log=log)
+    from . import beds
+    beds.fetch(beds.kinds_for(spec["texture"]), log=log)
     track = music.compose(spec["key"], spec["mode"], spec["bpm"], bars=72, texture=spec["texture"], seed=spec["seed"],
                           style=spec.get("style", "jazz"))
     wav = music.write_wav(track, work / "music.wav")

@@ -6,7 +6,7 @@ name: Listen
 
 on:
   push:
-    paths: ["facepipe/music.py", "facepipe/samples.py", ".github/workflows/listen.yml"]
+    paths: ["facepipe/music.py", "facepipe/samples.py", "facepipe/beds.py", ".github/workflows/listen.yml"]
   workflow_dispatch:
 
 jobs:
@@ -36,7 +36,11 @@ jobs:
         with:
           path: .cache/samples
           key: samples-${{ hashFiles('facepipe/samples.py') }}
-      - run: python -c "from facepipe import samples; assert samples.fetch()"
+      - uses: actions/cache@v4
+        with:
+          path: .cache/beds
+          key: beds-${{ hashFiles('facepipe/beds.py') }}
+      - run: python -c "from facepipe import samples, beds; assert samples.fetch(); beds.fetch(['rain', 'fire'])"
       - name: Render one minute per style and listen
         run: |
           mkdir -p listen

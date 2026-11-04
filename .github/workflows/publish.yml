@@ -53,6 +53,11 @@ jobs:
           path: .cache/samples
           key: samples-${{ hashFiles('facepipe/samples.py') }}
 
+      - uses: actions/cache@v4
+        with:
+          path: .cache/beds
+          key: beds-${{ hashFiles('facepipe/beds.py') }}
+
       - name: Install earshot so every render is listened to (audio_report.json)
         env:
           EARSHOT_HOME: ${{ github.workspace }}/.earshot

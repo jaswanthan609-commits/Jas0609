@@ -230,9 +230,15 @@ def _lowpass_stereo(x: np.ndarray, cutoff: float) -> np.ndarray:
 
 
 def texture_bed(texture: str, n: int, rng: np.random.Generator) -> np.ndarray:
-    """Rain, fire crackle or neither, generated circularly so it loops without a seam."""
+    """Rain, fire crackle or neither: real recordings when fetched (facepipe.beds), else generated. Both loop."""
+    from . import beds
+
     out = np.zeros((n, 2))
-    if texture in {"rain", "rain_fire"}:
+    real = {k: beds.bed(k, n, rng) for k in beds.kinds_for(texture)}
+    for k, y in real.items():
+        if y is not None:
+            out += y
+    if texture in {"rain", "rain_fire"} and real.get("rain") is None:
         for ch in range(2):
             # Rain on glass is a light high hiss plus many tiny ticks; low broadband noise reads as a waterfall.
             white = rng.standard_normal(n)
@@ -246,7 +252,7 @@ def texture_bed(texture: str, n: int, rng: np.random.Generator) -> np.ndarray:
             ticks = np.fft.irfft(np.fft.rfft(drops) * np.fft.rfft(tick, n), n=n)  # circular: seamless
             ticks = ticks - _lowpass(ticks, 1500)
             out[:, ch] += ticks / (np.max(np.abs(ticks)) + 1e-9) * 0.12
-    if texture in {"fire", "rain_fire"}:
+    if texture in {"fire", "rain_fire"} and real.get("fire") is None:
         crack = np.zeros(n)
         idx = rng.integers(0, n, size=n // SR * 6)
         crack[idx] = rng.random(len(idx)) ** 3

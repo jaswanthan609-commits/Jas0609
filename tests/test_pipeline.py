@@ -550,3 +550,18 @@ def test_lint_flags_ai_words():
     s = VideoScript(title="The Roman lamp", description="", tags=[], thumbnail_text="", facts_to_check=[], scenes=[
         Scene(narration="Rome's lamps are a testament to a vibrant, intricate tapestry of life.", visual_query="lamp")])
     assert any("AI-written" in p for p in lint(s, "sleep"))
+
+
+def test_real_bed_loop_is_seamless():
+    import numpy as np
+    from facepipe import beds
+
+    rng = np.random.default_rng(1)
+    t = np.arange(44100 * 7) / 44100
+    x = np.stack([np.sin(2 * np.pi * 3 * t) + 0.1 * rng.standard_normal(len(t))] * 2, axis=1)
+    y = beds.loop(x, 44100 * 20, rng)
+    assert y.shape == (44100 * 20, 2)
+    jump = np.abs(y[0] - y[-1]).max()
+    typical = np.abs(np.diff(y, axis=0)).max()
+    assert jump <= typical * 1.5
+    assert all("CC0" in c for c in beds.credits("rain_fire"))
