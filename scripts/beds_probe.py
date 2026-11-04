@@ -64,11 +64,24 @@ def mixkit(kind: str, url: str) -> list[dict]:
 
 
 def earshot(path: Path) -> str:
+    """Judge a 40 s excerpt (from 0:20) so long takes don't eat the job's time."""
+    clip = path.with_suffix(".clip.wav")
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "20", "-t", "40", "-i", str(path), "-ac", "2",
+                    "-ar", "44100", str(clip)], check=False, timeout=120)
+    if not clip.exists() or clip.stat().st_size < 1000:
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-t", "40", "-i", str(path), "-ac", "2", "-ar", "44100",
+                        str(clip)], check=False, timeout=120)
     res = []
-    for cmd in (["realness"], ["describe"], ["measure"]):
-        r = subprocess.run(["earshot", *cmd, str(path)], capture_output=True, text=True, timeout=600)
-        res.append((r.stdout or r.stderr).strip().splitlines()[0] if (r.stdout or r.stderr) else "")
-    return "\n".join(res)
+    for cmd in (["realness"], ["describe"]):
+        try:
+            r = subprocess.run(["earshot", *cmd, str(clip)], capture_output=True, text=True, timeout=300)
+            txt = (r.stdout or r.stderr).strip()
+            res.append(txt.splitlines()[0] if txt else "")
+        except subprocess.TimeoutExpired:
+            res.append(f"{cmd[0]}: timed out")
+    dur = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                         capture_output=True, text=True).stdout.strip()
+    return f"full duration {dur} s\n" + "\n".join(res)
 
 
 def main(out: Path = Path("probe")) -> None:
@@ -87,12 +100,13 @@ def main(out: Path = Path("probe")) -> None:
                 it["earshot"] = earshot(f)
             except Exception as e:  # noqa: BLE001
                 it["error"] = f"download: {e}"
-        report += [f"## {it['kind']} {it['source']} {it.get('id')} {it.get('title', '')}",
+        block = [f"## {it['kind']} {it['source']} {it.get('id')} {it.get('title', '')}",
                    f"- page: {it.get('page')}", f"- licence: {it.get('licence_links')} allowed={it.get('allowed')}",
                    f"- audio: {it.get('audio')}", f"- error: {it.get('error', '')}", "```", it.get("earshot", ""), "```", ""]
+        print("\n".join(block), flush=True)
+        report += block
     (out / "items.json").write_text(json.dumps(items, indent=2))
     (out / "report.md").write_text("\n".join(report))
-    print("\n".join(report))
 
 
 if __name__ == "__main__":

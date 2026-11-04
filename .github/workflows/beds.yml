@@ -10,7 +10,7 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       EARSHOT_HOME: ${{ github.workspace }}/.earshot
       EARSHOT_THREADS: "4"
