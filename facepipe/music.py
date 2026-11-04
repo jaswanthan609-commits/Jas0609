@@ -19,7 +19,7 @@ import numpy as np
 from . import samples
 
 SR = 44100
-BED_GAIN = 0.4  # about -8 dB: the rain/fire sits under the music, not over it
+MUSIC_OVER_BED_DB = 4.5  # quality gate: music 3-6 dB over the rain/fire, so both stay clear
 NOTES = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7,
          "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11}
 SCALES = {"major": [0, 2, 4, 5, 7, 9, 11], "minor": [0, 2, 3, 5, 7, 8, 10], "dorian": [0, 2, 3, 5, 7, 9, 10]}
@@ -218,11 +218,71 @@ def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, 
     music = np.stack([_reverb(music[:, 0], size, rng) * wet + music[:, 0] * 0.6,
                       _reverb(music[:, 1], size, rng) * wet + music[:, 1] * 0.6], axis=1)
     music = _lowpass_stereo(music, cutoff)
+    if sampled:
+        music = _presence(music)  # earshot heard the Wurlitzer mix as muffled (brightness ~500 Hz)
     music /= np.max(np.abs(music)) + 1e-9
     music *= 0.55
-    bed = texture_bed(texture, n, rng) * BED_GAIN  # earshot: at full level the rain drowned the music
+    if texture == "none":
+        return music
+    return mix(music, texture_bed(texture, n, rng))
+
+
+def _presence(x: np.ndarray, corner: float = 2500, gain_db: float = 4.0) -> np.ndarray:
+    """Gentle high shelf: lifts note attacks and air without making the mix bright."""
+    out = np.empty_like(x)
+    g = 10 ** (gain_db / 20)
+    for ch in range(x.shape[1]):
+        spec = np.fft.rfft(x[:, ch])
+        f = np.fft.rfftfreq(len(x), 1 / SR)
+        spec *= 1 + (g - 1) / (1 + (corner / np.maximum(f, 1)) ** 2)
+        out[:, ch] = np.fft.irfft(spec, n=len(x))
+    return out
+
+
+def _rms(x: np.ndarray) -> float:
+    loud = x[np.abs(x).max(axis=1) > 1e-4] if x.ndim == 2 else x
+    return float(np.sqrt(np.mean(loud ** 2))) if len(loud) else 0.0
+
+
+def mix(music: np.ndarray, bed: np.ndarray, over_db: float = MUSIC_OVER_BED_DB) -> np.ndarray:
+    """Music over the bed by `over_db` (RMS), then peak-safe."""
+    rb, rm = _rms(bed), _rms(music)
+    if rb > 0 and rm > 0:
+        bed = bed * (rm / 10 ** (over_db / 20) / rb)
     out = music + bed
     return out / max(1.0, np.max(np.abs(out)) / 0.95)
+
+
+def suite(key: str, mode: str, bpm: int, texture: str, seed: int, style: str = "jazz", pieces: int = 8,
+          bars: int = 48, gap: float = 3.0, bed_minutes: float = 6.0):
+    """A cycle of `pieces` different pieces (own progression, tempo and melody each) with a short breath between.
+
+    A single 4-minute piece looped for two hours is the 'repetitive content' YouTube demonetises, and it gives
+    no natural ad breakpoints. Each breath (music fades, the rain carries on) is one: 'a pause in audio' is
+    where YouTube's automatic mid-rolls land best. Returns (mix, music, bed) as float32, each cycle-long.
+    """
+    parts = []
+    for i in range(pieces):
+        tempo = int(np.clip(bpm + (-4, 0, 3, -2, 2, -3, 4, 0)[i % 8], 54, 80))
+        x = compose(key, mode, tempo, bars=bars, texture="none", seed=seed * 10 + i, style=style).astype(np.float32)
+        fin, fout = int(1.5 * SR), int(2.5 * SR)
+        x[:fin] *= np.linspace(0, 1, fin, dtype=np.float32)[:, None]
+        x[-fout:] *= np.linspace(1, 0, fout, dtype=np.float32)[:, None] ** 2
+        parts += [x, np.zeros((int(gap * SR), 2), np.float32)]
+    music = np.concatenate(parts)
+    n = len(music)
+    rng = np.random.default_rng(seed + 991)
+    if texture == "none":
+        return music, music, np.zeros_like(music)
+    nb = min(n, int(bed_minutes * 60 * SR))
+    tile = texture_bed(texture, nb, rng).astype(np.float32)
+    bed = np.tile(tile, (n // nb + 1, 1))[:n]  # the bed loops circularly, so tiling it is seamless
+    # balance against the music's playing parts, not the breaths
+    rb, rm = _rms(bed), _rms(music)
+    bed *= np.float32(rm / 10 ** (MUSIC_OVER_BED_DB / 20) / max(rb, 1e-9))
+    out = music + bed
+    out /= np.float32(max(1.0, float(np.max(np.abs(out))) / 0.95))
+    return out, music, bed
 
 
 def _lowpass_stereo(x: np.ndarray, cutoff: float) -> np.ndarray:

@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import json
 import shutil
+
+import numpy as np
 import subprocess
 from pathlib import Path
 from typing import Literal
@@ -105,14 +107,26 @@ def render(cfg: ChannelConfig, folder: Path, seconds: int | None = None, log=pri
     samples.fetch(list(samples.JAZZ if spec.get("style", "jazz") == "jazz" else samples.PIANO), log=log)
     from . import beds
     beds.fetch(beds.kinds_for(spec["texture"]), log=log)
-    track = music.compose(spec["key"], spec["mode"], spec["bpm"], bars=72, texture=spec["texture"], seed=spec["seed"],
-                          style=spec.get("style", "jazz"))
-    wav = music.write_wav(track, work / "music.wav")
+    mixed, music_stem, bed_stem = music.suite(spec["key"], spec["mode"], spec["bpm"], spec["texture"], spec["seed"],
+                                              style=spec.get("style", "jazz"))
+    wav = music.write_wav(mixed, work / "music.wav")
+    from . import qa
+    visual = qa.visual_report(loop)
+    audio = qa.audio_report(music_stem, bed_stem)
+    del mixed, music_stem, bed_stem
+    log(f"  qa: picture {visual}; audio {audio}")
     video = folder / "video.mp4"
     run(["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(loop), "-stream_loop", "-1", "-i", str(wav),
          "-t", str(seconds), "-map", "0:v", "-map", "1:a", "-c:v", "copy",
          "-af", f"afade=t=in:d=4,afade=t=out:st={seconds - 6}:d=6,loudnorm=I=-20:TP=-2",
          "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(video)])
+    from . import listen
+    heard = listen.listen(video)
+    if heard:
+        audio = qa.audio_report(np.zeros((1, 2)), np.zeros((1, 2)), heard) | audio
+    report = qa.gate(visual, audio)
+    qa.write(folder, report)
+    log(f"  qa: {report['summary']}")
     width, height, _ = FORMATS["ambience"]
     thumb = folder / "thumbnail.jpg"
     if spec.get("thumbnail_text", "").strip():

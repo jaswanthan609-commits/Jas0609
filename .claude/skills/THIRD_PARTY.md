@@ -20,6 +20,12 @@ Apache-2.0 (LICENSE in each folder):
 | `skill-creator`, `algorithmic-art`, `frontend-design` | https://github.com/anthropics/skills | ca45fc4 |
 | `hyperframes`, `hyperframes-cli`, `hyperframes-registry`, `style-sampling`, `reverse-any-video` | https://github.com/heygen-com/hyperframes | c6f87f5 |
 
+MIT (LICENSE in each folder):
+
+| skills | source | commit |
+| --- | --- | --- |
+| `prompt-optimizer`, `verification-loop`, `agent-self-evaluation`, `eval-harness`, `santa-method`, `loop-design-check`, `continuous-agent-loop`, `video-editing`, `content-engine`, `cost-aware-llm-pipeline`, `prompt-caching-strategy`, `growth-log`, `skill-scout` (13 of the ECC set) | https://github.com/affaan-m/everything-claude-code | b38be6a |
+
 AGPL-3.0 (LICENSE in the folder; these files stay under AGPL):
 
 | skills | source | commit |
@@ -37,4 +43,4 @@ that commit, to measure and describe every rendered soundtrack.
 `hooks.json` and `hookscore.py` from `yt-script` are also used by the pipeline in
 `facepipe/vendor/ytagent/` (with its LICENSE) for the free hook check in `facepipe/critic.py`.
 
-Our own: `outlier-scan`, `story-script`, `channel-ops`.
+Our own: `outlier-scan`, `story-script`, `channel-ops`, `brief-refiner` (turns the owner's rough asks into measurable targets), `quality-gate` (audio, picture, sync and packaging checks before anything is called done).

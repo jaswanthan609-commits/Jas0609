@@ -216,11 +216,7 @@ def render(
 def _render_ambience(cfg: ChannelConfig, folder: Path, vs, offline: bool, log) -> Result:
     from . import ambience
 
-    video, thumb = ambience.render(cfg, folder, seconds=60 if offline else None, log=log)
-    from . import listen
-
-    if listen.listen(video):
-        log("  listened: audio_report.json written")
+    video, thumb = ambience.render(cfg, folder, seconds=60 if offline else None, log=log)  # listens and gates
     meta_path = folder / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     description = affiliate.with_links(cfg, vs.description, vs.title)
@@ -247,6 +243,9 @@ def publish(cfg: ChannelConfig, result: Result, publish_at: datetime | None, log
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if meta.get("offline"):
         raise RuntimeError("This is an offline dry-run render; it can't be uploaded.")
+    qa_path = result.folder / "qa.json"
+    if qa_path.exists() and not json.loads(qa_path.read_text(encoding="utf-8")).get("ok", True):
+        raise RuntimeError(f"Quality gate failed, not uploading: {json.loads(qa_path.read_text())['summary']}")
     when = f" scheduled for {publish_at:%Y-%m-%d %H:%M %Z}" if publish_at else ""
     log(f"[{cfg.slug}] Uploading to YouTube{when}")
     result.video_id = upload.upload(
