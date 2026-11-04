@@ -1,0 +1,43 @@
+{
+  "title": "The 50-30-20 rule: where your salary should go",
+  "description": "A simple rule to split any salary so you save without feeling broke.\n\n#money #budget #personalfinance",
+  "tags": [
+    "50 30 20 rule",
+    "budgeting",
+    "salary planning",
+    "personal finance india",
+    "save money"
+  ],
+  "thumbnail_text": "SPLIT YOUR SALARY",
+  "scenes": [
+    {
+      "narration": "Salary comes in, and by the twentieth it is gone. Here is the fix.",
+      "visual_query": "empty wallet",
+      "on_screen_text": "Broke by the 20th?"
+    },
+    {
+      "narration": "Split every rupee three ways. Fifty percent for needs like rent, food and EMIs.",
+      "visual_query": "indian rupee notes",
+      "on_screen_text": "50% Needs"
+    },
+    {
+      "narration": "Thirty percent for wants, the movies, the trips, the new phone.",
+      "visual_query": "friends cinema",
+      "on_screen_text": "30% Wants"
+    },
+    {
+      "narration": "And twenty percent goes to savings first, before you spend anything.",
+      "visual_query": "piggy bank coins",
+      "on_screen_text": "20% Savings"
+    },
+    {
+      "narration": "Automate that twenty percent on salary day, and your future self will thank you. Follow for more money tips.",
+      "visual_query": "happy young man phone",
+      "on_screen_text": ""
+    }
+  ],
+  "facts_to_check": [
+    "The 50-30-20 rule splits take-home pay into needs, wants and savings"
+  ],
+  "reviewed": true
+}

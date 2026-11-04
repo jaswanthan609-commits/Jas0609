@@ -1,0 +1,215 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:SG;src:url(fonts/space-grotesk-latin-500-normal.woff2);font-weight:500}
+@font-face{font-family:SG;src:url(fonts/space-grotesk-latin-700-normal.woff2);font-weight:700}
+:root{--bg:#0a1324;--ink:#eef3fb;--mut:#9aabc8;--g:#3ccf8e;--o:#ff9933;--r:#ff4d4d;--card:#13213b}
+*{box-sizing:border-box}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--bg);font-family:SG,sans-serif;color:var(--ink)}
+#bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#16294d 0%,var(--bg) 70%)}
+#grid{position:absolute;inset:-200px;background-image:linear-gradient(rgba(154,171,200,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(154,171,200,.07) 1px,transparent 1px);background-size:80px 80px}
+#f3d{position:absolute;inset:0;width:1920px;height:1080px;display:none}
+.shot{position:absolute;inset:0;visibility:hidden}
+.c{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+#brand{position:absolute;left:120px;top:60px;font-weight:700;letter-spacing:.18em;font-size:30px;color:var(--o);z-index:5}
+#brand::before{content:'';display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--o);margin-right:14px}
+/* phone */
+.phone{position:absolute;left:50%;top:50%;width:560px;height:1100px;margin:-470px 0 0 -280px;border-radius:70px;background:#05080f;border:14px solid #1c2740;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 2px #2b3a5c inset;overflow:hidden}
+.phone .scr{position:absolute;inset:0;background:linear-gradient(160deg,#1d3260,#0b1730 60%)}
+.phone .clock{position:absolute;top:120px;width:100%;text-align:center;font-size:120px;font-weight:500;letter-spacing:-2px}
+.phone .date{position:absolute;top:262px;width:100%;text-align:center;font-size:30px;color:var(--mut)}
+.notif{position:absolute;left:24px;right:24px;top:360px;border-radius:30px;background:rgba(238,243,251,.96);color:#0a1324;padding:24px 26px;display:flex;gap:18px;align-items:flex-start}
+.notif img{width:70px;height:70px}
+.notif .h{font-size:22px;color:#5a6a88;font-weight:700;letter-spacing:.08em}
+.notif .b{font-size:30px;line-height:1.25;margin-top:6px;font-weight:500}
+.notif .amt{color:#d42f2f;font-weight:700}
+.big{font-size:230px;font-weight:700;letter-spacing:-4px;white-space:nowrap}
+.red{color:var(--r)} .grn{color:var(--g)} .org{color:var(--o)}
+.small{font-size:44px;color:var(--mut);font-weight:500;text-align:center}
+.stamp{border:14px solid var(--ink);border-radius:30px;padding:10px 60px}
+.crowd{display:grid;grid-template-columns:repeat(7,150px);gap:18px}
+.crowd img{width:150px;height:150px}
+/* ravi */
+.ravi{display:flex;align-items:center;gap:70px}
+.av{width:420px;height:420px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#25407a,#13213b);border:8px solid var(--o);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.av img{width:330px;margin-top:40px}
+.nm{font-size:150px;font-weight:700;line-height:1}
+.tag{display:inline-block;margin-top:24px;font-size:40px;padding:10px 26px;border-radius:999px;background:var(--card);border:3px solid var(--o);color:var(--ink)}
+.ex{font-size:28px;color:var(--mut);margin-top:22px}
+/* map */
+.pin{position:absolute;display:flex;flex-direction:column;align-items:center;gap:10px}
+.pin .dot{width:46px;height:46px;border-radius:50%;background:var(--o);box-shadow:0 0 0 14px rgba(255,153,51,.25)}
+.pin b{font-size:56px;letter-spacing:.06em}
+/* chat */
+.bub{position:absolute;left:30px;max-width:440px;background:#24365e;color:var(--ink);font-size:38px;line-height:1.25;padding:22px 26px;border-radius:28px 28px 28px 8px}
+.who{position:absolute;top:110px;width:100%;text-align:center;font-size:34px;font-weight:700}
+.who small{display:block;font-size:22px;color:var(--mut);font-weight:500}
+.typing{position:absolute;left:30px;top:250px;background:#24365e;border-radius:28px;padding:22px 30px;display:flex;gap:12px}
+.typing i{width:16px;height:16px;border-radius:50%;background:var(--mut);display:block}
+.btn{font-size:72px;font-weight:700;padding:44px 90px;border-radius:40px;background:var(--o);color:var(--bg);white-space:nowrap;box-shadow:0 20px 60px rgba(255,153,51,.35)}
+.btn.done{background:var(--g);box-shadow:0 20px 60px rgba(60,207,142,.35)}
+.tap{position:absolute;width:120px;height:120px;border-radius:50%;border:8px solid #fff;opacity:0}
+/* captions */
+#cap{position:absolute;left:0;right:0;bottom:70px;text-align:center;z-index:10}
+#cap span.box{display:inline-block;background:rgba(10,19,36,.82);padding:14px 34px;border-radius:20px;font-size:64px;font-weight:700}
+#cap i{font-style:normal}
+#cap i.on{color:var(--o)}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:20;pointer-events:none}
+</style></head>
+<body>
+<div id="bg"><div id="grid"></div></div>
+<img id="f3d">
+<div id="brand">NRI MONEY GUIDE</div>
+
+<div class="shot" id="s1">
+  <div class="phone" id="ph1"><div class="scr"></div><div class="clock">9:41</div><div class="date">Tuesday, 4 November</div>
+    <div class="notif" id="nt"><img src="icons/bell_3d.png"><div><div class="h">YOUR BANK · NOW</div><div class="b">TDS of <span class="amt">₹31,200.00</span> deducted from interest on your NRO deposit.</div></div></div>
+  </div>
+</div>
+<div class="shot" id="s2"><div class="c" style="top:23%"><div class="big red" id="n31">−₹31,200</div></div></div>
+<div class="shot" id="s3"><div class="c"><div class="big stamp" id="legal">LEGAL.</div><div class="small" style="margin-top:34px" id="act">Income-tax Act, 1961 · not a scam</div></div></div>
+<div class="shot" id="s4"><div class="c" style="top:44%"><div class="big org" style="font-size:170px;text-align:center" id="most">MOST NRIs</div>
+  <div class="crowd" id="crowd" style="margin-top:30px"></div></div></div>
+<div class="shot" id="s5"><div class="c" style="display:flex;align-items:center;gap:50px"><img src="icons/check_mark_button_3d.png" style="width:260px" id="chk"><div class="big grn" id="avd">AVOIDABLE</div></div></div>
+<div class="shot" id="s6"><img src="icons/cityscape_3d.png" style="position:absolute;right:90px;top:120px;width:520px;opacity:.18" id="city">
+  <div class="c ravi"><div class="av" id="av"><img src="icons/man_office_worker_3d_medium.png"></div>
+  <div><div class="nm" id="nm">RAVI</div><div class="tag" id="dubai">works in DUBAI</div><div class="ex">An example. The tax is real.</div></div></div></div>
+<div class="shot" id="s7">
+  <svg width="1920" height="1080" style="position:absolute;inset:0"><path id="arc" d="M 420 640 Q 960 180 1500 640" fill="none" stroke="#9aabc8" stroke-width="6" stroke-dasharray="18 18" opacity=".7"/></svg>
+  <div class="pin" style="left:330px;top:620px" id="p1"><div class="dot"></div><b>DUBAI</b></div>
+  <div class="pin" style="left:1410px;top:620px" id="p2"><div class="dot"></div><b>INDIA</b></div>
+  <img src="icons/house_with_garden_3d.png" id="home" style="position:absolute;left:1420px;top:400px;width:200px">
+  <img src="icons/airplane_3d.png" id="plane" style="position:absolute;left:0;top:0;width:190px">
+  <img src="icons/money_with_wings_3d.png" class="mw" style="position:absolute;left:0;top:0;width:110px">
+  <img src="icons/money_with_wings_3d.png" class="mw" style="position:absolute;left:0;top:0;width:110px">
+  <img src="icons/money_with_wings_3d.png" class="mw" style="position:absolute;left:0;top:0;width:110px">
+  <div class="small" style="position:absolute;top:150px;width:100%;font-size:54px;color:var(--ink)" id="mon">every month</div>
+</div>
+<div class="shot" id="s8">
+  <div class="phone" id="ph2"><div class="scr"></div><div class="who">Your Bank<small>Relationship manager</small></div>
+    <div class="typing" id="typ"><i></i><i></i><i></i></div>
+    <div class="bub" id="b1" style="top:250px">Put your savings in an <b class="org" id="nroW">NRO</b> account. Easy.</div>
+    <div class="bub" id="b2" style="top:430px;left:auto;right:30px;background:var(--o);color:var(--bg);border-radius:28px 28px 8px 28px">Ok, done</div>
+  </div>
+</div>
+<div class="shot" id="s9"><div class="c"><div class="btn" id="btn">OPEN NRO ACCOUNT</div></div><div class="tap" id="tap" style="left:1150px;top:560px"></div></div>
+<div class="shot" id="s10">
+  <svg width="1920" height="1080" style="position:absolute;inset:0"><ellipse id="ring" cx="1578" cy="492" rx="340" ry="205" fill="none" stroke="#ff4d4d" stroke-width="12" stroke-linecap="round"/></svg>
+  <div class="small" id="where" style="position:absolute;left:1180px;top:200px;width:760px;text-align:center;font-size:56px;color:#ff4d4d;font-weight:700">where the money went</div>
+  <div id="p2c" style="position:absolute;left:50%;top:150px;transform:translateX(-50%);font-size:44px;font-weight:700;background:var(--o);color:var(--bg);padding:14px 34px;border-radius:999px;white-space:nowrap">Next: the fix</div>
+</div>
+<div id="cap"></div>
+<div id="flash"></div>
+<script src="gsap.min.js"></script>
+<script>
+(async () => {
+const W = await (await fetch('words.json')).json();
+const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const wt = (w, n = 0) => { let k = 0; for (const x of W) if (norm(x.w) === w && k++ === n) return x.t; throw new Error(w + n); };
+const END = W[W.length - 1].t + W[W.length - 1].d + 0.9;
+const crowd = document.getElementById('crowd');
+const people = ['man_office_worker_3d_medium.png', 'woman_office_worker_3d_medium.png'];
+for (let i = 0; i < 14; i++) { const im = document.createElement('img'); im.src = 'icons/' + people[(i * 3 + (i >> 2)) % 2]; crowd.appendChild(im); }
+// shot windows [id, start]
+const S = [['s1', 0], ['s2', wt('but') - .12], ['s3', wt('its') - .12], ['s4', wt('it') - .12], ['s5', wt('and') - .12], ['s6', wt('ravi', 1) - .12],
+  ['s7', wt('every') - .12], ['s8', wt('his', 2) - .12], ['s9', wt('so') - .12], ['s10', wt('and', 1) - .12]];
+const win = S.map(([id, a], i) => [id, a, i + 1 < S.length ? S[i + 1][1] : END]);
+window.F3D = [['s2'], ['s10']].map(([id]) => win.find(x => x[0] === id));
+const tl = gsap.timeline({ paused: true });
+// cut punch: each shot opens with a quick zoom settle + white flash
+for (const [id, a] of win) {
+  if (a > 0) tl.fromTo('#flash', { opacity: .35 }, { opacity: 0, duration: .18, ease: 'power2.out', immediateRender: false }, a);
+  tl.fromTo('#' + id, { scale: 1.06 }, { scale: 1, duration: .45, ease: 'power3.out' }, a);
+}
+tl.fromTo('#grid', { x: 0, y: 0 }, { x: -160, y: -80, duration: END, ease: 'none' }, 0);
+// S1 phone + buzz
+tl.fromTo('#ph1', { y: 120, rotation: -4 }, { y: 0, rotation: -2, duration: 2.6, ease: 'power2.out' }, 0);
+tl.fromTo('#nt', { y: -300, opacity: 0 }, { y: 0, opacity: 1, duration: .4, ease: 'back.out(1.6)' }, .35);
+tl.to('#ph1', { keyframes: [{ x: -10, duration: .04 }, { x: 10, duration: .04 }, { x: -8, duration: .04 }, { x: 8, duration: .04 }, { x: 0, duration: .04 }] }, .4);
+tl.to('#ph1', { keyframes: [{ x: -10, duration: .04 }, { x: 10, duration: .04 }, { x: 0, duration: .04 }] }, 1.0);
+tl.to('#ph1', { scale: 1.25, y: 120, duration: 1.2, ease: 'power2.inOut' }, wt('single') - .3);
+// S2 3D stack + number slam
+const t31 = wt('thirtyone');
+tl.fromTo('#n31', { scale: 2.6, opacity: 0 }, { scale: 1, opacity: 1, duration: .28, ease: 'power4.in' }, t31 - .25);
+tl.to('#n31', { keyframes: [{ x: -14, duration: .04 }, { x: 14, duration: .04 }, { x: -9, duration: .04 }, { x: 0, duration: .04 }] }, t31 + .03);
+tl.to('#n31', { scale: 1.06, duration: 2, ease: 'none' }, t31 + .2);
+// S3 LEGAL stamp
+const tl3 = wt('legal');
+tl.fromTo('#legal', { scale: 3, opacity: 0, rotation: -14 }, { scale: 1, opacity: 1, rotation: -6, duration: .25, ease: 'power4.in' }, tl3 - .22);
+tl.from('#act', { opacity: 0, y: 30, duration: .3 }, tl3 + .2);
+tl.to('#legal', { scale: 1.08, duration: 1, ease: 'none' }, tl3 + .1);
+// S4 crowd
+tl.from('#most', { y: 60, opacity: 0, duration: .35, ease: 'power3.out' }, wt('it') - .05);
+tl.from('#crowd img', { scale: 0, duration: .3, ease: 'back.out(2)', stagger: .045 }, wt('happens'));
+tl.to('#crowd img', { y: -10, duration: .3, stagger: { each: .03, yoyo: true, repeat: 1 } }, wt('nris'));
+// S5 avoidable
+tl.from('#avd', { x: 120, opacity: 0, duration: .35, ease: 'power3.out' }, wt('and') - .05);
+tl.fromTo('#chk', { scale: 0, rotation: -40 }, { scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.2)' }, wt('avoidable'));
+// S6 ravi
+const tr = wt('ravi', 1);
+tl.from('#av', { scale: .6, opacity: 0, duration: .4, ease: 'back.out(1.6)' }, tr - .1);
+tl.from('#nm', { x: -60, opacity: 0, duration: .35 }, tr);
+tl.from('#dubai', { scale: .5, opacity: 0, duration: .35, ease: 'back.out(2)' }, wt('dubai') - .1);
+tl.fromTo('#city', { x: 60 }, { x: -40, duration: 2.5, ease: 'none' }, tr - .1);
+// S7 map hop
+const te = wt('every');
+tl.from('#p1', { scale: 0, duration: .3, ease: 'back.out(2)' }, te - .1);
+tl.from('#p2', { scale: 0, duration: .3, ease: 'back.out(2)' }, te + .15);
+tl.from('#arc', { attr: { 'stroke-dashoffset': 400 }, opacity: 0, duration: .5 }, te);
+tl.from('#mon', { y: -30, opacity: 0, duration: .3 }, te);
+const arcPt = u => { const x0 = 420, y0 = 640, cx = 960, cy = 180, x1 = 1500, y1 = 640; const a = (1 - u) * (1 - u), b = 2 * (1 - u) * u, c = u * u; return [a * x0 + b * cx + c * x1, a * y0 + b * cy + c * y1, Math.atan2(2 * (1 - u) * (cy - y0) + 2 * u * (y1 - cy), 2 * (1 - u) * (cx - x0) + 2 * u * (x1 - cx)) * 180 / Math.PI]; };
+const fly = { u: 0 };
+const place = () => {
+  const [x, y, ang] = arcPt(fly.u); gsap.set('#plane', { x: x - 95, y: y - 95, rotation: ang + 45, opacity: fly.u > 0 && fly.u < 1 ? 1 : 0 });
+  document.querySelectorAll('.mw').forEach((m, i) => { const uu = Math.max(0, fly.u - .07 * (i + 1)); const [mx, my] = arcPt(uu); gsap.set(m, { x: mx - 55, y: my - 55 + Math.sin(uu * 20 + i) * 12, opacity: uu > 0 && uu < .98 ? 1 : 0 }); });
+};
+tl.fromTo(fly, { u: 0 }, { u: 1, duration: wt('home') - te + .1, ease: 'power1.inOut', onUpdate: place }, te + .2);
+tl.call(place, null, te + .2);
+tl.from('#home', { scale: 0, y: 40, duration: .4, ease: 'back.out(2.2)' }, wt('home') - .05);
+// S8 chat
+const th = wt('his', 2);
+tl.fromTo('#ph2', { y: 160, rotation: 3 }, { y: 0, rotation: 2, duration: 1.2, ease: 'power3.out' }, th - .12);
+tl.fromTo('#typ', { opacity: 0 }, { opacity: 1, duration: .15 }, th);
+tl.to('#typ i', { y: -10, duration: .18, stagger: { each: .1, yoyo: true, repeat: 3 } }, th + .1);
+tl.to('#typ', { opacity: 0, duration: .1 }, wt('put') - .15);
+tl.fromTo('#b1', { scale: .6, opacity: 0, transformOrigin: '0% 100%' }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(2)' }, wt('put') - .15);
+tl.fromTo('#nroW', { backgroundColor: 'rgba(255,153,51,0)' }, { backgroundColor: 'rgba(255,153,51,.25)', duration: .2 }, wt('nro'));
+tl.to('#ph2', { scale: 1.18, y: 60, duration: 1.4, ease: 'power2.inOut' }, wt('nro') - .2);
+tl.fromTo('#b2', { scale: .6, opacity: 0, transformOrigin: '100% 100%' }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(2)' }, wt('account') + .1);
+// S9 tap
+const td = wt('did');
+tl.from('#btn', { scale: .7, opacity: 0, duration: .3, ease: 'back.out(2)' }, wt('so') - .1);
+tl.to('#btn', { scale: .93, duration: .08 }, td - .05);
+tl.to('#btn', { scale: 1, duration: .25, ease: 'back.out(3)' }, td + .05);
+tl.call(() => { const b = document.getElementById('btn'); b.classList.toggle('done', tl.time() >= td); b.textContent = tl.time() >= td ? '✓ NRO ACCOUNT OPENED' : 'OPEN NRO ACCOUNT'; }, null, td - .001);
+tl.fromTo('#tap', { scale: .3, opacity: .9 }, { scale: 2.2, opacity: 0, duration: .5, ease: 'power2.out' }, td - .05);
+// S10 3D cards + ring
+const tn = wt('n');
+tl.fromTo('#ring', { attr: { 'stroke-dasharray': '0 2000' } }, { attr: { 'stroke-dasharray': '1800 2000' }, duration: .55, ease: 'power2.out' }, tn - .05);
+tl.from('#where', { opacity: 0, y: 30, duration: .3 }, wt('where') - .1);
+tl.from('#p2c', { opacity: 0, y: -30, duration: .3 }, wt('went') + .3);
+// captions: chunks of <=4 words, split at sentence ends
+const chunks = []; { let cur = []; for (const w of W) { cur.push(w); if (cur.length === 4 || /[.?!,:]$/.test(w.w) || ['rupee', 'them', 'legal', 'nris', 'avoidable', 'dubai', 'home', 'account', 'did', 'word'].includes(norm(w.w))) { chunks.push(cur); cur = []; } } if (cur.length) chunks.push(cur); }
+const cap = document.getElementById('cap');
+function caption(t) {
+  const i = chunks.findIndex((c, k) => t >= c[0].t - .08 && (k === chunks.length - 1 ? t < END : t < chunks[k + 1][0].t - .08));
+  if (i < 0) { cap.innerHTML = ''; return; }
+  cap.innerHTML = '<span class="box">' + chunks[i].map((w, k) => { const nx = W[W.indexOf(w) + 1]; const e = nx ? Math.min(nx.t, w.t + w.d + .3) : w.t + 1; return `<i class="${t >= w.t - .03 && t < e - .03 ? 'on' : ''}">${w.w}</i>`; }).join(' ') + '</span>';
+}
+const f3d = document.getElementById('f3d');
+window.DUR = END; window.FPS = 30;
+window.renderAt = async (t) => {
+  for (const [id, a, b] of win) document.getElementById(id).style.visibility = (t >= a && t < b) ? 'visible' : 'hidden';
+  const w3 = window.F3D.find(([id, a, b]) => t >= a && t < b);
+  if (w3) { const fi = Math.round(t * 30); f3d.src = `f3d/${String(fi).padStart(5, '0')}.jpg`; f3d.style.display = 'block'; await f3d.decode().catch(() => {}); document.getElementById('bg').style.display = 'none'; }
+  else { f3d.style.display = 'none'; document.getElementById('bg').style.display = 'block'; }
+  tl.seek(t, false); place();
+  if (t >= td) { const b = document.getElementById('btn'); b.classList.add('done'); b.textContent = '✓ NRO ACCOUNT OPENED'; } else { const b = document.getElementById('btn'); b.classList.remove('done'); b.textContent = 'OPEN NRO ACCOUNT'; }
+  caption(t);
+};
+await document.fonts.ready;
+window.CUTS = win.map(x => x[1]);
+window.READY = true;
+})();
+</script>
+</body></html>

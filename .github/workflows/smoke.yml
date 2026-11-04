@@ -1,0 +1,51 @@
+# Run by hand (Actions > Smoke test > Run workflow) right after adding the secrets: makes one real
+# Short end to end (Claude script + critic, voice, footage, captions, render) without uploading,
+# and checks the market data for the paper trader. Costs about $0.02. Download the video from the
+# run's artifacts to see the quality before the autopilot starts.
+name: Smoke test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-core
+      - run: pip install -r requirements.txt
+      - name: One real Short, no upload
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+        run: |
+          python -m facepipe --channel ai-tools make "3 free AI tools that save an hour a day" --format short --no-review
+          python -m facepipe budget
+      - name: Kokoro voice works (free, better than Edge for long videos)
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y -qq espeak-ng
+          pip install -r requirements-kokoro.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          python -c "from pathlib import Path; from facepipe import config, voice; c = config.load_config('ai-tools', voice_provider='kokoro', voice='am_michael'); print(voice.synthesize(c, 'Here are three free AI tools that save you an hour every day.', Path('kokoro-test.mp3')), 'seconds')"
+      - name: Breakout research reaches YouTube
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python -c "from facepipe import breakout, config; o = breakout.find_outliers(config.load_config('ai-tools'), keep=3); print([(x['title'], x['score']) for x in o])"
+      - name: Market data reaches Yahoo Finance
+        run: python -c "from trader import bot; h, last = bot.fetch_history(['NIFTYBEES.NS', 'ITC.NS']); print(last, {t: s[-1] for t, s in h.items()})"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-video
+          path: |
+            output/*/*/video.mp4
+            output/*/*/thumbnail.jpg
+            output/*/*/script.json
+            kokoro-test.mp3
+          if-no-files-found: ignore

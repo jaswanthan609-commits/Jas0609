@@ -1,0 +1,32 @@
+# Channel: "what really happened" true stories of businesses, brands and disasters (English, global).
+# Data (2026-11-04 scan): "How a poor boy destroyed Lay's in India" got 4.7M views on a 4.3K-sub channel
+# born in Oct 2026; "What Really Happened Inside the flydubai Cockpit" 3.3M. Company downfalls run
+# 12-18 minutes. The format: cold open on the most dramatic real moment, then rewind.
+name: "What Really Happened"
+niche: "true stories told like a documentary: how small players beat giants, how famous companies collapsed, what really went on inside cockpits, boardrooms and control rooms"
+language: en
+audience: "curious adults in India, the US and the UK who watch business and disaster documentaries"
+tone: "gripping but precise; a calm narrator who lets real numbers, dates and decisions carry the drama"
+voice_provider: edge
+voice: en-US-AvaNeural
+fallback_voice: en-US-EmmaNeural
+voice_rate: 0.97
+long_format: story         # 15-minute stories
+stock_sources: [pexels, pixabay]
+music_volume: 0.10
+research_queries: ["what really happened", "how a small company beat", "the downfall of", "business story documentary"]
+scan_topics: ["business story", "company downfall", "brand story", "what happened to"]
+default_tags: ["business story", "what really happened", "case study", "documentary", "company downfall"]
+category_id: "27"          # Education
+publish_times: ["19:30"]   # IST; afternoon in the UK, morning in the US
+extra_guidelines: |
+  Only true, documented stories. Every name, date and amount goes in facts_to_check with the source to
+  check it against (annual reports, court records, accident investigation reports, major newspapers).
+  Never invent quotes, dialogue or what someone was thinking. No defamation: state what is on record
+  and say "reportedly" where reporting is the only source. Air accidents: follow the official
+  investigation report and treat victims with respect.
+  visual_query: concrete things stock libraries have (factory line, airport runway at night, stock
+  market screen, crowded indian street market, boardroom table), never brand logos.
+
+claude_model: claude-sonnet-5-5
+claude_model_short: claude-haiku-5-5

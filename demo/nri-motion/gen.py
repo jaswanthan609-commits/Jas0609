@@ -1,0 +1,189 @@
+import json, html
+sc = json.load(open('scenes.json')); D = round(sc[-1]['start'] + sc[-1]['dur'], 2)
+st = [s['start'] for s in sc]; du = [s['dur'] for s in sc]
+def scene(i, inner):
+    return f'<div id="s{i}" class="clip scene" data-start="{st[i]}" data-duration="{du[i]}" data-track-index="1">{inner}</div>'
+GLOBE = '''<svg viewBox="-60 -60 120 120" class="globe"><circle r="54" class="gl"/><g id="mer">''' + ''.join(f'<ellipse rx="{abs(54*__import__("math").cos(a/10*3.1416))+0.1:.1f}" ry="54" class="gl thin"/>' for a in range(0,10,2)) + '''</g><line x1="-54" x2="54" class="gl thin"/><line x1="-47" x2="47" y1="-27" y2="-27" class="gl thin"/><line x1="-47" x2="47" y1="27" y2="27" class="gl thin"/></svg>'''
+s = []
+s.append(scene(0, '''
+<div class="center col">
+  <div class="row big"><span id="h-nre" class="g">NRE</span><span id="h-vs" class="vs">vs</span><span id="h-nro" class="o">NRO</span></div>
+  <div id="h-sub" class="sub">3 differences that cost NRIs money</div>
+  <div class="row dots"><span id="dot1" class="dot">1</span><span id="dot2" class="dot">2</span><span id="dot3" class="dot">3</span></div>
+</div>'''))
+s.append(scene(1, '''
+<div class="hdr"><span class="num">1</span><span id="h1t">Where the money comes from</span></div>
+<div class="lane" id="lane1">
+  <div class="src">''' + GLOBE + '''<div class="lbl">Earned abroad</div></div>
+  <svg class="path" viewBox="0 0 700 40"><line id="p1" x1="10" y1="20" x2="690" y2="20" class="flow g-st"/></svg>
+  <div id="c1a" class="coin g-bg"></div><div id="c1b" class="coin g-bg"></div><div id="c1c" class="coin g-bg"></div>
+  <div class="acct g-bd" id="nre1"><b class="g">NRE</b><span>money from abroad</span></div>
+</div>
+<div class="lane" id="lane2">
+  <div class="src chips"><span id="ch1" class="chip">Rent</span><span id="ch2" class="chip">Dividends</span><span id="ch3" class="chip">Pension</span><div class="lbl">Earned in India</div></div>
+  <svg class="path" viewBox="0 0 700 40"><line id="p2" x1="10" y1="20" x2="690" y2="20" class="flow o-st"/></svg>
+  <div id="c2a" class="coin o-bg"></div><div id="c2b" class="coin o-bg"></div><div id="c2c" class="coin o-bg"></div>
+  <div class="acct o-bd" id="nro1"><b class="o">NRO</b><span>money from India</span></div>
+</div>'''))
+s.append(scene(2, '''
+<div class="hdr"><span class="num">2</span><span>Tax in India on ₹10,000 of interest</span></div>
+<div class="bars">
+  <div class="brow" id="b-nre"><b class="g tag">NRE</b><div class="track"><div id="fill-nre" class="fill g-bg"></div></div><div class="val"><span class="g">Tax: ₹0</span><small>tax free in India</small></div></div>
+  <div class="brow" id="b-nro"><b class="o tag">NRO</b><div class="track"><div id="fill-nro" class="fill o-bg"></div><div id="cut" class="cut"></div></div><div class="val"><span class="r">TDS: ₹<span id="tds">0</span></span><small>30% + 4% cess = 31.2%</small></div></div>
+</div>
+<div id="treaty" class="note">A tax treaty (DTAA) can lower this: give your bank a Tax Residency Certificate + Form 10F.<br><small>Surcharge also applies if total income is above ₹50 lakh.</small></div>'''))
+s.append(scene(3, '''
+<div class="hdr"><span class="num">3</span><span>Sending money back abroad</span></div>
+<div class="rep">
+  <div class="rcol g-bd" id="r-nre"><b class="g">NRE</b><div class="inf g" id="inf">∞</div><div>Fully repatriable</div><small>principal + interest</small></div>
+  <div class="rcol o-bd" id="r-nro"><b class="o">NRO</b><div class="meter"><div id="mfill" class="mfill o-bg"></div></div><div class="money">$<span id="usd">0</span></div><div>per financial year, after tax</div><div class="row tight"><span id="f15a" class="chip sm">Form 15CA</span><span id="f15b" class="chip sm">Form 15CB</span></div></div>
+</div>'''))
+s.append(scene(4, '''
+<div class="center col">
+  <div class="kicker">One catch</div>
+  <div class="row mid"><span id="c-a">Tax free in India</span></div>
+  <div class="row mid"><span id="neq" class="o">≠</span></div>
+  <div class="row mid strike-wrap"><span id="c-b">tax free everywhere</span><div id="strike" class="strike"></div></div>
+  <div id="c-us" class="note wide">Live in the US? NRE interest still goes on your US tax return.</div>
+</div>'''))
+s.append(scene(5, '''
+<div class="hdr"><span class="num">✓</span><span>Check the official sources</span></div>
+<ul class="srcs">
+<li id="sr1">RBI Master Direction: Deposits and Accounts · rbi.org.in</li>
+<li id="sr2">RBI: NRO remittance up to USD 1 million per financial year · rbi.org.in</li>
+<li id="sr3">Income Tax Department: TDS on payments to non-residents · incometax.gov.in</li>
+<li id="sr4">IRS: US citizens and residents abroad · irs.gov</li>
+</ul>
+<div id="disc" class="disc">Education only, not financial or tax advice. Follow for part 2.</div>'''))
+# captions: chunks of ~6 words timed by character share within each scene's speech (skip lead/trail silence)
+caps = []
+for x in sc:
+    w = x['text'].split(); ch = [' '.join(w[i:i+6]) for i in range(0, len(w), 6)]
+    tot = sum(len(c) for c in ch); t = x['start'] + 0.25; span = x['dur'] - 0.6
+    for c in ch:
+        d = span * len(c) / tot; caps.append((round(t, 3), round(d, 3), c)); t += d
+cap_html = ''.join(f'<div id="cap{i}" class="clip cap" data-start="{a}" data-duration="{d}" data-track-index="5"><span>{html.escape(c)}</span></div>' for i, (a, d, c) in enumerate(caps))
+JS = f'''
+const tl = gsap.timeline({{ paused: true }});
+const S = {json.dumps(st)}, DU = {json.dumps(du)}, DUR = {D};
+const at = (i, o) => S[i] + o;
+// background: slow drifting grid and glow for the whole film
+tl.fromTo('#grid', {{ backgroundPosition: '0px 0px' }}, {{ backgroundPosition: '-480px -240px', duration: DUR, ease: 'none' }}, 0);
+tl.fromTo('#glow', {{ x: -300, y: -120 }}, {{ x: 380, y: 160, duration: DUR, ease: 'sine.inOut' }}, 0);
+// scene in/out
+S.forEach((s, i) => {{ tl.fromTo('#s' + i + ' > *', {{ opacity: 0, y: 40 }}, {{ opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power3.out' }}, s + 0.02);
+  if (i < S.length - 1) tl.to('#s' + i + ' > *', {{ opacity: 0, y: -30, duration: 0.35, ease: 'power2.in' }}, s + DU[i] - 0.4); }});
+// s0
+tl.from('#h-nre', {{ x: -500, opacity: 0, duration: 0.6, ease: 'expo.out' }}, 0.2);
+tl.from('#h-nro', {{ x: 500, opacity: 0, duration: 0.6, ease: 'expo.out' }}, 0.45);
+tl.from('#h-vs', {{ scale: 3, opacity: 0, duration: 0.45, ease: 'back.out(2)' }}, 0.9);
+tl.from('#h-sub', {{ clipPath: 'inset(0 100% 0 0)', duration: 1.2, ease: 'power2.inOut' }}, 4.6);
+['#dot1', '#dot2', '#dot3'].forEach((d, k) => tl.from(d, {{ scale: 0, opacity: 0, duration: 0.4, ease: 'back.out(3)' }}, 7.3 + k * 0.35));
+tl.to('#h-nre, #h-nro', {{ scale: 1.06, duration: 0.6, yoyo: true, repeat: 3, ease: 'sine.inOut' }}, 2.0);
+// s1
+tl.fromTo('#mer', {{ rotation: 0 }}, {{ rotation: 0, duration: 0.01 }}, at(1, 0));
+tl.fromTo('#mer ellipse', {{ scaleX: 1 }}, {{ scaleX: -1, duration: 2.5, repeat: 3, ease: 'none', transformOrigin: '50% 50%' }}, at(1, 0.5));
+tl.fromTo('#p1', {{ strokeDashoffset: 700 }}, {{ strokeDashoffset: 0, duration: 1.2, ease: 'power2.inOut' }}, at(1, 1.6));
+tl.from('#nre1', {{ scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2)' }}, at(1, 2.6));
+['#c1a', '#c1b', '#c1c'].forEach((c, k) => tl.fromTo(c, {{ x: 0, opacity: 0 }}, {{ keyframes: [{{ opacity: 1, duration: 0.1 }}, {{ x: 640, duration: 1.4, ease: 'power1.inOut' }}, {{ opacity: 0, duration: 0.1 }}] }}, at(1, 2.9 + k * 0.5)));
+['#ch1', '#ch2', '#ch3'].forEach((c, k) => tl.from(c, {{ y: 30, opacity: 0, duration: 0.4, ease: 'back.out(2)' }}, at(1, 7.2 + k * 0.45)));
+tl.fromTo('#p2', {{ strokeDashoffset: 700 }}, {{ strokeDashoffset: 0, duration: 1.0, ease: 'power2.inOut' }}, at(1, 6.4));
+tl.from('#nro1', {{ scale: 0.6, opacity: 0, duration: 0.5, ease: 'back.out(2)' }}, at(1, 6.9));
+['#c2a', '#c2b', '#c2c'].forEach((c, k) => tl.fromTo(c, {{ x: 0, opacity: 0 }}, {{ keyframes: [{{ opacity: 1, duration: 0.1 }}, {{ x: 640, duration: 1.4, ease: 'power1.inOut' }}, {{ opacity: 0, duration: 0.1 }}] }}, at(1, 8.6 + k * 0.5)));
+// s2
+tl.fromTo('#fill-nre', {{ scaleX: 0 }}, {{ scaleX: 1, duration: 1.2, ease: 'power3.out', transformOrigin: '0 50%' }}, at(2, 2.6));
+tl.from('#b-nre .val', {{ opacity: 0, x: -20, duration: 0.4 }}, at(2, 3.6));
+tl.fromTo('#fill-nro', {{ scaleX: 0 }}, {{ scaleX: 1, duration: 1.2, ease: 'power3.out', transformOrigin: '0 50%' }}, at(2, 5.6));
+tl.fromTo('#cut', {{ scaleX: 0 }}, {{ scaleX: 1, duration: 1.6, ease: 'power2.inOut', transformOrigin: '100% 50%' }}, at(2, 7.6));
+const tds = {{ v: 0 }}; tl.to(tds, {{ v: 3120, duration: 1.6, ease: 'power2.inOut', onUpdate: () => document.getElementById('tds').textContent = Math.round(tds.v).toLocaleString('en-IN') }}, at(2, 7.6));
+tl.from('#b-nro .val', {{ opacity: 0, x: -20, duration: 0.4 }}, at(2, 7.4));
+tl.from('#treaty', {{ opacity: 0, y: 30, duration: 0.6, ease: 'power3.out' }}, at(2, 12.4));
+// s3
+tl.from('#r-nre', {{ x: -80, opacity: 0, duration: 0.6, ease: 'power3.out' }}, at(3, 2.4));
+tl.fromTo('#inf', {{ rotation: -90, scale: 0.4 }}, {{ rotation: 0, scale: 1, duration: 0.9, ease: 'back.out(2)' }}, at(3, 2.6));
+tl.from('#r-nro', {{ x: 80, opacity: 0, duration: 0.6, ease: 'power3.out' }}, at(3, 5.8));
+tl.fromTo('#mfill', {{ scaleX: 0 }}, {{ scaleX: 1, duration: 2.2, ease: 'power2.out', transformOrigin: '0 50%' }}, at(3, 6.6));
+const usd = {{ v: 0 }}; tl.to(usd, {{ v: 1000000, duration: 2.2, ease: 'power2.out', onUpdate: () => document.getElementById('usd').textContent = Math.round(usd.v).toLocaleString('en-US') }}, at(3, 6.6));
+tl.from('#f15a', {{ scale: 0, duration: 0.35, ease: 'back.out(3)' }}, at(3, 11.6));
+tl.from('#f15b', {{ scale: 0, duration: 0.35, ease: 'back.out(3)' }}, at(3, 12.0));
+// s4
+tl.from('#c-a', {{ y: 60, opacity: 0, duration: 0.6, ease: 'power3.out' }}, at(4, 1.2));
+tl.from('#neq', {{ scale: 0, rotation: -45, duration: 0.5, ease: 'back.out(3)' }}, at(4, 2.4));
+tl.from('#c-b', {{ y: 60, opacity: 0, duration: 0.6, ease: 'power3.out' }}, at(4, 2.8));
+tl.fromTo('#strike', {{ scaleX: 0 }}, {{ scaleX: 1, duration: 0.5, ease: 'power2.inOut', transformOrigin: '0 50%' }}, at(4, 4.2));
+tl.from('#c-us', {{ opacity: 0, y: 30, duration: 0.6 }}, at(4, 5.4));
+// s5
+['#sr1', '#sr2', '#sr3', '#sr4'].forEach((x, k) => tl.from(x, {{ x: -60, opacity: 0, duration: 0.45, ease: 'power3.out' }}, at(5, 0.4 + k * 0.35)));
+tl.from('#disc', {{ opacity: 0, duration: 0.5 }}, at(5, 2.4));
+// captions pop
+document.querySelectorAll('.cap span').forEach((el, k) => {{ const c = el.parentElement; tl.from(el, {{ y: 18, opacity: 0, scale: 0.92, duration: 0.18, ease: 'power2.out' }}, +c.dataset.start); }});
+window.__timelines['main'] = tl; tl.seek(0);
+'''
+CSS = '''
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-latin-500-normal.woff2'); font-weight: 500; }
+@font-face { font-family: 'Space Grotesk'; src: url('assets/fonts/space-grotesk-latin-700-normal.woff2'); font-weight: 700; }
+:root { --bg:#0a1324; --ink:#eef3fb; --mut:#8fa1bf; --g:#3ccf8e; --o:#ff9933; --r:#ff5d5d; --card:#13213b; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:1920px; height:1080px; overflow:hidden; background:var(--bg); }
+#root { position:relative; width:1920px; height:1080px; overflow:hidden; font-family:'Space Grotesk', Inter, sans-serif; color:var(--ink); background:radial-gradient(ellipse at 50% 40%, #12223f 0%, var(--bg) 70%); }
+#grid { position:absolute; inset:-200px; background-image:linear-gradient(rgba(143,161,191,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(143,161,191,.07) 1px, transparent 1px); background-size:80px 80px; }
+#glow { position:absolute; left:560px; top:240px; width:800px; height:600px; border-radius:50%; background:radial-gradient(circle, rgba(255,153,51,.13), transparent 65%); }
+#brand { position:absolute; left:120px; top:70px; font-weight:700; letter-spacing:.18em; font-size:30px; color:var(--o); }
+#brand::before { content:''; display:inline-block; width:14px; height:14px; border-radius:50%; background:var(--o); margin-right:14px; }
+.scene { position:absolute; inset:0; padding:150px 140px 200px; }
+.center { height:100%; display:flex; align-items:center; justify-content:center; }
+.col { flex-direction:column; gap:34px; } .row { display:flex; gap:40px; align-items:center; justify-content:center; } .tight { gap:16px; margin-top:12px; }
+.big span { font-size:220px; font-weight:700; letter-spacing:-.04em; line-height:1; display:inline-block; }
+.big .vs { font-size:90px; color:var(--mut); }
+.g { color:var(--g); } .o { color:var(--o); } .r { color:var(--r); }
+.g-bg { background:var(--g); } .o-bg { background:var(--o); } .g-st { stroke:var(--g); } .o-st { stroke:var(--o); }
+.g-bd { border-color:var(--g) !important; } .o-bd { border-color:var(--o) !important; }
+.sub { font-size:56px; color:var(--mut); }
+.dot { width:84px; height:84px; border-radius:50%; border:3px solid var(--mut); display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:700; }
+.hdr { display:flex; align-items:center; gap:28px; font-size:64px; font-weight:700; margin-bottom:60px; }
+.num { width:96px; height:96px; border-radius:24px; background:var(--o); color:var(--bg); display:flex; align-items:center; justify-content:center; font-size:58px; }
+.lane { position:relative; display:flex; align-items:center; height:260px; }
+.src { width:360px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+.chips { flex-direction:row; flex-wrap:wrap; justify-content:center; gap:12px; }
+.globe { width:150px; height:150px; } .gl { fill:none; stroke:var(--g); stroke-width:2.4; } .thin { stroke-width:1.2; opacity:.7; }
+.lbl { width:100%; text-align:center; font-size:32px; color:var(--mut); margin-top:6px; }
+.path { width:700px; height:40px; } .flow { stroke-width:6; stroke-linecap:round; stroke-dasharray:700; }
+.coin { position:absolute; left:400px; top:116px; width:28px; height:28px; border-radius:50%; box-shadow:0 0 24px currentColor; }
+.acct { width:430px; height:180px; border:4px solid; border-radius:28px; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; margin-left:20px; }
+.acct b { font-size:84px; } .acct span { font-size:30px; color:var(--mut); }
+.chip { padding:12px 26px; border-radius:40px; background:var(--card); border:2px solid var(--o); font-size:32px; }
+.chip.sm { font-size:28px; padding:8px 20px; }
+.bars { display:flex; flex-direction:column; gap:70px; margin-top:20px; }
+.brow { display:flex; align-items:center; gap:40px; } .tag { font-size:72px; width:220px; }
+.track { position:relative; width:900px; height:90px; border-radius:20px; background:var(--card); overflow:hidden; }
+.fill { position:absolute; inset:0; border-radius:20px; }
+.cut { position:absolute; right:0; top:0; bottom:0; width:31.2%; background:repeating-linear-gradient(45deg, var(--r), var(--r) 14px, #c43c3c 14px, #c43c3c 28px); }
+.val { display:flex; flex-direction:column; font-size:52px; font-weight:700; } .val small { font-size:28px; color:var(--mut); font-weight:500; }
+.note { margin-top:60px; font-size:36px; line-height:1.4; padding:26px 34px; border-left:6px solid var(--o); background:rgba(19,33,59,.8); border-radius:8px; max-width:1500px; }
+.note small { font-size:28px; color:var(--mut); }
+.note.wide { margin-top:30px; text-align:center; border-left:none; border-top:4px solid var(--o); }
+.rep { display:flex; gap:80px; justify-content:center; }
+.rcol { width:720px; height:520px; border:4px solid; border-radius:32px; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; font-size:38px; }
+.rcol b { font-size:80px; } .rcol small { font-size:30px; color:var(--mut); }
+.inf { font-size:150px; line-height:1; font-weight:700; }
+.meter { width:560px; height:40px; border-radius:20px; background:#0a1324; overflow:hidden; } .mfill { height:100%; }
+.money { font-size:84px; font-weight:700; color:var(--o); }
+.kicker { font-size:40px; letter-spacing:.2em; text-transform:uppercase; color:var(--o); }
+.mid span { font-size:110px; font-weight:700; line-height:1.05; display:inline-block; }
+.strike-wrap { position:relative; } .strike { position:absolute; left:-10px; right:-10px; top:52%; height:12px; background:var(--r); border-radius:6px; }
+.srcs { list-style:none; display:flex; flex-direction:column; gap:30px; font-size:40px; }
+.srcs li::before { content:'●'; color:var(--o); margin-right:22px; }
+.disc { margin-top:60px; font-size:34px; color:var(--mut); }
+.cap { position:absolute; left:0; right:0; bottom:70px; text-align:center; }
+.cap span { display:inline-block; padding:12px 30px; background:rgba(0,0,0,.6); border-radius:14px; font-size:46px; font-weight:700; color:#fff; }
+'''
+page = f'''<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=1920, height=1080" />
+<script src="assets/gsap.min.js"></script><style>{CSS}</style></head><body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="{D}" data-width="1920" data-height="1080">
+<div id="bg" class="clip" data-start="0" data-duration="{D}" data-track-index="0"><div id="grid"></div><div id="glow"></div><div id="brand">NRI MONEY GUIDE</div></div>
+{''.join(s)}
+{cap_html}
+<audio id="vo" class="clip" src="assets/vo.wav" data-start="0" data-duration="{D}" data-track-index="9"></audio>
+</div>
+<script>{JS}</script></body></html>'''
+open('index.html', 'w').write(page); print('ok', D, len(caps))

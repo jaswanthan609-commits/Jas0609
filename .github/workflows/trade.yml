@@ -1,0 +1,38 @@
+# Weekdays after the NSE close: the paper-trading bot makes its decisions with fake money.
+# Scorecard: trading/report.md (also on each run's summary page).
+name: Paper trading
+
+# Turned off on 2026-11-04: a 30-day paper test is mostly luck, and even a bot that works makes
+# about Rs 700 a year on Rs 7,000. Run it by hand from the Actions tab if you want to experiment.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade
+  cancel-in-progress: false
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Trade one day (paper money)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m trader run
+      - name: Save the portfolio to main
+        if: always()
+        run: |
+          git config user.name "facepipe-bot"
+          git config user.email "facepipe-bot@users.noreply.github.com"
+          git add trading/ ledger/ 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "Paper trading $(date -u +%Y-%m-%d) [skip ci]" && git pull --rebase -q origin main && git push origin HEAD:main; }

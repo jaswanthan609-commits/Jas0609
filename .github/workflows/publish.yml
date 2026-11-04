@@ -1,0 +1,109 @@
+# When drafts are merged to main: render every approved script and (once enabled) upload it to
+# YouTube into the next free publish slot. Videos are also kept as a downloadable artifact for 7
+# days, so you can upload by hand while the YouTube API audit is pending.
+name: Render and publish
+
+on:
+  push:
+    branches: [main]
+    paths: ["output/**/script.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install ffmpeg and fonts
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-core
+      - run: pip install -r requirements.txt
+      - name: Install the Kokoro voice if a channel uses it
+        run: |
+          if grep -q "voice_provider: kokoro" config/channels/*.yaml; then
+            sudo apt-get install -y -qq espeak-ng
+            pip install -r requirements-kokoro.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          fi
+
+      - name: Install the 3D renderer if a channel uses ambience
+        run: |
+          if grep -q "visual_mode: ambience" config/channels/*.yaml; then
+            npm install --prefix render3d --no-audit --no-fund
+            npx --prefix render3d playwright install --with-deps chromium
+          fi
+
+      - uses: actions/cache@v4
+        with:
+          path: .earshot
+          key: earshot-models-591fa3e
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/samples
+          key: samples-${{ hashFiles('facepipe/samples.py') }}
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/beds
+          key: beds-${{ hashFiles('facepipe/beds.py') }}
+
+      - name: Install earshot so every render is listened to (audio_report.json)
+        env:
+          EARSHOT_HOME: ${{ github.workspace }}/.earshot
+        run: |
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "earshot @ git+https://github.com/Leonxlnx/earshot@591fa3e028032e6dce56620a20e932e35667e8d8"
+          earshot doctor --fetch || echo "earshot models unavailable; renders go on without listening"
+
+      - name: Write YouTube credentials
+        env:
+          SECRETS_JSON: ${{ toJSON(secrets) }}
+        run: python -m facepipe.ci
+
+      - name: Render and upload approved scripts
+        env:
+          EARSHOT_HOME: ${{ github.workspace }}/.earshot
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+        run: |
+          # Set the repository variable UPLOAD_ENABLED=true once YouTube tokens are added.
+          if [ "${{ vars.UPLOAD_ENABLED }}" = "true" ]; then
+            python -m facepipe publish-approved --all --upload --schedule
+          else
+            python -m facepipe publish-approved --all
+          fi
+
+      - name: Keep the videos for 7 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-${{ github.run_number }}
+          path: |
+            output/*/*/video.mp4
+            output/*/*/thumbnail.jpg
+            output/*/*/metadata.json
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Record what was published
+        if: always()
+        run: |
+          git config user.name "facepipe-bot"
+          git config user.email "facepipe-bot@users.noreply.github.com"
+          git add -f output/*/*/metadata.json 2>/dev/null || true
+          git add ledger/ 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "Record published videos [skip ci]" && git pull --rebase -q origin main && git push; }

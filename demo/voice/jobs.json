@@ -1,0 +1,372 @@
+{
+ "sample_in": "Namaste. If you earn in dollars and send money home, these three rules can save you real money.",
+ "jobs": [
+  {
+   "id": "nri/en-IN-NeerjaNeural/0",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "NRE or NRO? If you live abroad, picking the wrong account can cost you real money in tax. Here are the three differences that matter."
+  },
+  {
+   "id": "nri/en-IN-NeerjaNeural/1",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One. Where the money comes from. NRE is for money you earn abroad and send into India. NRO is for money you earn in India: rent, dividends, or a pension."
+  },
+  {
+   "id": "nri/en-IN-NeerjaNeural/2",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Two. Tax in India. Interest on an NRE account is tax free in India. On an NRO account it's taxable, and the bank deducts thirty percent, plus four percent cess, before you even see it. A tax treaty can lower that, if you file the right forms."
+  },
+  {
+   "id": "nri/en-IN-NeerjaNeural/3",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Three. Taking money back out. NRE money, with its interest, goes back abroad freely. From NRO, the limit is one million US dollars per financial year, after tax, with forms fifteen C A and fifteen C B."
+  },
+  {
+   "id": "nri/en-IN-NeerjaNeural/4",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One catch. Tax free in India doesn't mean tax free everywhere. Live in the US? You still report NRE interest on your US tax return."
+  },
+  {
+   "id": "nri/en-IN-NeerjaNeural/5",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "The official sources are on screen. This is education, not advice. Follow for part two."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/0",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "NRE or NRO? If you live abroad, picking the wrong account can cost you real money in tax. Here are the three differences that matter."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/1",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One. Where the money comes from. NRE is for money you earn abroad and send into India. NRO is for money you earn in India: rent, dividends, or a pension."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/2",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Two. Tax in India. Interest on an NRE account is tax free in India. On an NRO account it's taxable, and the bank deducts thirty percent, plus four percent cess, before you even see it. A tax treaty can lower that, if you file the right forms."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/3",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Three. Taking money back out. NRE money, with its interest, goes back abroad freely. From NRO, the limit is one million US dollars per financial year, after tax, with forms fifteen C A and fifteen C B."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/4",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One catch. Tax free in India doesn't mean tax free everywhere. Live in the US? You still report NRE interest on your US tax return."
+  },
+  {
+   "id": "nri/en-IN-PrabhatNeural/5",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "The official sources are on screen. This is education, not advice. Follow for part two."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/0",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "NRE or NRO? If you live abroad, picking the wrong account can cost you real money in tax. Here are the three differences that matter."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/1",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One. Where the money comes from. NRE is for money you earn abroad and send into India. NRO is for money you earn in India: rent, dividends, or a pension."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/2",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Two. Tax in India. Interest on an NRE account is tax free in India. On an NRO account it's taxable, and the bank deducts thirty percent, plus four percent cess, before you even see it. A tax treaty can lower that, if you file the right forms."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/3",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Three. Taking money back out. NRE money, with its interest, goes back abroad freely. From NRO, the limit is one million US dollars per financial year, after tax, with forms fifteen C A and fifteen C B."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/4",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "One catch. Tax free in India doesn't mean tax free everywhere. Live in the US? You still report NRE interest on your US tax return."
+  },
+  {
+   "id": "nri/en-IN-NeerjaExpressiveNeural/5",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "The official sources are on screen. This is education, not advice. Follow for part two."
+  },
+  {
+   "id": "sleep/en-GB-SoniaNeural/title",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Plate three. The oil lamp, in Latin, lucerna."
+  },
+  {
+   "id": "sleep/en-GB-SoniaNeural/d1",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+  },
+  {
+   "id": "sleep/en-GB-SoniaNeural/d2",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+  },
+  {
+   "id": "sleep/en-GB-SoniaNeural/d3",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+  },
+  {
+   "id": "sleep/en-GB-SoniaNeural/close",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "sleep/en-US-AvaNeural/title",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Plate three. The oil lamp, in Latin, lucerna."
+  },
+  {
+   "id": "sleep/en-US-AvaNeural/d1",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+  },
+  {
+   "id": "sleep/en-US-AvaNeural/d2",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+  },
+  {
+   "id": "sleep/en-US-AvaNeural/d3",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+  },
+  {
+   "id": "sleep/en-US-AvaNeural/close",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "sleep/en-US-EmmaNeural/title",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Plate three. The oil lamp, in Latin, lucerna."
+  },
+  {
+   "id": "sleep/en-US-EmmaNeural/d1",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+  },
+  {
+   "id": "sleep/en-US-EmmaNeural/d2",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+  },
+  {
+   "id": "sleep/en-US-EmmaNeural/d3",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+  },
+  {
+   "id": "sleep/en-US-EmmaNeural/close",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "sleep/en-GB-LibbyNeural/title",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Plate three. The oil lamp, in Latin, lucerna."
+  },
+  {
+   "id": "sleep/en-GB-LibbyNeural/d1",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+  },
+  {
+   "id": "sleep/en-GB-LibbyNeural/d2",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+  },
+  {
+   "id": "sleep/en-GB-LibbyNeural/d3",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+  },
+  {
+   "id": "sleep/en-GB-LibbyNeural/close",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "sleep/en-AU-NatashaNeural/title",
+   "voice": "en-AU-NatashaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Plate three. The oil lamp, in Latin, lucerna."
+  },
+  {
+   "id": "sleep/en-AU-NatashaNeural/d1",
+   "voice": "en-AU-NatashaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+  },
+  {
+   "id": "sleep/en-AU-NatashaNeural/d2",
+   "voice": "en-AU-NatashaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+  },
+  {
+   "id": "sleep/en-AU-NatashaNeural/d3",
+   "voice": "en-AU-NatashaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+  },
+  {
+   "id": "sleep/en-AU-NatashaNeural/close",
+   "voice": "en-AU-NatashaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "nri2/en-IN-NeerjaExpressiveNeural/0",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "nri2/en-IN-PrabhatNeural/0",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "nri2/en-IN-NeerjaNeural/0",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "sleep2/en-GB-SoniaNeural/intro",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-US-AvaNeural/intro",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-US-EmmaNeural/intro",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-GB-LibbyNeural/intro",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "nri3/en-IN-NeerjaExpressiveNeural/cold",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Ravi hadn't spent a single rupee. But his bank in India just took thirty-one thousand, two hundred of them. It's legal. It happens to most NRIs. And it's avoidable. Ravi works in Dubai. Every month, he sends his savings home. His bank said: put it in an NRO account. So he did. And that one word, N R O, is exactly where the money went."
+  },
+  {
+   "id": "nri4/en-IN-NeerjaExpressiveNeural/cold",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "-10%",
+   "pitch": "+0Hz",
+   "text": "Ravi hadn't spent a single rupee. But his bank in India just took thirty-one thousand, two hundred of them. It's legal. It happens to most NRIs. And it's avoidable. Ravi works in Dubai. Every month, he sends his savings home. His bank said: put it in an NRO account. So he did. And that one word, N R O, is exactly where the money went."
+  }
+ ],
+ "only_prefix": [
+  "nri4/"
+ ]
+}

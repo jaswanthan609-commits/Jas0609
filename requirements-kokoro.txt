@@ -1,0 +1,6 @@
+# Free open-source voice (Kokoro-82M). Installed by the workflows only when a channel uses
+# voice_provider: kokoro. CPU-only PyTorch keeps the install small:
+#   pip install -r requirements-kokoro.txt --extra-index-url https://download.pytorch.org/whl/cpu
+# Also needs espeak-ng (sudo apt-get install espeak-ng).
+kokoro>=0.9.4
+soundfile>=0.12

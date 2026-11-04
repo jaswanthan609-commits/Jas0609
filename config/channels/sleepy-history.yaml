@@ -1,0 +1,45 @@
+# Channel: 2-hour history videos to fall asleep to (English, global).
+# Data (2026-11-04 scan): winners run 2-3 hours, put "you" inside a hard past life, use real period
+# art, and "NO AI" titles get 1.5-2.1M views. So: real museum paintings, a soft voice, slow fades,
+# no words burned on the picture (captions are uploaded as a switchable track instead).
+name: "Slow History for Sleep"
+niche: "gentle, detailed walk-throughs of everyday life in history: a day in ancient Rome, medieval villages, the Silk Road, old lighthouses"
+language: en
+audience: "adults in the US, UK, Canada and Australia who listen to calm long videos to fall asleep or relax"
+tone: "soft, slow, warm, descriptive, never dramatic"
+voice_provider: kokoro     # free, commercial use allowed; soft female voice (owner dislikes deep male voices)
+voice: af_heart
+fallback_voice: en-GB-SoniaNeural
+voice_rate: 0.88
+long_format: sleep         # 2-hour videos, written chapter by chapter
+visual_mode: public_art    # real public-domain paintings (The Met, Art Institute of Chicago), stock as fallback
+art_sources: [met, artic]
+stock_sources: [pexels, pixabay]
+burn_captions: false
+dissolve: 2.5              # every picture fades in and out; no hard cuts for a drowsy viewer
+music_volume: 0.14
+research_queries: ["history for sleep", "boring history to fall asleep", "sleep story history", "what life was like for"]
+scan_topics: ["history for sleep", "ancient civilizations", "explained slowly for sleep"]
+default_tags: ["history for sleep", "sleep story", "boring history", "relaxing history", "fall asleep"]
+category_id: "27"          # Education
+publish_times: ["21:30"]   # IST; evening in Europe, afternoon in the US
+extra_guidelines: |
+  Every fact must be well established; add each date, number and claim to facts_to_check.
+  Describe sights, sounds and routines so listeners can picture them. No violence in detail.
+  visual_query is searched in museum collections: name period subjects that painters and engravers
+  depicted (e.g. "peasants harvest wheat", "medieval market", "roman villa fresco", "oil lamp").
+
+claude_model: claude-sonnet-5-5
+
+# Amazon Associates links (amazon.com), added to matching descriptions with a disclosure.
+# Paste in your tagged links after signing up. Empty urls are skipped.
+affiliate_links:
+  - label: "Listen to history audiobooks free with an Audible trial"
+    url: ""
+    always: true
+  - label: "A readable history of ancient Rome (book)"
+    url: ""
+    keywords: ["rome", "roman"]
+  - label: "A history of medieval life (book)"
+    url: ""
+    keywords: ["medieval", "middle ages", "castle", "village"]

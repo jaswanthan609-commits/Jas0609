@@ -1,0 +1,148 @@
+# Every morning: Claude drafts whatever today's budget allows and opens a pull request.
+# Your only job: read the PR on your phone, delete any script you don't like, and merge.
+# Merging is the approval; publish.yml then renders and uploads the merged scripts.
+name: Daily drafts
+
+on:
+  schedule:
+    - cron: "30 0 * * *"   # 06:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: drafts
+  cancel-in-progress: false
+
+jobs:
+  drafts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      branch: ${{ steps.pr.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Weekly scan of what is breaking out across YouTube
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        # Mondays (or when research/scan.json is a week old): ~40 seed searches, ranked in research/scan.json.
+        run: python -m facepipe scan
+
+      - name: Breakout research and follow-ups for our winners
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        # Weekly: proven breakout videos per niche -> research/. Daily: our videos with 3x the usual
+        # views get follow-up topics at the front of the queue.
+        run: python -m facepipe breakout --all
+
+      - name: Draft what today's budget allows
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # config/autopilot.yaml decides which channels draft today, from the money left.
+        run: python -m facepipe autopilot
+
+      - name: Save the ledger and research to main
+        if: always()
+        run: |
+          git config user.name "facepipe-bot"
+          git config user.email "facepipe-bot@users.noreply.github.com"
+          git add ledger/ research/ 2>/dev/null || true
+          # Topic queues (and which topics are used) go straight to main, so an unmerged drafts PR
+          # never makes tomorrow's run draft the same topics again.
+          git add -f output/*/*/metadata.json topics/ 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "Ledger and research $(date -u +%Y-%m-%d) [skip ci]" && git pull --rebase -q origin main && git push origin HEAD:main; }
+
+      - name: Open the review pull request
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          branch="drafts/$(date -u +%Y-%m-%d)"
+          git checkout -b "$branch"
+          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json output/*/*/ambience.json; do
+            [ -e "$f" ] && git add -f "$f"
+          done
+          if git diff --cached --quiet; then echo "Nothing drafted today"; exit 0; fi
+          git commit -m "Drafts for $(date -u +%Y-%m-%d)"
+          git push -u origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          python - > body.md <<'PY'
+          import json, pathlib, subprocess
+          files = subprocess.run(["git", "diff", "--name-only", "HEAD~1", "--", "output"], capture_output=True, text=True).stdout.split()
+          print("Merge to approve: every script here gets rendered and uploaded. Delete a script's folder first to reject it.\n")
+          for f in sorted(f for f in files if f.endswith("script.json")):
+              s = json.loads(pathlib.Path(f).read_text(encoding="utf-8"))
+              print(f"### {s['title']}\n`{f}`\n")
+              c = pathlib.Path(f).with_name("critic.json")
+              if c.exists():
+                  r = json.loads(c.read_text(encoding="utf-8"))
+                  print(f"Critic: hook {r['hook']}/10, specific {r['specificity']}/10, original {r['originality']}/10, policy {r['policy_risk']}/10\n")
+              if s.get("title_options"):
+                  print("Other titles (swap one in by editing the script before merging):")
+                  for t in s["title_options"]:
+                      print(f"- {t}")
+                  print()
+              print("Facts to check:")
+              for fact in s.get("facts_to_check", []) or ["(none listed)"]:
+                  print(f"- [ ] {fact}")
+              print()
+          PY
+          gh pr create --base main --head "$branch" --title "Drafts for $(date -u +%Y-%m-%d)" --body-file body.md
+
+  # Claude Code reviews the drafts before you do, with the repo's own skills (quality-gate, humanizer,
+  # yt-script, yt-package, brief-refiner), fixes what fails and pushes the fixes to the drafts branch.
+  # You then only read a PR that already passed the checks.
+  review:
+    needs: drafts
+    if: needs.drafts.outputs.branch != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.drafts.outputs.branch }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ github.token }}
+          claude_args: >-
+            --model sonnet --max-turns 40
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(git diff:*),Bash(git status),Bash(python -m facepipe:*),Bash(gh pr comment:*),Bash(gh pr view:*)"
+          prompt: |
+            You are the editor of this YouTube pipeline. Branch ${{ needs.drafts.outputs.branch }} holds today's drafts
+            (output/*/*/script.json, ambience.json, critic.json). The owner only reads and merges; they should never
+            have to ask for a fix.
+
+            For every draft on this branch:
+            1. Read .claude/skills/quality-gate/SKILL.md and apply its packaging and script gates.
+            2. Story/history scripts: check the hook with .claude/skills/yt-script and the humanizer skill. The first
+               15 seconds must open on a concrete image or stake, never "In this video" or a dictionary opening.
+               The close must invite the next video in one line, not beg for subscribes.
+            3. Titles and thumbnail_text: check with .claude/skills/yt-package. Keep each title under 95 characters.
+            4. Facts: every claim in facts_to_check stays in the list; never invent a source.
+            5. Fix what fails by editing the JSON in place, keeping the schema. Run `python -m facepipe lint <folder>`
+               on every folder until it prints ok. Do not touch anything outside output/.
+            6. Commit as "Editor pass" and push to ${{ needs.drafts.outputs.branch }}.
+            7. Comment once on the pull request for this branch with `gh pr comment ${{ needs.drafts.outputs.branch }}`:
+               one line per draft saying what you changed and why, ending with
+               "---\n_Generated by [Claude Code](https://claude.ai/code)_".

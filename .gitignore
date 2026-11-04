@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+client_secret*.json
+
+output/
+
+assets/music/*
+!assets/music/README.md
+assets/fonts/*
+!assets/fonts/README.md
+tokens/
+footage/
+topics/*.done.txt
+render3d/node_modules
+.cache/

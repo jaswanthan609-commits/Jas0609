@@ -1,0 +1,60 @@
+# The self-funding autopilot. GitHub runs `python -m facepipe autopilot` every morning: it works out
+# how much money is left, keeps a steady pace, and drafts only what today's budget allows.
+#
+# Money left = starting_budget_usd + reinvest_share x ad revenue earned since `started` - money spent.
+# Spending is logged in ledger/spend.jsonl; earnings come from YouTube Analytics every Monday.
+# Also set a hard monthly spend limit in the Anthropic Console as a safety net.
+
+started: 2026-11-04
+starting_budget_usd: 70        # the one-time budget (about Rs 7,000)
+reinvest_share: 1.0            # share of earnings the autopilot may spend (1.0 = all of it)
+runway_days: 60                # spread the money left over this many days, so it never runs out at once
+usd_inr: 88
+image_usd: 0.07                # estimated cost of one AI illustration (kids channel)
+
+# Order matters: when money is tight, channels lower in the list are skipped first,
+# and a channel's long video is dropped before its Short.
+#
+# Revised plan (2026-11-04): from 1 Feb 2027 YouTube needs 8,000 watch hours before it pays ads,
+# so the line-up is built for watch hours, not volume. Shorts are trailers only.
+# No earnings gates: there is no ad money before Partner Program approval, so gates would never open.
+channels:
+  # 2026-11-04 rework from the cross-niche scan (research/scan.json): three areas where channels
+  # under a year old are breaking out. NRI money is paused: its winners are expert faces.
+
+  # 2-hour sleep history: longest watch time per viewer, so the fastest route to watch hours.
+  # Scripts are written chapter by chapter (about 9 Claude calls), hence the higher estimate.
+  - slug: sleepy-history
+    long_days: [mon, wed, fri]
+    short_days: []
+    est_long_usd: 0.70
+
+  # 15-minute "what really happened" stories; Shorts are trailers cut from the cold open.
+  - slug: what-really-happened
+    long_days: [tue, thu]
+    short_days: [tue, sat]
+    est_long_usd: 0.25
+    est_short_usd: 0.01
+
+  # 90-minute cozy ambience: no voice, one small Claude call, the rest is rendered for free.
+  - slug: cozy-hours
+    long_days: [tue, thu, sun]
+    short_days: []
+    est_long_usd: 0.01
+
+  - slug: nri-money
+    paused: true
+    long_days: [tue, thu, sat]
+    short_days: [tue, sat]
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  # Paused until the pipeline can record screens by itself.
+  - slug: ai-tools
+    paused: true
+    long_days: [mon, wed, fri]
+    short_days: []
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  # kids-stories is dropped from the autopilot (lowest pay per view, heaviest AI scrutiny).
