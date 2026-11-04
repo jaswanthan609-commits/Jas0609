@@ -350,10 +350,16 @@
    "rate": "-18%",
    "pitch": "-2Hz",
    "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "nri3/en-IN-NeerjaExpressiveNeural/cold",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Ravi hadn't spent a single rupee. But his bank in India just took thirty-one thousand, two hundred of them. It's legal. It happens to most NRIs. And it's avoidable. Ravi works in Dubai. Every month, he sends his savings home. His bank said: put it in an NRO account. So he did. And that one word, N R O, is exactly where the money went."
   }
  ],
  "only_prefix": [
-  "nri2/",
-  "sleep2/"
+  "nri3/"
  ]
 }
