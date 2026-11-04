@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
-from .config import ROOT, list_channels, load_config
+from .config import FORMATS, ROOT, list_channels, load_config
 
 
 def _topics_file(cfg) -> Path:
@@ -210,6 +210,35 @@ def cmd_breakout(cfg, args):
             print(f"[{slug}] breakout failed: {exc}", file=sys.stderr)
 
 
+def cmd_scan(cfg, args):
+    """Weekly cross-niche outlier scan -> research/scan.json (which areas small channels are winning)."""
+    import os
+
+    from . import scan
+
+    if not os.environ.get("YOUTUBE_API_KEY"):
+        print("scan: no YOUTUBE_API_KEY, skipped")
+        return
+    if not args.force and not scan.stale():
+        print("scan: this week's scan is saved; --force to rerun")
+        return
+    try:
+        result = scan.scan(days=args.days)
+    except Exception as exc:  # research must never block the day's drafts
+        print(f"scan failed: {exc}", file=sys.stderr)
+        return
+    scan.save(result)
+    from . import hooks
+
+    print(f"hooks: {hooks.refresh(result['outliers'])} new breakout openings saved")
+    text = scan.report(result)
+    print(text)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write("```\n" + text + "\n```\n")
+
+
 def cmd_autopilot(cfg, args):
     """Unattended daily run: decide what today's budget allows, then draft it."""
     import os
@@ -336,12 +365,12 @@ def main(argv=None):
 
     s = sub.add_parser("script", help="Write one script for review")
     s.add_argument("topic")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
+    s.add_argument("--format", choices=list(FORMATS), default="long")
     s.set_defaults(func=cmd_script)
 
     s = sub.add_parser("batch", help="Write scripts for the next topics in topics/<channel>.txt")
     s.add_argument("topics", nargs="?", help="Topics file (default topics/<channel>.txt)")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
+    s.add_argument("--format", choices=list(FORMATS), default="long")
     s.add_argument("--limit", type=int, default=7)
     s.set_defaults(func=cmd_batch)
 
@@ -356,7 +385,7 @@ def main(argv=None):
 
     s = sub.add_parser("make", help="Script and stop for review; or render straight away with --no-review")
     s.add_argument("topic", nargs="?")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="short")
+    s.add_argument("--format", choices=list(FORMATS), default="short")
     s.add_argument("--offline", action="store_true", help="Dry run: sample script, silent voice, colour frames")
     s.add_argument("--no-review", action="store_true", help="Render without stopping for review")
     add_publish(s)
@@ -371,6 +400,11 @@ def main(argv=None):
     s.add_argument("--all", action="store_true", help="All channels")
     s.add_argument("--force", action="store_true", help="Refresh outliers even if this week's are saved")
     s.set_defaults(func=cmd_breakout)
+
+    s = sub.add_parser("scan", help="Weekly: rank which areas small and new channels are breaking out in")
+    s.add_argument("--force", action="store_true", help="Rerun even if this week's scan is saved")
+    s.add_argument("--days", type=int, help="Look back this many days (default from config/scan.yaml)")
+    s.set_defaults(func=cmd_scan)
 
     s = sub.add_parser("autopilot", help="Unattended: draft whatever today's budget allows, across all channels")
     s.add_argument("--dry-run", action="store_true", help="Show the plan without drafting")
@@ -396,7 +430,7 @@ def main(argv=None):
     s.set_defaults(func=cmd_stats)
 
     args = p.parse_args(argv)
-    needs_channel = args.command not in {"channels", "autopilot", "budget"} and not (
+    needs_channel = args.command not in {"channels", "autopilot", "budget", "scan"} and not (
         args.command in {"stats", "publish-approved", "breakout"} and args.all
     )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None

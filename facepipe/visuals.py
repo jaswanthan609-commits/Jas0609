@@ -7,6 +7,11 @@
 3. Pixabay stock video (PIXABAY_API_KEY). Free for commercial use.
 4. An offline colour placeholder, so dry runs work with no keys.
 
+History channels (visual_mode: public_art) use real public-domain paintings and engravings from
+museum open-access collections: The Met (CC0) and the Art Institute of Chicago (CC0 for public
+domain works). No API key, no cost, and real period art instead of AI pictures, which matters
+because viewers of sleep history channels reward "no AI" (2026-11 data: 1.5-2.1M views).
+
 Illustrated channels (visual_mode: ai_images, e.g. kids stories) instead generate one picture per
 scene with Google's Nano Banana image model (GEMINI_API_KEY), passing the character reference
 images each time so characters stay consistent.
@@ -124,6 +129,57 @@ def fetch(cfg: ChannelConfig, query: str, width: int, height: int, out_stem: Pat
         if found:
             return found
     return None
+
+
+MET = "https://collectionapi.metmuseum.org/public/collection/v1"
+ARTIC = "https://api.artic.edu/api/v1/artworks/search"
+ART_HEADERS = {"User-Agent": "facepipe/1.0 (open-access art for educational videos)"}
+
+
+def _met(query: str, out_stem: Path, used: set, tries: int = 12) -> Path | None:
+    r = requests.get(f"{MET}/search", params={"q": query, "hasImages": "true"}, headers=ART_HEADERS, timeout=30)
+    r.raise_for_status()
+    for oid in (r.json().get("objectIDs") or [])[:tries]:
+        if ("met", oid) in used:
+            continue
+        o = requests.get(f"{MET}/objects/{oid}", headers=ART_HEADERS, timeout=30)
+        if not o.ok:
+            continue
+        o = o.json()
+        url = o.get("primaryImage")  # full size; primaryImageSmall is too small for 1080p
+        if o.get("isPublicDomain") and url:
+            used.add(("met", oid))
+            return _download(url, out_stem.with_suffix(".jpg"))
+    return None
+
+
+def _artic(query: str, out_stem: Path, used: set) -> Path | None:
+    r = requests.get(ARTIC, params={"q": query, "limit": 15, "fields": "id,image_id,is_public_domain"},
+                     headers=ART_HEADERS, timeout=30)
+    r.raise_for_status()
+    for art in r.json().get("data", []):
+        if not art.get("is_public_domain") or not art.get("image_id") or ("artic", art["id"]) in used:
+            continue
+        used.add(("artic", art["id"]))
+        url = f"https://www.artic.edu/iiif/2/{art['image_id']}/full/1686,/0/default.jpg"
+        return _download(url, out_stem.with_suffix(".jpg"))
+    return None
+
+
+ART = {"met": _met, "artic": _artic}
+
+
+def public_art(cfg: ChannelConfig, query: str, width: int, height: int, out_stem: Path, used: set) -> Path | None:
+    """A public-domain artwork for the scene; falls back to stock footage, then None."""
+    for source in cfg.art_sources:
+        try:
+            found = ART[source](query, out_stem, used)
+        except requests.RequestException as exc:
+            print(f"  {source} failed for '{query}': {exc}")
+            continue
+        if found:
+            return found
+    return fetch(cfg, query, width, height, out_stem, used)
 
 
 GEMINI_INTERACTIONS = "https://generativelanguage.googleapis.com/v1beta/interactions"

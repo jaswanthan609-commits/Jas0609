@@ -28,6 +28,12 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
+      - name: Weekly scan of what is breaking out across YouTube
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        # Mondays (or when research/scan.json is a week old): ~40 seed searches, ranked in research/scan.json.
+        run: python -m facepipe scan
+
       - name: Breakout research and follow-ups for our winners
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -60,7 +66,7 @@ jobs:
           set -e
           branch="drafts/$(date -u +%Y-%m-%d)"
           git checkout -b "$branch"
-          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json; do
+          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json output/*/*/ambience.json; do
             [ -e "$f" ] && git add -f "$f"
           done
           if git diff --cached --quiet; then echo "Nothing drafted today"; exit 0; fi

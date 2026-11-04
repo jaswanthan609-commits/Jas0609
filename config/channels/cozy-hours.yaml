@@ -1,0 +1,26 @@
+# Channel: Cozy Hours. 90-minute cozy window scenes with original music, for sleep, study and reading.
+# Data (2026-11-04 scan): relaxing music / ambience had the most breakout videos from channels under a
+# year old (37 of 65 long outliers); "Magical Cozy Autumn Porch" 3.0M, "Serene Autumn Retreat Jazz" 12M.
+# Every upload has its own 3D scene (render3d/cozy.js) and its own synthesised music (facepipe/music.py):
+# YouTube demonetises reused or repetitive ambience, so nothing is ever repeated across videos.
+name: "Cozy Hours"
+niche: "cozy window-nook ambience: rain, snow and firelight scenes with soft original piano for sleep, study and reading"
+language: en
+audience: "students and adults worldwide who play calm background videos while studying, working or falling asleep"
+tone: "warm, quiet, inviting"
+visual_mode: ambience
+long_format: ambience
+voice_provider: edge       # unused: ambience videos have no narration
+music_volume: 1.0
+research_queries: ["cozy ambience", "rain sounds window", "relaxing piano rain", "cozy room ambience"]
+scan_topics: ["ambience", "relaxing music", "lofi"]
+default_tags: ["cozy ambience", "rain sounds", "relaxing music", "sleep music", "study music", "piano"]
+category_id: "10"          # Music
+publish_times: ["23:30"]   # IST; evening in the US, late night in Europe
+extra_guidelines: |
+  Ideas are seasonal and specific: a rainy autumn night in a city flat, first snow at a forest cabin at
+  dusk, a seaside window at dawn. Titles follow top ambience channels: scene + emoji + sounds + use + length.
+  The music is original and made for this video; say so in the description. No claims about health,
+  cures or "sleep in 5 minutes".
+
+claude_model: claude-haiku-5-5
