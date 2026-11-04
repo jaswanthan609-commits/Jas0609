@@ -565,3 +565,27 @@ def test_real_bed_loop_is_seamless():
     typical = np.abs(np.diff(y, axis=0)).max()
     assert jump <= typical * 1.5
     assert all("CC0" in c for c in beds.credits("rain_fire"))
+
+
+def test_lint_command_exit_codes(tmp_path):
+    import pytest
+    from facepipe.__main__ import main
+    from facepipe.script import Scene, VideoScript, save_script
+
+    good = tmp_path / "a"
+    good.mkdir()
+    (good / "topic.txt").write_text("ambience\nrainy night\n")
+    save_script(VideoScript(title="Rainy Autumn Night by the Window | Soft Jazz for Sleep and Study", description="",
+                            tags=[], thumbnail_text="", facts_to_check=[], scenes=[]), good / "script.json")
+    with pytest.raises(SystemExit) as e:
+        main(["lint", str(good)])
+    assert e.value.code == 0
+    bad = tmp_path / "b"
+    bad.mkdir()
+    (bad / "topic.txt").write_text("sleep\nlamps\n")
+    save_script(VideoScript(title="The Roman lamp", description="", tags=[], thumbnail_text="", facts_to_check=[],
+                            scenes=[Scene(narration="A testament to a vibrant, intricate tapestry!", visual_query="lamp")]),
+                bad / "script.json")
+    with pytest.raises(SystemExit) as e:
+        main(["lint", str(bad)])
+    assert e.value.code == 1

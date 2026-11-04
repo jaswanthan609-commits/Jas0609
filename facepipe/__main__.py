@@ -344,6 +344,26 @@ def cmd_stats(cfg, args):
         print()
 
 
+def cmd_lint(cfg, args):
+    """Free rule checks on drafted folders; exits 1 if any fail (used by the Claude Code editor pass)."""
+    from . import critic
+    from .script import load_script
+
+    failed = False
+    for folder in map(Path, args.folders):
+        topic = folder / "topic.txt"
+        fmt = topic.read_text(encoding="utf-8").split("\n", 1)[0].strip() if topic.exists() else "long"
+        script = load_script(folder / "script.json")
+        if fmt == "ambience":
+            problems = [f"The title is {len(script.title)} characters; keep it 60-95."] \
+                if not 60 <= len(script.title) <= 95 else []
+        else:
+            problems = critic.lint(script, fmt)
+        failed |= bool(problems)
+        print(f"{folder}: " + ("ok" if not problems else "\n  - " + "\n  - ".join(problems)))
+    sys.exit(1 if failed else 0)
+
+
 def main(argv=None):
     load_dotenv(ROOT / ".env")
     p = argparse.ArgumentParser(prog="facepipe", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -429,8 +449,12 @@ def main(argv=None):
     s.add_argument("--save-revenue", action="store_true", help="Save earnings since the autopilot start for the budget")
     s.set_defaults(func=cmd_stats)
 
+    s = sub.add_parser("lint", help="Free rule checks on drafted output folders")
+    s.add_argument("folders", nargs="+")
+    s.set_defaults(func=cmd_lint)
+
     args = p.parse_args(argv)
-    needs_channel = args.command not in {"channels", "autopilot", "budget", "scan"} and not (
+    needs_channel = args.command not in {"channels", "autopilot", "budget", "scan", "lint"} and not (
         args.command in {"stats", "publish-approved", "breakout"} and args.all
     )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None
