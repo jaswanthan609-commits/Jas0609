@@ -18,8 +18,11 @@ async def main():
     vs = await edge_tts.list_voices()
     inds = [v['ShortName'] for v in vs if v['Locale'] == 'en-IN']
     json.dump(inds, open(os.path.join(OUT, 'en-IN-voices.json'), 'w'))
-    for v in inds: await say(f'samples/{v}', v, J['sample_in'])
+    only = J.get('only_prefix')
+    if not only:
+        for v in inds: await say(f'samples/{v}', v, J['sample_in'])
     for j in J['jobs']:
+        if only and not j['id'].startswith(tuple(only)): continue
         for k in range(3):
             try: await say(j['id'], j['voice'], j['text'], j.get('rate', '+0%'), j.get('pitch', '+0Hz')); break
             except Exception as e: print('retry', j['id'], e); await asyncio.sleep(3)

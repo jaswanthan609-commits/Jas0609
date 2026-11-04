@@ -301,6 +301,59 @@
    "rate": "-18%",
    "pitch": "-2Hz",
    "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+  },
+  {
+   "id": "nri2/en-IN-NeerjaExpressiveNeural/0",
+   "voice": "en-IN-NeerjaExpressiveNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "nri2/en-IN-PrabhatNeural/0",
+   "voice": "en-IN-PrabhatNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "nri2/en-IN-NeerjaNeural/0",
+   "voice": "en-IN-NeerjaNeural",
+   "rate": "+0%",
+   "pitch": "+0Hz",
+   "text": "Thirty-one thousand rupees. That's how much the wrong bank account can take from every one lakh of interest you earn in India. NRE or NRO? Here are the three rules that decide it."
+  },
+  {
+   "id": "sleep2/en-GB-SoniaNeural/intro",
+   "voice": "en-GB-SoniaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-US-AvaNeural/intro",
+   "voice": "en-US-AvaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-US-EmmaNeural/intro",
+   "voice": "en-US-EmmaNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
+  },
+  {
+   "id": "sleep2/en-GB-LibbyNeural/intro",
+   "voice": "en-GB-LibbyNeural",
+   "rate": "-18%",
+   "pitch": "-2Hz",
+   "text": "Tonight, in the quiet hour before dawn in old Rome, one small clay lamp is still burning. We'll follow its soft light, slowly, piece by piece, until your eyes grow heavy."
   }
+ ],
+ "only_prefix": [
+  "nri2/",
+  "sleep2/"
  ]
 }
