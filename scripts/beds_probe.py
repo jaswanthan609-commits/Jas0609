@@ -60,7 +60,7 @@ def mixkit(kind: str, url: str) -> list[dict]:
         if o["id"] not in seen:
             seen.add(o["id"])
             uniq.append(o)
-    return uniq
+    return uniq[:8]  # the page lists its best first; 8 per kind keeps the job short
 
 
 def earshot(path: Path) -> str:
