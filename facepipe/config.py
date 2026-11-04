@@ -74,6 +74,9 @@ class ChannelConfig:
     monthly_target_inr: int = 0
     research_queries: list[str] = field(default_factory=list)  # YouTube searches for breakout research
     long_format: str = "long"  # format used for this channel's long videos: long (9 min) or deep (30 min)
+    # Affiliate or referral links added to matching video descriptions (see facepipe/affiliate.py).
+    # Each item: {label, url, keywords: [...], always: false}. Empty urls are skipped.
+    affiliate_links: list[dict] = field(default_factory=list)
 
     @property
     def voice_name(self) -> str:

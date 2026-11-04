@@ -239,17 +239,21 @@ def test_budget_plan_by_weekday_and_unlock():
     from facepipe import budget
 
     ap = _autopilot()
+    # Revised plan: sleep history + NRI money from day 1, 3 long videos a week each.
     monday = budget.plan(ap, today=date(2026, 11, 9))
-    assert monday.jobs == [("ai-tools", 1, 1), ("nri-money", 1, 1)]
-    assert any("kids-stories: locked until earnings reach $30" in n for n in monday.notes)
+    assert monday.jobs == [("sleepy-history", 1, 0)]
     tuesday = budget.plan(ap, today=date(2026, 11, 10))
-    assert [j[0] for j in tuesday.jobs] == ["ai-tools", "nri-money"]
-    assert any("sleepy-history: locked" in n for n in tuesday.notes)
+    assert tuesday.jobs == [("nri-money", 1, 1)]
+    sunday = budget.plan(ap, today=date(2026, 11, 15))
+    assert sunday.jobs == []
+    assert budget.active_channels(ap) == ["sleepy-history", "nri-money"]
+    assert "kids-stories" not in [ch.slug for ch in ap.channels]
 
-    budget.save_revenue("ai-tools", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
-    unlocked = budget.plan(ap, today=date(2026, 11, 10))
-    assert ("sleepy-history", 1, 0) in unlocked.jobs
-    assert ("kids-stories", 1, 1) in budget.plan(ap, today=date(2026, 11, 9)).jobs
+    # Earnings gates still work if a channel sets one.
+    ap.channels[0].unlock_at_usd = 50
+    assert budget.plan(ap, today=date(2026, 11, 9)).jobs == []
+    budget.save_revenue("nri-money", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
+    assert ("sleepy-history", 1, 0) in budget.plan(ap, today=date(2026, 11, 9)).jobs
     assert budget.available(ap) == pytest.approx(130)
 
 
@@ -262,12 +266,11 @@ def test_budget_slows_down_and_stops():
     from datetime import timedelta, timezone
 
     later = datetime.now(timezone.utc) + timedelta(days=10)  # the big spend was over a week ago
-    budget.record("claude", "ai-tools", 66.0)  # $4 left -> about $0.47 a week
-    tight = budget.plan(ap, today=date(2026, 11, 9), now=later)
-    assert ("ai-tools", 1, 1) in tight.jobs
-    assert all(slug != "kids-stories" or n_long == 0 for slug, n_long, _ in tight.jobs)
-    budget.record("claude", "ai-tools", 5.0)
-    broke = budget.plan(ap, today=date(2026, 11, 9), now=later)
+    budget.record("claude", "nri-money", 69.0)  # $1 left -> about $0.12 a week
+    tight = budget.plan(ap, today=date(2026, 11, 10), now=later)
+    assert tight.jobs == [("nri-money", 0, 1)]  # the long video is dropped first, the Short stays
+    budget.record("claude", "nri-money", 5.0)
+    broke = budget.plan(ap, today=date(2026, 11, 10), now=later)
     assert broke.jobs == [] and "out of money" in broke.notes[-1]
 
 
@@ -451,3 +454,28 @@ def test_voice_falls_back_to_edge(tmp_path, monkeypatch):
     cfg = load_config("ai-tools", voice_provider="kokoro", voice="am_michael", fallback_voice="en-US-AndrewNeural")
     assert voice.synthesize(cfg, "hi", tmp_path / "a.mp3") == 1.5
     assert calls == ["en-US-AndrewNeural"]
+
+
+def test_affiliate_links_match_and_disclose():
+    from facepipe import affiliate
+
+    cfg = load_config("nri-money", affiliate_links=[
+        {"label": "Wise", "url": "https://wise.example/ref", "keywords": ["send money"]},
+        {"label": "Empty", "url": "", "always": True},
+        {"label": "Other", "url": "https://other.example", "keywords": ["nre account"]},
+    ])
+    out = affiliate.with_links(cfg, "Hook line.\nSummary here.\n#nri", "How to send money home cheaply")
+    lines = out.split("\n")
+    assert lines[0] == "Hook line." and affiliate.DISCLOSURE in out
+    assert "Wise: https://wise.example/ref" in out and "Empty" not in out and "Other" not in out
+    assert out.index("Wise:") < out.index("Summary here.")
+    # Nothing matches: description unchanged. Made for Kids: never any links.
+    assert affiliate.with_links(cfg, "Hook.\nBody", "tax filing") == "Hook.\nBody"
+    kids = load_config("kids-stories", affiliate_links=[{"label": "X", "url": "https://x", "always": True}])
+    assert affiliate.with_links(kids, "Hook.", "anything") == "Hook."
+
+
+def test_shipped_affiliate_links_start_empty():
+    for slug in ["nri-money", "sleepy-history"]:
+        cfg = load_config(slug)
+        assert cfg.affiliate_links and all(link["url"] == "" for link in cfg.affiliate_links)

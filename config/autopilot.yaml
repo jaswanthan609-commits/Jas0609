@@ -14,28 +14,34 @@ image_usd: 0.07                # estimated cost of one AI illustration (kids cha
 
 # Order matters: when money is tight, channels lower in the list are skipped first,
 # and a channel's long video is dropped before its Short.
+#
+# Revised plan (2026-11-04): from 1 Feb 2027 YouTube needs 8,000 watch hours before it pays ads,
+# so the line-up is built for watch hours, not volume. Three long videos a week per channel
+# (fewer, better videos also keep clear of the "mass-produced" rule). Shorts are trailers only.
+# No earnings gates: there is no ad money before Partner Program approval, so gates would never open.
 channels:
-  - slug: ai-tools             # best ad rates; goes first
-    est_long_usd: 0.12
-    est_short_usd: 0.01
-
-  - slug: nri-money
-    est_long_usd: 0.12
-    est_short_usd: 0.01
-
-  - slug: kids-stories         # illustrated, so far more expensive per video
-    # Locked until the other channels earn $30: it would take about two thirds of the $70 for
-    # the lowest ad rates (Made for Kids). Set to 0 to start it on day 1.
-    unlock_at_usd: 30
-    long_days: [mon]
-    short_days: [mon, wed, fri]
-    est_long_usd: 2.20         # ~30 illustrations
-    est_short_usd: 0.45        # ~6 illustrations
-
-  # Opens once the channels above have earned $50 in total. Proven faceless format:
-  # long, calm history videos people play while falling asleep.
+  # Long calm videos build watch hours fastest (people watch 20+ minutes at a time).
   - slug: sleepy-history
-    long_days: [tue, fri]
+    long_days: [mon, wed, fri]
     short_days: []
     est_long_usd: 0.30
-    unlock_at_usd: 50
+
+  # Best ad rates of the line-up; few English faceless rivals.
+  - slug: nri-money
+    long_days: [tue, thu, sat]
+    short_days: [tue, sat]     # trailers for the long videos
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  # Paused until the pipeline can record screens by itself: stock clips of laptops make
+  # useless tutorials. Set paused: false to restart it.
+  - slug: ai-tools
+    paused: true
+    long_days: [mon, wed, fri]
+    short_days: []
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  # kids-stories is dropped from the autopilot: Made for Kids earns the least per view, AI kids
+  # content is under the heaviest scrutiny, and each video costs ~18x the others. Its config stays
+  # in config/channels/ in case you ever run it by hand.

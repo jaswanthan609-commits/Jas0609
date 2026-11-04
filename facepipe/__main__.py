@@ -184,13 +184,14 @@ def cmd_breakout(cfg, args):
     """Refresh breakout research (weekly) and queue follow-ups for our own winners (daily)."""
     import os
 
-    from . import breakout
+    from . import breakout, budget
     from .script import follow_up_topics
 
     if not os.environ.get("YOUTUBE_API_KEY"):
         print("breakout: no YOUTUBE_API_KEY, skipped")
         return
-    slugs = list_channels() if args.all else [cfg.slug]
+    # Only research channels the autopilot runs: each search spends YouTube API quota.
+    slugs = budget.active_channels() if args.all else [cfg.slug]
     for slug in slugs:
         c = load_config(slug)
         try:

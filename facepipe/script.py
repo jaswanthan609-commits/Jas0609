@@ -58,13 +58,15 @@ Facts must be accurate. If a number is uncertain, say it approximately rather th
 Never promise guaranteed returns or give personalised financial or medical advice. For Indian
 markets, stay educational: no specific buy or sell calls (SEBI rules for unregistered creators).
 Make each video distinct: a specific angle, concrete examples and numbers, no filler or generic
-intros. YouTube demonetises templated, mass-produced content, so avoid stock phrases."""
+intros. YouTube demonetises templated, mass-produced content, so avoid stock phrases.
+Never put links or URLs in the description; the pipeline adds any links itself."""
 
 FORMAT_BRIEF = {
     "short": (
         "a YouTube Short of about {seconds} seconds (roughly {words} spoken words). "
         "Open with a hook in the first 2 seconds that stops the scroll. Use 5-8 short scenes. "
-        "End with a one-line call to follow the channel."
+        "It works as a trailer for the channel's long videos: end with one line inviting viewers to "
+        "watch the full video on the channel."
     ),
     "long": (
         "a long-form YouTube video of about {minutes} minutes (roughly {words} spoken words). "

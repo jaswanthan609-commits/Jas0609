@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from . import assemble, captions, script as scriptmod, visuals, voice
+from . import affiliate, assemble, captions, script as scriptmod, visuals, voice
 from .config import FORMATS, ChannelConfig
 from .media import require_ffmpeg
 
@@ -149,8 +149,10 @@ def render(
 
     meta_path = folder / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    spoken = " ".join([vs.title, *(scene.narration for scene in vs.scenes)])
+    description = affiliate.with_links(cfg, vs.description, spoken)
     meta.update(
-        channel=cfg.slug, title=vs.title, description=vs.description, tags=vs.tags, format=fmt,
+        channel=cfg.slug, title=vs.title, description=description, tags=vs.tags, format=fmt,
         language=cfg.language, duration=round(sum(t[1] for t in timeline), 1),
         rendered_at=datetime.now().isoformat(timespec="seconds"), offline=offline,
     )
@@ -180,7 +182,7 @@ def publish(cfg: ChannelConfig, result: Result, publish_at: datetime | None, log
         cfg,
         result.video,
         result.script.title,
-        result.script.description,
+        meta.get("description") or result.script.description,
         result.script.tags,
         publish_at=publish_at,
         thumbnail=result.thumbnail,
