@@ -1,0 +1,36 @@
+# Paper-trading test: Claude trades fake money on NSE for 30+ days, with realistic fees, and is
+# scored against simply buying and holding the Nifty 50 ETF with the same money.
+# Delivery (CNC) equity and ETFs only: no F&O, no intraday, no leverage.
+
+started: 2026-11-05
+starting_cash_inr: 7000
+benchmark: NIFTYBEES.NS          # buy-and-hold comparison
+model: claude-haiku-5-5          # about Rs 0.10 a day
+max_position_share: 0.35         # no single holding above 35% of the portfolio
+review_after_days: 30
+pass_rule:
+  beat_benchmark_by_pct: 2.0     # after fees, at least 2 points better than holding the Nifty
+  max_drawdown_pct: 15.0         # and never more than 15% below its peak
+
+# Approximate Zerodha delivery charges (check the latest on zerodha.com/charges).
+fees:
+  buy_pct: 0.12                  # STT 0.1% + stamp duty 0.015% + exchange and GST
+  sell_pct: 0.105                # STT 0.1% + exchange and GST
+  sell_flat_inr: 15.93           # depository charge per stock sold per day
+
+# Liquid NSE names cheap enough to buy whole shares with Rs 7,000.
+universe:
+  - NIFTYBEES.NS
+  - BANKBEES.NS
+  - JUNIORBEES.NS
+  - ITBEES.NS
+  - GOLDBEES.NS
+  - ITC.NS
+  - TATASTEEL.NS
+  - NTPC.NS
+  - BEL.NS
+  - ONGC.NS
+  - COALINDIA.NS
+  - POWERGRID.NS
+  - SBIN.NS
+  - HDFCBANK.NS

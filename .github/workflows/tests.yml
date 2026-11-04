@@ -2,10 +2,10 @@ name: Tests
 
 on:
   pull_request:
-    paths: ["facepipe/**", "tests/**", "config/**", "requirements*.txt"]
+    paths: ["facepipe/**", "trader/**", "tests/**", "config/**", "requirements*.txt"]
   push:
     branches: [main]
-    paths: ["facepipe/**", "tests/**", "config/**", "requirements*.txt"]
+    paths: ["facepipe/**", "trader/**", "tests/**", "config/**", "requirements*.txt"]
 
 jobs:
   pytest:

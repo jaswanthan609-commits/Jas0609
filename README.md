@@ -151,6 +151,19 @@ Budget profile: the channel configs use `claude-sonnet-5-5` for long scripts, `c
 for Shorts and free edge-tts voices. Switch `voice_provider` to `elevenlabs` and `claude_model` to
 `claude-opus-5-5` once the channels earn.
 
+## Paper-trading test
+
+[`trader/`](trader) is a separate test of whether an AI trading bot is worth real money. On
+weekdays after the NSE close (`trade.yml`), Claude Haiku gets the day's prices and simple signals
+for 14 cheap, liquid NSE stocks and ETFs ([`config/trader.yaml`](config/trader.yaml)), decides
+orders, and they are filled at the close with fake money (Rs 7,000) and realistic Zerodha delivery
+fees. Delivery only: no F&O, intraday, shorting or leverage.
+
+It is scored against buying and holding the Nifty 50 ETF with the same Rs 7,000. After 30 days the
+scorecard in `trading/report.md` says PASSED only if the bot beat holding the Nifty by 2+ points
+after fees and never fell more than 15% from its peak. No real money moves; nothing connects to a
+broker. Run it yourself with `python -m trader run` (one day) or `python -m trader report`.
+
 ## YouTube setup
 
 1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable
@@ -187,6 +200,8 @@ facepipe/budget.py      spend ledger, earnings, daily plan that keeps within the
 facepipe/ci.py          writes YouTube secrets for every channel in GitHub Actions
 config/autopilot.yaml   budget, reinvestment and which channel drafts on which day
 ledger/                 spending and earnings, committed by the workflows
+trader/                 paper-trading bot (fake money, real prices and fees) vs holding the Nifty
+trading/                its portfolio, journal and scorecard, committed by trade.yml
 facepipe/pipeline.py    draft -> review gate -> render -> publish
 facepipe/__main__.py    CLI
 tests/                  pytest, including an offline end-to-end render

@@ -356,3 +356,53 @@ def test_ideas_prompt_uses_breakout_inspiration(monkeypatch):
     monkeypatch.setattr(scriptmod, "_parse", lambda cfg, prompt, schema, max_tokens=0, model=None: seen.update(p=prompt) or scriptmod.TopicIdeas(topics=["x"]))
     scriptmod.generate_ideas(load_config("ai-tools"), 5, inspiration='- "Hit": 1 views')
     assert "proven angles" in seen["p"] and '"Hit"' in seen["p"]
+
+
+# ---------- paper trader ----------
+
+def _trader(tmp_path, monkeypatch):
+    from trader import bot
+
+    monkeypatch.setattr(bot, "DATA_DIR", tmp_path / "trading")
+    return bot, bot.load_config()
+
+
+def _history(prices: dict[str, float], days: int = 60) -> dict[str, list[float]]:
+    return {t: [p * (0.9 + 0.1 * i / (days - 1)) for i in range(days)] for t, p in prices.items()}
+
+
+def test_trader_fills_with_fees_and_refuses_bad_orders(tmp_path, monkeypatch):
+    bot, cfg = _trader(tmp_path, monkeypatch)
+    hist = _history({"NIFTYBEES.NS": 280, "ITC.NS": 420, "GOLDBEES.NS": 80})
+    orders = [
+        bot.Order(ticker="ITC.NS", action="buy", shares=5, reason="test"),       # Rs 2,100: under 35%
+        bot.Order(ticker="GOLDBEES.NS", action="buy", shares=100, reason="x"),   # Rs 8,000: too much
+        bot.Order(ticker="TSLA", action="buy", shares=1, reason="x"),            # not in universe
+        bot.Order(ticker="SBIN.NS", action="sell", shares=1, reason="x"),        # not held
+    ]
+    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=orders),
+                        today=cfg.started)
+    status = [f["status"].split(":")[0] for f in entry["fills"]]
+    assert status == ["rejected", "filled", "rejected", "rejected"]  # sells first, then buys in order
+    state = json.loads((tmp_path / "trading" / "state.json").read_text())
+    assert state["positions"]["ITC.NS"]["shares"] == 5
+    assert state["cash"] == pytest.approx(7000 - 2100 * 1.0012, abs=0.01)
+    assert state["benchmark"]["units"] == 24
+    again = bot.run_day(cfg, hist, decide=lambda *a: 1 / 0, today=cfg.started)
+    assert again == {"skipped": "already ran today"}
+
+
+def test_trader_sell_pays_flat_fee_and_verdict(tmp_path, monkeypatch):
+    from datetime import timedelta
+
+    bot, cfg = _trader(tmp_path, monkeypatch)
+    hist = _history({"NIFTYBEES.NS": 280, "ITC.NS": 420})
+    buy = [bot.Order(ticker="ITC.NS", action="buy", shares=5, reason="b")]
+    bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=buy), today=cfg.started)
+    sell = [bot.Order(ticker="ITC.NS", action="sell", shares=5, reason="s")]
+    later = cfg.started + timedelta(days=31)
+    entry = bot.run_day(cfg, hist, decide=lambda *a: bot.Decision(view="v", orders=sell), today=later)
+    assert entry["fills"][0]["fee"] == pytest.approx(2100 * 0.00105 + 15.93, abs=0.01)
+    report = (tmp_path / "trading" / "report.md").read_text()
+    assert "FAILED" in report  # round trip at the same price only loses fees
+    assert bot.features(hist)["ITC.NS"]["rsi_14"] == 100.0
