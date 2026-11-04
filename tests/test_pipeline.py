@@ -541,3 +541,12 @@ def test_sample_credits_and_fallback(tmp_path, monkeypatch):
     assert any("Greg Sullivan" in c and "CC BY 3.0" in c for c in samples.credits())
     x = music.compose("F", "major", 72, bars=2, texture="none", seed=3, style="jazz")
     assert x.shape[1] == 2 and abs(x).max() <= 1.0
+
+
+def test_lint_flags_ai_words():
+    from facepipe.critic import lint
+    from facepipe.script import Scene, VideoScript
+
+    s = VideoScript(title="The Roman lamp", description="", tags=[], scenes=[
+        Scene(narration="Rome's lamps are a testament to a vibrant, intricate tapestry of life.", visual_query="lamp")])
+    assert any("AI-written" in p for p in lint(s, "sleep"))

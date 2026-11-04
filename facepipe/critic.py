@@ -70,6 +70,11 @@ WEAK_OPENERS = ("welcome", "hey guys", "hi everyone", "hello everyone", "in this
                 "don't forget to subscribe", "make sure to subscribe")
 FILLER = ("in today's video", "without further ado", "fast forward", "little did they know",
           "buckle up", "game changer", "let that sink in", "delve")
+# Stock AI words from blader/humanizer (MIT, .claude/skills/humanizer), after Wikipedia's "Signs of AI writing".
+# Two or more in one script reads as machine-written, which is what YouTube's inauthentic-content rule targets.
+AI_WORDS = ("tapestry", "testament to", "pivotal", "meticulous", "intricate", "underscore", "showcase",
+            "vibrant", "interplay", "bolstered", "garner", "enduring legacy", "deep dive", "crucial role",
+            "rich history", "stands as", "serves as a reminder", "not just", "it's not about")
 
 
 def hook_score(line: str) -> tuple[int, str, str]:
@@ -114,6 +119,10 @@ def lint(script, fmt: str = "long") -> list[str]:
     for phrase in FILLER:
         if phrase in whole:
             problems.append(f"Cut the stock phrase '{phrase}'; it marks templated content.")
+    tells = [w for w in AI_WORDS if re.search(r"\b" + re.escape(w) + r"\b", whole)]
+    if len(tells) >= 2:
+        problems.append(f"The script reads as AI-written ({', '.join(tells[:5])}). Say the plain, concrete thing "
+                        "instead (see the humanizer skill).")
     return problems
 
 
