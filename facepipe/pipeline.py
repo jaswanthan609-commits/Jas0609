@@ -54,6 +54,20 @@ def draft_script(cfg: ChannelConfig, topic: str, fmt: str = "short", log=print, 
     """
     from . import critic
 
+    if fmt == "ambience":  # no narration: a scene and music spec instead of a script
+        from . import ambience
+
+        previous = critic.previous_titles(cfg)
+        folder = _new_folder(cfg, fmt, topic)
+        seed = int(datetime.now().strftime("%Y%m%d%H%M%S")) % 1_000_003
+        spec = ambience.draft(cfg, topic, folder, seed)
+        dup = critic.duplicate_of(spec.title, previous)
+        if dup:
+            spec = ambience.draft(cfg, topic, folder, seed, notes=f"Too close to our earlier \"{dup}\"; pick a clearly different scene and title.")
+        (folder / "topic.txt").write_text(f"{fmt}\n{topic}\n", encoding="utf-8")
+        log(f"  Title: {spec.title}")
+        return folder / "script.json"
+
     log(f"[{cfg.slug}] Writing {fmt} script with {cfg.claude_model}: {topic}")
     vs = scriptmod.write_script(cfg, topic, fmt)
     review = None
@@ -61,17 +75,24 @@ def draft_script(cfg: ChannelConfig, topic: str, fmt: str = "short", log=print, 
         previous = critic.previous_titles(cfg)
         for attempt in (1, 2):
             dup = critic.duplicate_of(vs.title, previous)
+            problems = [] if dup else critic.lint(vs, fmt)
             if dup:
                 notes = f"The title is too close to an earlier video, \"{dup}\". Take a clearly different angle."
+            elif problems:
+                log("  lint: " + " | ".join(problems))
+                notes = "An editor rejected the first draft. Fix all of these:\n- " + "\n- ".join(problems)
+                if attempt == 2:  # rule problems after a rewrite: keep it, the reviewer sees them in the PR
+                    review = critic.critique(cfg, vs, fmt)
+                    break
             else:
-                review = critic.critique(cfg, vs)
+                review = critic.critique(cfg, vs, fmt)
                 log(f"  critic: hook {review.hook}, specific {review.specificity}, original {review.originality}, "
                     f"policy {review.policy_risk}")
                 if review.score >= critic.PASS_SCORE:
                     break
                 notes = critic.notes_for_rewrite(review)
             if attempt == 2:
-                raise Rejected(f"dropped after rewrite: {dup and 'duplicate of ' + dup or review.fixes}")
+                raise Rejected(f"dropped after rewrite: {dup and 'duplicate of ' + dup or (review.fixes if review else problems)}")
             log("  rewriting with the critic's notes")
             vs = scriptmod.write_script(cfg, topic, fmt, notes=notes)
     folder = _new_folder(cfg, fmt, topic)
@@ -84,6 +105,24 @@ def draft_script(cfg: ChannelConfig, topic: str, fmt: str = "short", log=print, 
     log(f"  Facts to check: {len(vs.facts_to_check)}")
     log(f"  Review it, set \"reviewed\": true, then: python -m facepipe --channel {cfg.slug} render {path}")
     return path
+
+
+def _stamp(seconds: float) -> str:
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+
+
+def with_chapters(description: str, scenes, timeline) -> str:
+    """YouTube chapters (first at 0:00, at least 3, each 10 s+) from the scenes' chapter titles."""
+    marks, t = [], 0.0
+    for scene, (_, seconds, _) in zip(scenes, timeline):
+        if scene.chapter and (not marks or t - marks[-1][0] >= 10):
+            marks.append((0.0 if not marks else t, scene.chapter))
+        t += seconds
+    if len(marks) < 3:
+        return description
+    return description + "\n\nChapters\n" + "\n".join(f"{_stamp(t)} {title}" for t, title in marks)
 
 
 def render(
@@ -107,6 +146,8 @@ def render(
     if fmt is None:
         fmt = topic_file.read_text(encoding="utf-8").split("\n")[0] if topic_file.exists() else "short"
     width, height, _ = FORMATS[fmt]
+    if fmt == "ambience":
+        return _render_ambience(cfg, folder, vs, offline, log)
     work = folder / "work"
     if work.exists():
         shutil.rmtree(work)
@@ -128,29 +169,40 @@ def render(
             visual = None
         elif cfg.visual_mode == "ai_images":
             visual = visuals.ai_image(cfg, scene.image_prompt or scene.visual_query, width, height, stem)
+        elif cfg.visual_mode == "public_art":
+            visual = visuals.public_art(cfg, scene.visual_query, width, height, stem, used)
         else:
             visual = visuals.fetch(cfg, scene.visual_query, width, height, stem, used)
         if visual is None:
             if not offline:
                 log(f"  no footage for '{scene.visual_query}', using placeholder; fix before publishing")
             visual = visuals.placeholder(i, width, height, stem)
-        clip_parts.append(assemble.scene_clip(visual, seconds, width, height, work / f"clip_{i:03d}.mp4"))
+        clip_parts.append(assemble.scene_clip(visual, seconds, width, height, work / f"clip_{i:03d}.mp4",
+                                              fade=cfg.dissolve))
         timeline.append((scene.narration, seconds, scene.on_screen_text))
         log(f"  scene {i + 1}/{len(vs.scenes)}: {seconds:.1f}s  {visual.name}")
 
     voice_track = assemble.concat(voice_parts, work / "voice.mp3", audio=True)
     silent_video = assemble.concat(clip_parts, work / "video.mp4", audio=False)
-    subs = captions.build_ass(cfg, timeline, width, height, work / "captions.ass")
+    if cfg.burn_captions:
+        subs = captions.build_ass(cfg, timeline, width, height, work / "captions.ass")
+    else:  # no words on the picture; YouTube shows the uploaded captions.srt if the viewer wants them
+        subs = None
+        captions.build_srt(timeline, folder / "captions.srt")
     music = assemble.pick_music(cfg)
     if music is None:
         log("  no music in assets/music, rendering voice only")
     final = assemble.final_render(cfg, silent_video, voice_track, subs, folder / "video.mp4", music)
     thumb = assemble.thumbnail(silent_video, vs.thumbnail_text, cfg, folder / "thumbnail.jpg", width, height)
+    from . import listen
+
+    if not offline and listen.listen(final):
+        log("  listened: audio_report.json written")
 
     meta_path = folder / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     spoken = " ".join([vs.title, *(scene.narration for scene in vs.scenes)])
-    description = affiliate.with_links(cfg, vs.description, spoken)
+    description = affiliate.with_links(cfg, with_chapters(vs.description, vs.scenes, timeline), spoken)
     meta.update(
         channel=cfg.slug, title=vs.title, description=description, tags=vs.tags, format=fmt,
         language=cfg.language, duration=round(sum(t[1] for t in timeline), 1),
@@ -159,6 +211,21 @@ def render(
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     log(f"  Done: {final}")
     return Result(folder=folder, video=final, thumbnail=thumb, script=vs)
+
+
+def _render_ambience(cfg: ChannelConfig, folder: Path, vs, offline: bool, log) -> Result:
+    from . import ambience
+
+    video, thumb = ambience.render(cfg, folder, seconds=60 if offline else None, log=log)  # listens and gates
+    meta_path = folder / "metadata.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    description = affiliate.with_links(cfg, vs.description, vs.title)
+    meta.update(channel=cfg.slug, title=vs.title, description=description, tags=vs.tags, format="ambience",
+                language=cfg.language, duration=FORMATS["ambience"][2],
+                rendered_at=datetime.now().isoformat(timespec="seconds"), offline=offline)
+    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    log(f"  Done: {video}")
+    return Result(folder=folder, video=video, thumbnail=thumb, script=vs)
 
 
 def make_offline(cfg: ChannelConfig, fmt: str = "short", log=print) -> Result:
@@ -176,6 +243,9 @@ def publish(cfg: ChannelConfig, result: Result, publish_at: datetime | None, log
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if meta.get("offline"):
         raise RuntimeError("This is an offline dry-run render; it can't be uploaded.")
+    qa_path = result.folder / "qa.json"
+    if qa_path.exists() and not json.loads(qa_path.read_text(encoding="utf-8")).get("ok", True):
+        raise RuntimeError(f"Quality gate failed, not uploading: {json.loads(qa_path.read_text())['summary']}")
     when = f" scheduled for {publish_at:%Y-%m-%d %H:%M %Z}" if publish_at else ""
     log(f"[{cfg.slug}] Uploading to YouTube{when}")
     result.video_id = upload.upload(

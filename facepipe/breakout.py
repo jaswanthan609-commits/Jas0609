@@ -95,10 +95,14 @@ def save_outliers(cfg: ChannelConfig, outliers: list[dict]) -> Path:
 
 
 def load_outliers(cfg: ChannelConfig) -> list[dict]:
+    """This channel's own outliers plus the weekly cross-niche scan's outliers for its scan_topics."""
+    from . import scan
+
     path = RESEARCH_DIR / f"{cfg.slug}.json"
-    if not path.exists():
-        return []
-    return json.loads(path.read_text(encoding="utf-8")).get("outliers", [])
+    own = json.loads(path.read_text(encoding="utf-8")).get("outliers", []) if path.exists() else []
+    seen = {o["id"] for o in own}
+    extra = [o for o in scan.outliers_for(cfg.scan_topics) if o["id"] not in seen]
+    return sorted(own + extra, key=lambda o: o["score"], reverse=True)
 
 
 def outliers_stale(cfg: ChannelConfig, max_age_days: int = 7) -> bool:

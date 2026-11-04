@@ -30,8 +30,9 @@ def isolated_ledger(tmp_path, monkeypatch):
 
 
 def test_english_channels_load():
-    assert list_channels() == ["ai-tools", "kids-stories", "nri-money", "sleepy-history"]
-    assert load_config("sleepy-history").long_format == "deep"
+    assert list_channels() == ["ai-tools", "cozy-hours", "kids-stories", "nri-money", "sleepy-history",
+                               "what-really-happened"]
+    assert load_config("sleepy-history").long_format == "sleep"
     assert {load_config(c).language for c in list_channels()} == {"en"}
     kids = load_config("kids-stories")
     assert kids.made_for_kids and kids.visual_mode == "ai_images" and "Pip" in kids.characters
@@ -239,14 +240,14 @@ def test_budget_plan_by_weekday_and_unlock():
     from facepipe import budget
 
     ap = _autopilot()
-    # Revised plan: sleep history + NRI money from day 1, 3 long videos a week each.
+    # 2026-11-04 line-up from the cross-niche scan; NRI money paused.
     monday = budget.plan(ap, today=date(2026, 11, 9))
     assert monday.jobs == [("sleepy-history", 1, 0)]
     tuesday = budget.plan(ap, today=date(2026, 11, 10))
-    assert tuesday.jobs == [("nri-money", 1, 1)]
+    assert tuesday.jobs == [("what-really-happened", 1, 1), ("cozy-hours", 1, 0)]
     sunday = budget.plan(ap, today=date(2026, 11, 15))
-    assert sunday.jobs == []
-    assert budget.active_channels(ap) == ["sleepy-history", "nri-money"]
+    assert sunday.jobs == [("cozy-hours", 1, 0)]
+    assert budget.active_channels(ap) == ["sleepy-history", "what-really-happened", "cozy-hours"]
     assert "kids-stories" not in [ch.slug for ch in ap.channels]
 
     # Earnings gates still work if a channel sets one.
@@ -268,7 +269,8 @@ def test_budget_slows_down_and_stops():
     later = datetime.now(timezone.utc) + timedelta(days=10)  # the big spend was over a week ago
     budget.record("claude", "nri-money", 69.0)  # $1 left -> about $0.12 a week
     tight = budget.plan(ap, today=date(2026, 11, 10), now=later)
-    assert tight.jobs == [("nri-money", 0, 1)]  # the long video is dropped first, the Short stays
+    # the expensive long video is dropped first; the Short and the near-free ambience video stay
+    assert tight.jobs == [("what-really-happened", 0, 1), ("cozy-hours", 1, 0)]
     budget.record("claude", "nri-money", 5.0)
     broke = budget.plan(ap, today=date(2026, 11, 10), now=later)
     assert broke.jobs == [] and "out of money" in broke.notes[-1]
@@ -428,13 +430,14 @@ def test_critic_rewrites_then_drops_weak_scripts(tmp_path, monkeypatch):
     weak = critic.Critique(hook=4, specificity=8, originality=8, policy_risk=9, fixes=["Stronger first line"])
     strong = critic.Critique(hook=8, specificity=8, originality=8, policy_risk=9, fixes=[])
     verdicts = [weak, strong]
-    monkeypatch.setattr(critic, "critique", lambda c, s: verdicts.pop(0))
+    monkeypatch.setattr(critic, "lint", lambda s, f="long": [])
+    monkeypatch.setattr(critic, "critique", lambda c, s, f="long": verdicts.pop(0))
     path = pipeline.draft_script(cfg, "topic", "short", log=lambda *a: None)
     assert writes == ["", critic.notes_for_rewrite(weak)]
     assert json.loads((path.parent / "critic.json").read_text())["hook"] == 8
 
     # Same title again: duplicate, rewrite still duplicate -> dropped without spending on the critic.
-    monkeypatch.setattr(critic, "critique", lambda c, s: 1 / 0)
+    monkeypatch.setattr(critic, "critique", lambda c, s, f="long": 1 / 0)
     with pytest.raises(pipeline.Rejected):
         pipeline.draft_script(cfg, "topic", "short", log=lambda *a: None)
 
@@ -479,3 +482,110 @@ def test_shipped_affiliate_links_start_empty():
     for slug in ["nri-money", "sleepy-history"]:
         cfg = load_config(slug)
         assert cfg.affiliate_links and all(link["url"] == "" for link in cfg.affiliate_links)
+
+
+# --- 2026-11 rework: formats, lint, captions, chapters, scan, music ---
+
+def test_new_channels_load():
+    from facepipe.config import load_config
+
+    for slug in ("sleepy-history", "what-really-happened", "cozy-hours"):
+        cfg = load_config(slug)
+        assert cfg.scan_topics
+    assert load_config("sleepy-history").burn_captions is False
+
+
+def test_lint_flags_greeting_and_passes_cold_open():
+    from facepipe.critic import lint
+    from facepipe.script import Scene, VideoScript
+
+    def vs(first):
+        return VideoScript(title="How a Poor Boy Beat Lay's in India", description="", tags=[], thumbnail_text="",
+                           facts_to_check=[], scenes=[Scene(narration=first, visual_query="x"),
+                                                      Scene(narration="In 2019 Ravi Kumar sold 40 packets.", visual_query="x")])
+    assert any("greeting" in p for p in lint(vs("Welcome back to the channel, today we look at chips."), "story"))
+    good = "At 4:12 in the morning in Indore, a 23-year-old made a call that would cost Lay's 900 crore rupees."
+    assert lint(vs(good), "story") == []
+
+
+def test_srt_and_chapters(tmp_path):
+    from facepipe.captions import build_srt
+    from facepipe.pipeline import with_chapters
+    from facepipe.script import Scene
+
+    timeline = [("one two three", 12.0, ""), ("four five", 15.0, ""), ("six", 20.0, ""), ("seven", 5.0, "")]
+    srt = build_srt(timeline, tmp_path / "c.srt").read_text()
+    assert srt.startswith("1\n00:00:00,000 --> ")
+    scenes = [Scene(narration=n, visual_query="x", chapter=c) for (n, _, _), c in zip(timeline, ["Dawn", "Market", "Dusk", ""])]
+    desc = with_chapters("About", scenes, timeline)
+    assert "0:00 Dawn" in desc and "0:12 Market" in desc and "0:27 Dusk" in desc
+
+
+def test_music_loops_seamlessly():
+    import numpy as np
+
+    from facepipe import music
+
+    x = music.compose("D", "major", 70, bars=4, texture="rain_fire", seed=2)
+    assert x.shape[1] == 2 and np.max(np.abs(x)) <= 1.0
+    typical = np.abs(np.diff(x, axis=0)).mean()
+    assert np.abs(x[-1] - x[0]).max() < 20 * typical + 0.05
+
+
+def test_sample_credits_and_fallback(tmp_path, monkeypatch):
+    """CC BY samples must be credited; without the sample sets the music falls back to synthesis."""
+    monkeypatch.setenv("FACEPIPE_SAMPLES", str(tmp_path))
+    from facepipe import music, samples
+
+    assert not samples.available()
+    assert any("Greg Sullivan" in c and "CC BY 3.0" in c for c in samples.credits())
+    x = music.compose("F", "major", 72, bars=2, texture="none", seed=3, style="jazz")
+    assert x.shape[1] == 2 and abs(x).max() <= 1.0
+
+
+def test_lint_flags_ai_words():
+    from facepipe.critic import lint
+    from facepipe.script import Scene, VideoScript
+
+    s = VideoScript(title="The Roman lamp", description="", tags=[], thumbnail_text="", facts_to_check=[], scenes=[
+        Scene(narration="Rome's lamps are a testament to a vibrant, intricate tapestry of life.", visual_query="lamp")])
+    assert any("AI-written" in p for p in lint(s, "sleep"))
+
+
+def test_real_bed_loop_is_seamless():
+    import numpy as np
+    from facepipe import beds
+
+    rng = np.random.default_rng(1)
+    t = np.arange(44100 * 7) / 44100
+    x = np.stack([np.sin(2 * np.pi * 3 * t) + 0.1 * rng.standard_normal(len(t))] * 2, axis=1)
+    y = beds.loop(x, 44100 * 20, rng)
+    assert y.shape == (44100 * 20, 2)
+    jump = np.abs(y[0] - y[-1]).max()
+    typical = np.abs(np.diff(y, axis=0)).max()
+    assert jump <= typical * 1.5
+    assert all("CC0" in c for c in beds.credits("rain_fire"))
+
+
+def test_lint_command_exit_codes(tmp_path):
+    import pytest
+    from facepipe.__main__ import main
+    from facepipe.script import Scene, VideoScript, save_script
+
+    good = tmp_path / "a"
+    good.mkdir()
+    (good / "topic.txt").write_text("ambience\nrainy night\n")
+    save_script(VideoScript(title="Rainy Autumn Night by the Window | Soft Jazz for Sleep and Study", description="",
+                            tags=[], thumbnail_text="", facts_to_check=[], scenes=[]), good / "script.json")
+    with pytest.raises(SystemExit) as e:
+        main(["lint", str(good)])
+    assert e.value.code == 0
+    bad = tmp_path / "b"
+    bad.mkdir()
+    (bad / "topic.txt").write_text("sleep\nlamps\n")
+    save_script(VideoScript(title="The Roman lamp", description="", tags=[], thumbnail_text="", facts_to_check=[],
+                            scenes=[Scene(narration="A testament to a vibrant, intricate tapestry!", visual_query="lamp")]),
+                bad / "script.json")
+    with pytest.raises(SystemExit) as e:
+        main(["lint", str(bad)])
+    assert e.value.code == 1

@@ -36,6 +36,36 @@ jobs:
             pip install -r requirements-kokoro.txt --extra-index-url https://download.pytorch.org/whl/cpu
           fi
 
+      - name: Install the 3D renderer if a channel uses ambience
+        run: |
+          if grep -q "visual_mode: ambience" config/channels/*.yaml; then
+            npm install --prefix render3d --no-audit --no-fund
+            npx --prefix render3d playwright install --with-deps chromium
+          fi
+
+      - uses: actions/cache@v4
+        with:
+          path: .earshot
+          key: earshot-models-591fa3e
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/samples
+          key: samples-${{ hashFiles('facepipe/samples.py') }}
+
+      - uses: actions/cache@v4
+        with:
+          path: .cache/beds
+          key: beds-${{ hashFiles('facepipe/beds.py') }}
+
+      - name: Install earshot so every render is listened to (audio_report.json)
+        env:
+          EARSHOT_HOME: ${{ github.workspace }}/.earshot
+        run: |
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "earshot @ git+https://github.com/Leonxlnx/earshot@591fa3e028032e6dce56620a20e932e35667e8d8"
+          earshot doctor --fetch || echo "earshot models unavailable; renders go on without listening"
+
       - name: Write YouTube credentials
         env:
           SECRETS_JSON: ${{ toJSON(secrets) }}
@@ -43,6 +73,7 @@ jobs:
 
       - name: Render and upload approved scripts
         env:
+          EARSHOT_HOME: ${{ github.workspace }}/.earshot
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

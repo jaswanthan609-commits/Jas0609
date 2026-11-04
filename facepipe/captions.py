@@ -72,3 +72,29 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         t += dur
     out.write_text(header + "\n".join(lines) + "\n", encoding="utf-8")
     return out
+
+
+def _srt_ts(seconds: float) -> str:
+    ms = int(round(seconds * 1000))
+    h, ms = divmod(ms, 3600000)
+    m, ms = divmod(ms, 60000)
+    s, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
+
+
+def build_srt(scenes: list[tuple[str, float, str]], out: Path, max_words: int = 10) -> Path:
+    """Plain SRT for YouTube's own caption track (switchable, searchable, never on the picture)."""
+    blocks, t, n = [], 0.0, 1
+    for narration, dur, _ in scenes:
+        chunks = _chunks(narration, max_words)
+        total = sum(len(c) for c in chunks) or 1
+        ct = t
+        for chunk in chunks:
+            cd = dur * len(chunk) / total
+            if chunk:
+                blocks.append(f"{n}\n{_srt_ts(ct)} --> {_srt_ts(ct + cd)}\n{chunk}\n")
+                n += 1
+            ct += cd
+        t += dur
+    out.write_text("\n".join(blocks), encoding="utf-8")
+    return out

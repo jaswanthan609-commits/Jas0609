@@ -1,0 +1,26 @@
+# Demo only: renders the voice lines in demo/voice/jobs.json with free Edge neural voices
+# and commits the MP3s back to this branch (the cloud sandbox can't reach the voice service).
+name: Demo voices
+on:
+  push:
+    branches: [claude/project-thread-vc75vb]
+    paths: [demo/voice/jobs.json, demo/voice/make.py, .github/workflows/voice-samples.yml]
+permissions:
+  contents: write
+jobs:
+  voices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install "edge-tts>=7.0"
+      - run: python demo/voice/make.py
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add demo/voice/out
+          git commit -m "Demo voices: render Edge neural voice lines" || exit 0
+          git pull --rebase origin ${GITHUB_REF_NAME}
+          git push origin HEAD:${GITHUB_REF_NAME}

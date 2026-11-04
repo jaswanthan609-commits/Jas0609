@@ -11,24 +11,36 @@ from .media import run
 FPS = 30
 
 
-def scene_clip(visual: Path, seconds: float, width: int, height: int, out: Path) -> Path:
-    """Fit a stock clip or still image to the frame (cover + crop) for exactly `seconds`."""
+def scene_clip(visual: Path, seconds: float, width: int, height: int, out: Path, fade: float = 0.0) -> Path:
+    """Fit a stock clip or still image to the frame (cover + crop) for exactly `seconds`.
+
+    fade > 0 fades the clip in from and out to near-black over `fade` seconds: sleep videos never cut,
+    so a drowsy viewer is not jolted by a sudden change of picture.
+    """
     cover = (
         f"scale={width}:{height}:force_original_aspect_ratio=increase,"
         f"crop={width}:{height},setsar=1"
     )
     if visual.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
         frames = max(1, int(seconds * FPS))
-        # Slow Ken Burns zoom so stills don't look static.
+        # Slow Ken Burns zoom so stills don't look static, spread over the whole scene (a fixed step
+        # finished zooming after 6 s and then sat still, which is worst on 40 s sleep scenes).
+        step = 0.12 / frames
         vf = (
             f"scale={width * 2}:{height * 2}:force_original_aspect_ratio=increase,crop={width * 2}:{height * 2},"
-            f"zoompan=z='min(zoom+0.0008,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+            f"zoompan=z='min(zoom+{step:.6f},1.12)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
             f":d={frames}:s={width}x{height}:fps={FPS},setsar=1"
         )
+    else:
+        vf = f"{cover},fps={FPS}"
+    if fade > 0:
+        f = min(fade, seconds / 3)
+        vf += f",fade=t=in:st=0:d={f:.2f},fade=t=out:st={seconds - f:.2f}:d={f:.2f}"
+    if visual.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
         cmd = ["ffmpeg", "-y", "-loop", "1", "-i", str(visual), "-vf", vf]
     else:
         # Loop short clips so they always cover the narration.
-        cmd = ["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(visual), "-vf", f"{cover},fps={FPS}"]
+        cmd = ["ffmpeg", "-y", "-stream_loop", "-1", "-i", str(visual), "-vf", vf]
     cmd += [
         "-t", f"{seconds:.3f}", "-an", "-c:v", "libx264", "-preset", "veryfast",
         "-crf", "20", "-pix_fmt", "yuv420p", str(out),
@@ -54,13 +66,16 @@ def final_render(
     cfg: ChannelConfig,
     video: Path,
     voice: Path,
-    subtitles: Path,
+    subtitles: Path | None,
     out: Path,
     music: Path | None,
 ) -> Path:
-    fonts_dir = (cfg.music_path.parent / "fonts").resolve()
-    sub_path = str(subtitles.resolve()).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
-    sub_filter = f"ass='{sub_path}':fontsdir='{fonts_dir}'"
+    if subtitles:
+        fonts_dir = (cfg.music_path.parent / "fonts").resolve()
+        sub_path = str(subtitles.resolve()).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
+        sub_filter = f"ass='{sub_path}':fontsdir='{fonts_dir}'"
+    else:
+        sub_filter = "null"
     cmd = ["ffmpeg", "-y", "-i", str(video), "-i", str(voice)]
     if music:
         cmd += ["-stream_loop", "-1", "-i", str(music)]

@@ -13,3 +13,5 @@ assets/fonts/*
 tokens/
 footage/
 topics/*.done.txt
+render3d/node_modules
+.cache/

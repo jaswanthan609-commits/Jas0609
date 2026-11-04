@@ -23,6 +23,7 @@ from .config import ROOT, ChannelConfig
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/youtube.force-ssl",  # caption uploads
     "https://www.googleapis.com/auth/yt-analytics.readonly",
     "https://www.googleapis.com/auth/yt-analytics-monetary.readonly",
 ]
@@ -125,4 +126,15 @@ def upload(
             youtube.thumbnails().set(videoId=video_id, media_body=MediaFileUpload(str(thumbnail))).execute()
         except Exception as exc:  # custom thumbnails need a verified channel
             print(f"  thumbnail skipped: {exc}")
+    srt = video.with_name("captions.srt")
+    if srt.exists():  # channels with burn_captions: false get real, switchable captions instead
+        try:
+            youtube.captions().insert(
+                part="snippet",
+                body={"snippet": {"videoId": video_id, "language": cfg.language, "name": cfg.language_name,
+                                  "isDraft": False}},
+                media_body=MediaFileUpload(str(srt), mimetype="application/octet-stream"),
+            ).execute()
+        except Exception as exc:  # captions are a bonus; never fail the upload over them
+            print(f"  captions skipped: {exc}")
     return video_id
