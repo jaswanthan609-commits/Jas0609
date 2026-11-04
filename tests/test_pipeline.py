@@ -547,6 +547,6 @@ def test_lint_flags_ai_words():
     from facepipe.critic import lint
     from facepipe.script import Scene, VideoScript
 
-    s = VideoScript(title="The Roman lamp", description="", tags=[], scenes=[
+    s = VideoScript(title="The Roman lamp", description="", tags=[], thumbnail_text="", facts_to_check=[], scenes=[
         Scene(narration="Rome's lamps are a testament to a vibrant, intricate tapestry of life.", visual_query="lamp")])
     assert any("AI-written" in p for p in lint(s, "sleep"))
