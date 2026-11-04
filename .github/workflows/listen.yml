@@ -6,7 +6,7 @@ name: Listen
 
 on:
   push:
-    paths: ["facepipe/music.py", ".github/workflows/listen.yml"]
+    paths: ["facepipe/music.py", "facepipe/samples.py", ".github/workflows/listen.yml"]
   workflow_dispatch:
 
 jobs:
@@ -32,6 +32,11 @@ jobs:
           path: .earshot
           key: earshot-models-591fa3e
       - run: earshot doctor --fetch
+      - uses: actions/cache@v4
+        with:
+          path: .cache/samples
+          key: samples-${{ hashFiles('facepipe/samples.py') }}
+      - run: python -c "from facepipe import samples; assert samples.fetch()"
       - name: Render one minute per style and listen
         run: |
           mkdir -p listen

@@ -530,3 +530,14 @@ def test_music_loops_seamlessly():
     assert x.shape[1] == 2 and np.max(np.abs(x)) <= 1.0
     typical = np.abs(np.diff(x, axis=0)).mean()
     assert np.abs(x[-1] - x[0]).max() < 20 * typical + 0.05
+
+
+def test_sample_credits_and_fallback(tmp_path, monkeypatch):
+    """CC BY samples must be credited; without the sample sets the music falls back to synthesis."""
+    monkeypatch.setenv("FACEPIPE_SAMPLES", str(tmp_path))
+    from facepipe import music, samples
+
+    assert not samples.available()
+    assert any("Greg Sullivan" in c and "CC BY 3.0" in c for c in samples.credits())
+    x = music.compose("F", "major", 72, bars=2, texture="none", seed=3, style="jazz")
+    assert x.shape[1] == 2 and abs(x).max() <= 1.0

@@ -16,7 +16,10 @@ from pathlib import Path
 
 import numpy as np
 
+from . import samples
+
 SR = 44100
+BED_GAIN = 0.4  # about -8 dB: the rain/fire sits under the music, not over it
 NOTES = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7,
          "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11}
 SCALES = {"major": [0, 2, 4, 5, 7, 9, 11], "minor": [0, 2, 3, 5, 7, 8, 10], "dorian": [0, 2, 3, 5, 7, 9, 10]}
@@ -120,10 +123,41 @@ def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, 
     melody_scale = [root + 12 + s for s in scale] + [root + 24 + s for s in scale[:5]]
     last = len(melody_scale) // 2
     swing = beat * 2 / 3  # the "and" of each beat lands two thirds through it (swung eighths)
+    sampled = style == "jazz" and samples.available()
+    if sampled:
+        wurli, bass, kit = samples.instruments()
     for bar in range(bars):
         start = bar * 4 * beat
         chord = _chord(root, scale, prog[bar % len(prog)])
         nxt = _chord(root, scale, prog[(bar + 1) % len(prog)])
+        if sampled:  # real recorded Wurlitzer, double bass and kit; our notes, voicings and feel
+            def hum(t: float) -> float:  # human timing: a few ms early or late
+                return t + rng.normal(0, 0.008)
+            for b, m in enumerate(_walk(chord, nxt, scale, rng)):
+                add(bass.note(m, 0.5 + 0.15 * (b == 0), beat * 0.95, rng) * 0.9, hum(start + b * beat), 0.48)
+            for b in range(4):
+                add(kit.hit("ride", 0.15 + 0.15 * (b % 2) + 0.05 * rng.random(), rng, 3.0) * 0.30,
+                    hum(start + b * beat), 0.66)
+                if b % 2 == 1:
+                    add(kit.hit("ride", 0.05, rng, 2.0) * 0.22, hum(start + b * beat + swing), 0.66)
+                    add(kit.hit("pedal", 0.3, rng) * 0.35, hum(start + b * beat), 0.6)
+                add(kit.hit("kick", 0.0, rng, 0.6) * 0.18, hum(start + b * beat), 0.5)  # feathered
+            if rng.random() < 0.25:
+                add(kit.hit("xstick", 0.2, rng) * 0.25, hum(start + 3 * beat), 0.45)
+            voicing = [chord[1], chord[2], chord[3], chord[0] + 14]
+            hit = start + (beat + swing if rng.random() < .5 else 3 * beat)
+            hold = 2 * beat if hit < start + 2 * beat else beat
+            for k, m in enumerate(voicing):
+                add(wurli.note(m, 0.2 + 0.1 * rng.random(), hold, rng) * 0.22, hum(hit + k * 0.012),
+                    0.38 + 0.06 * k)
+            if bar % 8 >= 2:
+                for b in range(8):
+                    if rng.random() < 0.24:
+                        last = int(np.clip(last + rng.choice([-2, -1, -1, 0, 1, 1, 2]), 0, len(melody_scale) - 1))
+                        at = start + (b // 2) * beat + (swing if b % 2 else 0)
+                        add(wurli.note(melody_scale[last], 0.35 + 0.25 * rng.random(), beat * 1.2, rng) * 0.32,
+                            hum(at), 0.4 + 0.25 * rng.random())
+            continue
         if style == "jazz":
             add(_pad([_hz(m) for m in chord], 4 * beat + 1.5, 0.10), start, 0.5)
             for b, m in enumerate(_walk(chord, nxt, scale, rng)):  # walking upright-ish bass
@@ -161,12 +195,13 @@ def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, 
                     add(_epiano(_hz(melody_scale[last]), 2.8, 0.13), start + b * beat + rng.random() * 0.03,
                         0.3 + 0.4 * rng.random())
     music = np.stack([left, right], axis=1)
-    music = np.stack([_reverb(music[:, 0], 3.2, rng) * 0.5 + music[:, 0] * 0.6,
-                      _reverb(music[:, 1], 3.2, rng) * 0.5 + music[:, 1] * 0.6], axis=1)
-    music = _lowpass_stereo(music, 6500)
+    wet, size, cutoff = (0.22, 1.8, 14000) if sampled else (0.5, 3.2, 6500)  # recordings carry their own room
+    music = np.stack([_reverb(music[:, 0], size, rng) * wet + music[:, 0] * 0.6,
+                      _reverb(music[:, 1], size, rng) * wet + music[:, 1] * 0.6], axis=1)
+    music = _lowpass_stereo(music, cutoff)
     music /= np.max(np.abs(music)) + 1e-9
     music *= 0.55
-    bed = texture_bed(texture, n, rng)
+    bed = texture_bed(texture, n, rng) * BED_GAIN  # earshot: at full level the rain drowned the music
     out = music + bed
     return out / max(1.0, np.max(np.abs(out)) / 0.95)
 
@@ -180,13 +215,18 @@ def texture_bed(texture: str, n: int, rng: np.random.Generator) -> np.ndarray:
     out = np.zeros((n, 2))
     if texture in {"rain", "rain_fire"}:
         for ch in range(2):
-            noise = _lowpass(rng.standard_normal(n), 2200) - _lowpass(rng.standard_normal(n), 300) * 0.3
+            # Rain on glass is a light high hiss plus many tiny ticks; low broadband noise reads as a waterfall.
+            white = rng.standard_normal(n)
+            noise = _lowpass(white, 7000) - _lowpass(white, 900)
             swell = 1 + 0.15 * np.sin(2 * np.pi * np.arange(n) / n * 3 + ch)  # whole cycles: seamless
-            out[:, ch] += noise / (np.std(noise) + 1e-9) * 0.05 * swell
+            out[:, ch] += noise / (np.std(noise) + 1e-9) * 0.03 * swell
             drops = np.zeros(n)
-            idx = rng.integers(0, n, size=n // SR * 25)
-            drops[idx] = rng.random(len(idx)) * 0.5
-            out[:, ch] += _lowpass(drops, 3500) * 0.25
+            idx = rng.integers(0, n, size=n // SR * 60)
+            drops[idx] = (rng.random(len(idx)) ** 2) * rng.choice([-1, 1], len(idx))
+            tick = np.exp(-np.arange(int(0.004 * SR)) / (0.0008 * SR)) * rng.standard_normal(int(0.004 * SR))
+            ticks = np.fft.irfft(np.fft.rfft(drops) * np.fft.rfft(tick, n), n=n)  # circular: seamless
+            ticks = ticks - _lowpass(ticks, 1500)
+            out[:, ch] += ticks / (np.max(np.abs(ticks)) + 1e-9) * 0.12
     if texture in {"fire", "rain_fire"}:
         crack = np.zeros(n)
         idx = rng.integers(0, n, size=n // SR * 6)

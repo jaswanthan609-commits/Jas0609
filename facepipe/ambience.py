@@ -63,6 +63,10 @@ def draft(cfg: ChannelConfig, topic: str, folder: Path, seed: int, notes: str = 
               f"Idea: {topic}\nMake the scene, weather, light and music fit the idea and each other."
               + (f"\n\n{notes}" if notes else ""))
     spec = _parse(cfg, prompt, AmbienceSpec, max_tokens=3000)
+    if spec.style == "jazz":  # CC BY needs the credit in the description
+        from . import samples
+        spec.description = spec.description.rstrip() + "\n\nMusic: an original composition for this video. Instrument samples:\n" \
+            + "\n".join(f"- {c}" for c in samples.credits())
     data = spec.model_dump() | {"seed": seed}
     (folder / "ambience.json").write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     save_script(VideoScript(title=spec.title, description=spec.description, tags=spec.tags,
@@ -97,6 +101,9 @@ def render(cfg: ChannelConfig, folder: Path, seconds: int | None = None, log=pri
     log(f"[{cfg.slug}] Ambience: 3D loop ({spec['weather']}, {spec['time']}, {spec['light']}, {spec['outside']})")
     loop = render_loop(spec, work / "loop.mp4")
     log(f"  music: {spec['key']} {spec['mode']} {spec['bpm']} bpm, {spec['texture']}")
+    if spec.get("style", "jazz") == "jazz":
+        from . import samples
+        samples.fetch(log=log)
     track = music.compose(spec["key"], spec["mode"], spec["bpm"], bars=72, texture=spec["texture"], seed=spec["seed"],
                           style=spec.get("style", "jazz"))
     wav = music.write_wav(track, work / "music.wav")
