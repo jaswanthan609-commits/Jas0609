@@ -131,6 +131,7 @@ const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
 const chunks = []; { let cur = []; for (const w of WORDS) { cur.push(w); if (cur.length === 5 || /[.?!,]$/.test(w.w)) { chunks.push(cur); cur = []; } } if (cur.length) chunks.push(cur); }
 function overlay(t) {
   g2.clearRect(0, 0, W, H); g2.drawImage(renderer.domElement, 0, 0);
+  if (q.get('clean')) return;
   // brand
   g2.globalAlpha = 1; g2.fillStyle = '#ff9933'; g2.beginPath(); g2.arc(127 * S, 82 * S, 7 * S, 0, 7); g2.fill();
   g2.font = `700 ${30 * S}px SG7`; g2.letterSpacing = `${5 * S}px`; g2.textAlign = 'left'; g2.fillText('NRI MONEY GUIDE', 148 * S, 93 * S); g2.letterSpacing = '0px';
