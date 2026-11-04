@@ -14,12 +14,16 @@ ideas ──► Claude script ──► YOU review + fact-check ──► voice 
 
 One YAML file per channel in [`config/channels/`](config/channels):
 
-| Channel | Config | Viewers | Visuals | Main income | Target (base case, month 18) |
+Which channels the autopilot runs is set in [`config/autopilot.yaml`](config/autopilot.yaml).
+From 1 February 2027 YouTube needs 1,000 subscribers and **8,000 watch hours** before it pays ads to
+a new channel, so the line-up is built for watch hours, at three long videos a week per channel:
+
+| Channel | Config | Status | Viewers | Visuals | Income before ads |
 |---|---|---|---|---|---|
-| AI Tools Explained | `ai-tools` | global, aim 30%+ US/UK | your screen recordings, then stock | ads + AI-tool affiliates | Rs 1.27 lakh/month |
-| NRI Money Guide | `nri-money` | Indians abroad + global | stock footage + charts | ads + referrals | Rs 1.10 lakh/month |
-| Moonlit Story Garden | `kids-stories` | children 3-7 (US/UK/global), Made for Kids | AI illustrations with recurring characters | ads (low RPM) + later licensing, books | Rs 0.60 lakh/month |
-| Slow History for Sleep | `sleepy-history` | adults who fall asleep to calm videos (US/UK) | stock footage, 30-minute videos | ads (long watch time) | opens after $50 earned |
+| Slow History for Sleep | `sleepy-history` | **running** (Mon, Wed, Fri) | adults who fall asleep to calm videos (US/UK) | stock footage, 30-minute videos | Amazon Associates links |
+| NRI Money Guide | `nri-money` | **running** (Tue, Thu, Sat + 2 trailer Shorts) | Indians abroad | stock footage + charts | remittance referral links |
+| AI Tools Explained | `ai-tools` | paused until screens are recorded automatically | global | screen recordings | none |
+| Moonlit Story Garden | `kids-stories` | dropped from the autopilot | children 3-7, Made for Kids | AI illustrations | none (no links on kids videos) |
 
 Change names, niches, voices, characters, publish times and targets in those files. Add a channel
 by adding a file. Hindi and Tamil still work (`language: hi` / `ta`, `voice_provider: sarvam`).
@@ -151,7 +155,9 @@ channel plan. Each morning `autopilot`:
    last 7 days of spending;
 3. drafts channels in order of priority, dropping a long video before a Short, and skipping
    channels that don't fit today;
-4. opens a channel listed with `unlock_at_usd` once lifetime earnings pass that level.
+4. skips channels marked `paused: true`, and opens a channel listed with `unlock_at_usd` once
+   lifetime earnings pass that level (none use one now: there are no ad earnings before Partner
+   Program approval, and AdSense only pays monthly once the balance reaches $100).
 
 When earnings stop, it slows down; when the money is gone, it stops until earnings come in.
 Check it any time with `python -m facepipe budget`, or preview today's plan with
@@ -161,10 +167,28 @@ Budget profile: the channel configs use `claude-sonnet-5-5` for long scripts, `c
 for Shorts and free edge-tts voices. Switch `voice_provider` to `elevenlabs` and `claude_model` to
 `claude-opus-5-5` once the channels earn.
 
-## Paper-trading test
+## Affiliate links (income before the Partner Program)
 
-[`trader/`](trader) is a separate test of whether an AI trading bot is worth real money. On
-weekdays after the NSE close (`trade.yml`), Claude Haiku gets the day's prices and simple signals
+Each channel config can list `affiliate_links`. When a link's keywords show up in a video's title
+or narration (or it's marked `always`), the link is added near the top of the description with a
+disclosure line. Kids videos never get links. Every `url` ships empty, so nothing is added until
+you sign up and paste in your own links:
+
+- **NRI Money Guide:** Wise and Remitly referral or affiliate links. Indian broker and
+  investment-app referrals are left out on purpose: SEBI bars regulated firms from paying
+  unregistered creators who discuss investments.
+- **Slow History for Sleep:** Amazon Associates (amazon.com) links for an Audible trial and
+  history books.
+
+Expect small amounts until views grow: these pay a commission per sign-up or sale.
+
+## Paper-trading test (off)
+
+The daily schedule is turned off: a 30-day test is mostly luck, and even a bot that works makes
+about Rs 700 a year on Rs 7,000. The code stays; run it by hand from the Actions tab.
+
+[`trader/`](trader) is a separate test of whether an AI trading bot is worth real money. When run
+(`trade.yml`), Claude Haiku gets the day's prices and simple signals
 for 14 cheap, liquid NSE stocks and ETFs ([`config/trader.yaml`](config/trader.yaml)), decides
 orders, and they are filled at the next trading day's close (never the close Claude just saw) with fake money (Rs 7,000) and realistic Zerodha delivery
 fees. Delivery only: no F&O, intraday, shorting or leverage.

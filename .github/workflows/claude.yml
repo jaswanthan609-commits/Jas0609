@@ -1,0 +1,45 @@
+# Ask for changes in plain words: comment "@claude ..." on any pull request or issue (works from the
+# GitHub phone app), e.g. "@claude the hook on the second draft is boring, make it start with the fire".
+# Claude Code reads the repo's skills in .claude/skills, makes the change on that PR's branch and replies.
+# Only the repository owner's comments trigger it.
+name: Claude
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
+
+jobs:
+  claude:
+    if: >-
+      github.actor == github.repository_owner && (
+      contains(github.event.comment.body, '@claude') || contains(github.event.review.body, '@claude'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: >-
+            --model sonnet --max-turns 40
+            --append-system-prompt "The owner writes short, rough requests. Before acting, turn the request into a
+            precise brief with .claude/skills/brief-refiner, then do it, then check the result with
+            .claude/skills/quality-gate and python -m facepipe lint. Never upload to YouTube and never merge."

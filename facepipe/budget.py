@@ -72,6 +72,12 @@ def load(path: Path = AUTOPILOT) -> Autopilot:
     )
 
 
+def active_channels(ap: Autopilot | None = None) -> list[str]:
+    """Channels the autopilot runs (in config/autopilot.yaml and not paused)."""
+    ap = ap or load()
+    return [ch.slug for ch in ap.channels if not ch.paused]
+
+
 def image_cost() -> float:
     try:
         return load().image_usd

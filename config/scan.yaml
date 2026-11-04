@@ -1,0 +1,47 @@
+# Weekly cross-niche scan (python -m facepipe scan). Each seed costs 100 of the 10,000 daily
+# YouTube API units, so keep it near 40. research/scan.json ranks the areas by how many young or
+# small channels broke out there; channels list their own seeds under scan_topics.
+days: 90
+language: en
+seeds:
+  # our three channels (names match the channels' scan_topics)
+  - ambience
+  - relaxing music
+  - lofi
+  - business story
+  - company downfall
+  - brand story
+  - what happened to
+  - history for sleep
+  - ancient civilizations
+  - explained slowly for sleep
+  # areas to watch for the next channel
+  - documentary
+  - unsolved mystery
+  - aviation
+  - ocean
+  - space
+  - wildlife
+  - bible stories
+  - stoicism
+  - psychology
+  - geography
+  - economy explained
+  - true crime
+  - war history
+  - survival
+  - medicine history
+  - mythology
+  - study music
+  - asmr
+  - game lore
+  - movie explained
+  - court case
+  - cricket
+  - football history
+  - what if
+  - top 10
+  - kids stories
+  - travel
+  - learn english
+  - cooking

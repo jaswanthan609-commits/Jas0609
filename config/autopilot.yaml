@@ -14,28 +14,47 @@ image_usd: 0.07                # estimated cost of one AI illustration (kids cha
 
 # Order matters: when money is tight, channels lower in the list are skipped first,
 # and a channel's long video is dropped before its Short.
+#
+# Revised plan (2026-11-04): from 1 Feb 2027 YouTube needs 8,000 watch hours before it pays ads,
+# so the line-up is built for watch hours, not volume. Shorts are trailers only.
+# No earnings gates: there is no ad money before Partner Program approval, so gates would never open.
 channels:
-  - slug: ai-tools             # best ad rates; goes first
-    est_long_usd: 0.12
+  # 2026-11-04 rework from the cross-niche scan (research/scan.json): three areas where channels
+  # under a year old are breaking out. NRI money is paused: its winners are expert faces.
+
+  # 2-hour sleep history: longest watch time per viewer, so the fastest route to watch hours.
+  # Scripts are written chapter by chapter (about 9 Claude calls), hence the higher estimate.
+  - slug: sleepy-history
+    long_days: [mon, wed, fri]
+    short_days: []
+    est_long_usd: 0.70
+
+  # 15-minute "what really happened" stories; Shorts are trailers cut from the cold open.
+  - slug: what-really-happened
+    long_days: [tue, thu]
+    short_days: [tue, sat]
+    est_long_usd: 0.25
     est_short_usd: 0.01
+
+  # 90-minute cozy ambience: no voice, one small Claude call, the rest is rendered for free.
+  - slug: cozy-hours
+    long_days: [tue, thu, sun]
+    short_days: []
+    est_long_usd: 0.01
 
   - slug: nri-money
+    paused: true
+    long_days: [tue, thu, sat]
+    short_days: [tue, sat]
     est_long_usd: 0.12
     est_short_usd: 0.01
 
-  - slug: kids-stories         # illustrated, so far more expensive per video
-    # Locked until the other channels earn $30: it would take about two thirds of the $70 for
-    # the lowest ad rates (Made for Kids). Set to 0 to start it on day 1.
-    unlock_at_usd: 30
-    long_days: [mon]
-    short_days: [mon, wed, fri]
-    est_long_usd: 2.20         # ~30 illustrations
-    est_short_usd: 0.45        # ~6 illustrations
-
-  # Opens once the channels above have earned $50 in total. Proven faceless format:
-  # long, calm history videos people play while falling asleep.
-  - slug: sleepy-history
-    long_days: [tue, fri]
+  # Paused until the pipeline can record screens by itself.
+  - slug: ai-tools
+    paused: true
+    long_days: [mon, wed, fri]
     short_days: []
-    est_long_usd: 0.30
-    unlock_at_usd: 50
+    est_long_usd: 0.12
+    est_short_usd: 0.01
+
+  # kids-stories is dropped from the autopilot (lowest pay per view, heaviest AI scrutiny).

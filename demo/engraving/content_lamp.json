@@ -1,0 +1,82 @@
+{
+ "plate_no": "Pl. III",
+ "series": "Slow History \u00b7 A Roman Night",
+ "title": "The Oil Lamp",
+ "latin": "Lucerna",
+ "subject": "lamp",
+ "details": [
+  {
+   "name": "Handle",
+   "latin": "ansa",
+   "note": "A ring for one finger, to carry the light.",
+   "focus": "handle"
+  },
+  {
+   "name": "Filling Hole",
+   "latin": "infundibulum",
+   "note": "Olive oil was poured in through the dish.",
+   "focus": "fill"
+  },
+  {
+   "name": "Nozzle",
+   "latin": "rostrum",
+   "note": "A linen wick drank the oil and held the flame.",
+   "focus": "wick"
+  }
+ ],
+ "colors": [
+  {
+   "region": "body",
+   "color": "#b8693f"
+  },
+  {
+   "region": "discus",
+   "color": "#9c5434"
+  },
+  {
+   "region": "soot",
+   "color": "#3b2c24"
+  }
+ ],
+ "caption": "Rome, the first century",
+ "nat_size_label": "Natural size",
+ "signature": {
+  "left": "Slow History del.",
+  "right": "sculp."
+ },
+ "voice": {
+  "voice": "bm_george",
+  "speed": 0.8,
+  "lines": [
+   {
+    "id": "title",
+    "text": "Plate three. The oil lamp, in Latin, lucerna."
+   },
+   {
+    "id": "d1",
+    "text": "At the back, a small ring, just wide enough for one finger, to carry the light from room to room."
+   },
+   {
+    "id": "d2",
+    "text": "In the middle of the shallow dish, a little hole, where olive oil was poured in, slowly, so it would not spill."
+   },
+   {
+    "id": "d3",
+    "text": "And at the narrow end, a twist of linen drew up the oil, and held one small, steady flame."
+   },
+   {
+    "id": "close",
+    "text": "Made by the thousand in clay moulds, lamps like this kept the long Roman nights soft, and warm, and quiet."
+   }
+  ]
+ },
+ "end": {
+  "film_title": "The Oil Lamp, Plate III",
+  "style_name": "Slow History for Sleep",
+  "credits": [
+   "Voice \u00b7 Kokoro TTS (Apache-2.0)",
+   "Engraving engine \u00b7 Lemo-Opuscar (MIT)",
+   "Score \u00b7 written in code"
+  ]
+ }
+}

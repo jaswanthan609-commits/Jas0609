@@ -35,7 +35,12 @@ FORMATS = {
     "short": (1080, 1920, 50),
     "long": (1920, 1080, 540),
     "deep": (1920, 1080, 1800),  # 30-minute calm videos (sleep / background listening)
+    "story": (1920, 1080, 900),  # 15-minute "what really happened" stories (cold open, open loops)
+    "sleep": (1920, 1080, 7200),  # 2-hour sleep videos, written chapter by chapter
+    "ambience": (1920, 1080, 7800),  # 130-minute cozy scene + original music (breakout median: 129 min)
 }
+VISUAL_MODES = {"stock", "ai_images", "public_art", "ambience"}
+LONG_FORMATS = [f for f in FORMATS if f != "short"]
 
 
 @dataclass
@@ -55,7 +60,7 @@ class ChannelConfig:
     music_volume: float = 0.12
     footage_dir: str | None = None  # your own clips (screen recordings), used before stock
     stock_sources: list[str] = field(default_factory=lambda: ["pexels", "pixabay"])
-    visual_mode: str = "stock"  # stock: footage per scene | ai_images: one illustration per scene
+    visual_mode: str = "stock"  # stock | ai_images (illustration per scene) | public_art (museum paintings) | ambience
     image_model: str = "gemini-nano-banana-2.1"
     image_style: str = ""  # art direction added to every image prompt
     characters: str = ""  # recurring characters, described the same way every time
@@ -73,7 +78,14 @@ class ChannelConfig:
     timezone: str = "Asia/Kolkata"
     monthly_target_inr: int = 0
     research_queries: list[str] = field(default_factory=list)  # YouTube searches for breakout research
-    long_format: str = "long"  # format used for this channel's long videos: long (9 min) or deep (30 min)
+    long_format: str = "long"  # this channel's long videos: long (9 min), deep (30), story (15), sleep (120)
+    scan_topics: list[str] = field(default_factory=list)  # seeds from config/scan.yaml that feed this channel
+    burn_captions: bool = True  # False: no subtitles on the picture; a captions.srt is uploaded instead
+    dissolve: float = 0.0  # seconds each scene fades in and out (sleep videos: slow, no hard cuts)
+    art_sources: list[str] = field(default_factory=lambda: ["met", "artic"])  # visual_mode public_art
+    # Affiliate or referral links added to matching video descriptions (see facepipe/affiliate.py).
+    # Each item: {label, url, keywords: [...], always: false}. Empty urls are skipped.
+    affiliate_links: list[dict] = field(default_factory=list)
 
     @property
     def voice_name(self) -> str:
@@ -139,8 +151,10 @@ def load_config(channel: str | None = None, **overrides) -> ChannelConfig:
     cfg = ChannelConfig(**data)
     if cfg.language not in LANGUAGE_NAMES:
         raise ValueError(f"language must be one of {list(LANGUAGE_NAMES)}, got {cfg.language!r}")
-    if cfg.visual_mode not in {"stock", "ai_images"}:
-        raise ValueError(f"visual_mode must be stock or ai_images, got {cfg.visual_mode!r}")
+    if cfg.visual_mode not in VISUAL_MODES:
+        raise ValueError(f"visual_mode must be one of {sorted(VISUAL_MODES)}, got {cfg.visual_mode!r}")
+    if cfg.long_format not in LONG_FORMATS:
+        raise ValueError(f"long_format must be one of {LONG_FORMATS}, got {cfg.long_format!r}")
     if cfg.voice_provider not in DEFAULT_VOICES:
         raise ValueError(f"voice_provider must be one of {list(DEFAULT_VOICES)}, got {cfg.voice_provider!r}")
     return cfg

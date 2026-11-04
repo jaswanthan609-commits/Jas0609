@@ -19,7 +19,7 @@ from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 
-from .config import ROOT, list_channels, load_config
+from .config import FORMATS, ROOT, list_channels, load_config
 
 
 def _topics_file(cfg) -> Path:
@@ -184,13 +184,14 @@ def cmd_breakout(cfg, args):
     """Refresh breakout research (weekly) and queue follow-ups for our own winners (daily)."""
     import os
 
-    from . import breakout
+    from . import breakout, budget
     from .script import follow_up_topics
 
     if not os.environ.get("YOUTUBE_API_KEY"):
         print("breakout: no YOUTUBE_API_KEY, skipped")
         return
-    slugs = list_channels() if args.all else [cfg.slug]
+    # Only research channels the autopilot runs: each search spends YouTube API quota.
+    slugs = budget.active_channels() if args.all else [cfg.slug]
     for slug in slugs:
         c = load_config(slug)
         try:
@@ -207,6 +208,35 @@ def cmd_breakout(cfg, args):
                       f"queued {len(topics)} follow-ups")
         except Exception as exc:  # research must never block the day's drafts
             print(f"[{slug}] breakout failed: {exc}", file=sys.stderr)
+
+
+def cmd_scan(cfg, args):
+    """Weekly cross-niche outlier scan -> research/scan.json (which areas small channels are winning)."""
+    import os
+
+    from . import scan
+
+    if not os.environ.get("YOUTUBE_API_KEY"):
+        print("scan: no YOUTUBE_API_KEY, skipped")
+        return
+    if not args.force and not scan.stale():
+        print("scan: this week's scan is saved; --force to rerun")
+        return
+    try:
+        result = scan.scan(days=args.days)
+    except Exception as exc:  # research must never block the day's drafts
+        print(f"scan failed: {exc}", file=sys.stderr)
+        return
+    scan.save(result)
+    from . import hooks
+
+    print(f"hooks: {hooks.refresh(result['outliers'])} new breakout openings saved")
+    text = scan.report(result)
+    print(text)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write("```\n" + text + "\n```\n")
 
 
 def cmd_autopilot(cfg, args):
@@ -314,6 +344,26 @@ def cmd_stats(cfg, args):
         print()
 
 
+def cmd_lint(cfg, args):
+    """Free rule checks on drafted folders; exits 1 if any fail (used by the Claude Code editor pass)."""
+    from . import critic
+    from .script import load_script
+
+    failed = False
+    for folder in map(Path, args.folders):
+        topic = folder / "topic.txt"
+        fmt = topic.read_text(encoding="utf-8").split("\n", 1)[0].strip() if topic.exists() else "long"
+        script = load_script(folder / "script.json")
+        if fmt == "ambience":
+            problems = [f"The title is {len(script.title)} characters; keep it 60-95."] \
+                if not 60 <= len(script.title) <= 95 else []
+        else:
+            problems = critic.lint(script, fmt)
+        failed |= bool(problems)
+        print(f"{folder}: " + ("ok" if not problems else "\n  - " + "\n  - ".join(problems)))
+    sys.exit(1 if failed else 0)
+
+
 def main(argv=None):
     load_dotenv(ROOT / ".env")
     p = argparse.ArgumentParser(prog="facepipe", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -335,12 +385,12 @@ def main(argv=None):
 
     s = sub.add_parser("script", help="Write one script for review")
     s.add_argument("topic")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
+    s.add_argument("--format", choices=list(FORMATS), default="long")
     s.set_defaults(func=cmd_script)
 
     s = sub.add_parser("batch", help="Write scripts for the next topics in topics/<channel>.txt")
     s.add_argument("topics", nargs="?", help="Topics file (default topics/<channel>.txt)")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="long")
+    s.add_argument("--format", choices=list(FORMATS), default="long")
     s.add_argument("--limit", type=int, default=7)
     s.set_defaults(func=cmd_batch)
 
@@ -355,7 +405,7 @@ def main(argv=None):
 
     s = sub.add_parser("make", help="Script and stop for review; or render straight away with --no-review")
     s.add_argument("topic", nargs="?")
-    s.add_argument("--format", choices=["short", "long", "deep"], default="short")
+    s.add_argument("--format", choices=list(FORMATS), default="short")
     s.add_argument("--offline", action="store_true", help="Dry run: sample script, silent voice, colour frames")
     s.add_argument("--no-review", action="store_true", help="Render without stopping for review")
     add_publish(s)
@@ -370,6 +420,11 @@ def main(argv=None):
     s.add_argument("--all", action="store_true", help="All channels")
     s.add_argument("--force", action="store_true", help="Refresh outliers even if this week's are saved")
     s.set_defaults(func=cmd_breakout)
+
+    s = sub.add_parser("scan", help="Weekly: rank which areas small and new channels are breaking out in")
+    s.add_argument("--force", action="store_true", help="Rerun even if this week's scan is saved")
+    s.add_argument("--days", type=int, help="Look back this many days (default from config/scan.yaml)")
+    s.set_defaults(func=cmd_scan)
 
     s = sub.add_parser("autopilot", help="Unattended: draft whatever today's budget allows, across all channels")
     s.add_argument("--dry-run", action="store_true", help="Show the plan without drafting")
@@ -394,8 +449,12 @@ def main(argv=None):
     s.add_argument("--save-revenue", action="store_true", help="Save earnings since the autopilot start for the budget")
     s.set_defaults(func=cmd_stats)
 
+    s = sub.add_parser("lint", help="Free rule checks on drafted output folders")
+    s.add_argument("folders", nargs="+")
+    s.set_defaults(func=cmd_lint)
+
     args = p.parse_args(argv)
-    needs_channel = args.command not in {"channels", "autopilot", "budget"} and not (
+    needs_channel = args.command not in {"channels", "autopilot", "budget", "scan", "lint"} and not (
         args.command in {"stats", "publish-approved", "breakout"} and args.all
     )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None

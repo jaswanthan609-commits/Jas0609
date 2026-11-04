@@ -1,0 +1,47 @@
+# Weekly cross-niche scan on its own (the drafts workflow also runs it), plus a manual button.
+# Also runs when config/scan.yaml changes on any branch, so new seeds are checked straight away.
+# Commits research/scan.json and research/hooks.json back to the branch it ran on.
+name: Outlier scan
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"    # Mondays 06:30 IST
+  push:
+    paths: ["config/scan.yaml", ".github/workflows/scan.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Check the YouTube key is set
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          if [ -z "$YOUTUBE_API_KEY" ]; then echo "::error::YOUTUBE_API_KEY secret is missing"; exit 1; fi
+          curl -s -o /dev/null -w "YouTube API answered HTTP %{http_code}\n" \
+            "https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key=$YOUTUBE_API_KEY"
+      - name: Scan
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python -m facepipe scan --force
+      - name: Save the results to the branch
+        run: |
+          git config user.name "facepipe-bot"
+          git config user.email "facepipe-bot@users.noreply.github.com"
+          git add research/
+          git diff --cached --quiet || { git commit -m "Outlier scan $(date -u +%Y-%m-%d) [skip ci]" && git push; }

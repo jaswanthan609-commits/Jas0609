@@ -8,6 +8,11 @@ voice_provider: edge       # free; switch to elevenlabs when income covers it
 fallback_voice: ""         # set an Edge voice here if you switch voice_provider to kokoro
 voice: en-IN-PrabhatNeural
 stock_sources: [pexels, pixabay]
+extra_guidelines: |
+  Stick to evergreen how-to topics (opening an NRE account, filing as an NRI, sending money home),
+  not this year's budget news. For every item in facts_to_check, add the official source to check
+  it against in brackets, e.g. (incometax.gov.in), (rbi.org.in), (irs.gov), (gov.uk/hmrc).
+  If you can't name an official source for a claim, leave the claim out.
 research_queries: ["nri tax", "nre nro account", "send money to india", "nri investment india"]   # YouTube searches for breakout research
 default_tags: ["nri", "nri finance", "nre account", "send money to india"]
 category_id: "27"              # Education
@@ -17,3 +22,15 @@ monthly_target_inr: 110000
 # --- $50 fast-track budget profile (switch back to elevenlabs / claude-opus-5-5 once it earns) ---
 claude_model: claude-sonnet-5-5
 claude_model_short: claude-haiku-5-5
+
+# Affiliate / referral links, added to matching descriptions with a disclosure. Paste in your own
+# links after signing up (each program is a self-serve web form). Empty urls are skipped.
+# Indian broker and investment-app referrals are left out on purpose: SEBI bars regulated firms
+# from paying unregistered creators who discuss investments.
+affiliate_links:
+  - label: "Send money to India with Wise"
+    url: ""
+    keywords: ["send money", "remit", "transfer", "exchange rate", "wise"]
+  - label: "Send money to India with Remitly"
+    url: ""
+    keywords: ["send money", "remit", "transfer", "remitly"]
