@@ -1,0 +1,60 @@
+# Ears for the pipeline: renders a minute of Cozy Hours music for each style and has earshot
+# (github.com/Leonxlnx/earshot, MIT) measure and describe it, so music changes are judged by a
+# listener, not by the code that made them. Runs when the music code changes, or by hand.
+# The report is in the run summary and in the "listening-report" artifact.
+name: Listen
+
+on:
+  push:
+    paths: ["facepipe/music.py", ".github/workflows/listen.yml"]
+  workflow_dispatch:
+
+jobs:
+  listen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      EARSHOT_HOME: ${{ github.workspace }}/.earshot
+      EARSHOT_THREADS: "4"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Install facepipe and earshot (pinned)
+        run: |
+          pip install -q -r requirements.txt
+          pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -q "earshot @ git+https://github.com/Leonxlnx/earshot@591fa3e028032e6dce56620a20e932e35667e8d8"
+      - uses: actions/cache@v4
+        with:
+          path: .earshot
+          key: earshot-models-591fa3e
+      - run: earshot doctor --fetch
+      - name: Render one minute per style and listen
+        run: |
+          mkdir -p listen
+          python - <<'PY'
+          from pathlib import Path
+          from facepipe import music
+          for style, key, mode, bpm, tex in [("jazz", "F", "major", 72, "rain_fire"), ("piano", "D", "major", 64, "rain")]:
+              x = music.compose(key, mode, bpm, bars=18, texture=tex, seed=11, style=style)
+              music.write_wav(x, Path(f"listen/{style}.wav"))
+              x = music.compose(key, mode, bpm, bars=18, texture="none", seed=11, style=style)
+              music.write_wav(x, Path(f"listen/{style}-dry.wav"))
+          PY
+          {
+            for f in listen/*.wav; do
+              echo "### $f"; echo '```'
+              earshot measure "$f"; earshot describe "$f"; earshot realness "$f"
+              echo '```'
+            done
+          } | tee listen/report.md
+          cat listen/report.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: listening-report
+          path: listen/
+          retention-days: 14

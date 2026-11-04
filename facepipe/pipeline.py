@@ -194,6 +194,10 @@ def render(
         log("  no music in assets/music, rendering voice only")
     final = assemble.final_render(cfg, silent_video, voice_track, subs, folder / "video.mp4", music)
     thumb = assemble.thumbnail(silent_video, vs.thumbnail_text, cfg, folder / "thumbnail.jpg", width, height)
+    from . import listen
+
+    if not offline and listen.listen(final):
+        log("  listened: audio_report.json written")
 
     meta_path = folder / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
@@ -213,6 +217,10 @@ def _render_ambience(cfg: ChannelConfig, folder: Path, vs, offline: bool, log) -
     from . import ambience
 
     video, thumb = ambience.render(cfg, folder, seconds=60 if offline else None, log=log)
+    from . import listen
+
+    if listen.listen(video):
+        log("  listened: audio_report.json written")
     meta_path = folder / "metadata.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     description = affiliate.with_links(cfg, vs.description, vs.title)
