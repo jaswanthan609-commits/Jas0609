@@ -97,18 +97,33 @@ const SKY = {
   night: ['#060a18', '#141c34', '#ffcf8a'], dusk: ['#1d1838', '#c06a4a', '#ffd9a0'], dawn: ['#28304e', '#d9a07c', '#fff0d0'],
 }[spec.time];
 const outsideMat = new THREE.ShaderMaterial({
-  uniforms: { uPh: { value: 0 }, uTop: { value: col(SKY[0]) }, uLow: { value: col(SKY[1]) }, uLamp: { value: col(SKY[2]) },
+  uniforms: { uPh: { value: 0 }, uCam: { value: 0 }, uTop: { value: col(SKY[0]) }, uLow: { value: col(SKY[1]) }, uLamp: { value: col(SKY[2]) },
     uSeed: { value: spec.seed }, uSnow: { value: spec.weather === 'snow' ? 1 : 0 }, uRain: { value: spec.weather.includes('rain') ? 1 : 0 },
     uLeaves: { value: spec.weather.startsWith('autumn') ? 1 : 0 },
     uKind: { value: ['city', 'forest', 'sea', 'village'].indexOf(spec.outside) } },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-  fragmentShader: `varying vec2 vUv; uniform float uPh,uSeed,uSnow,uRain,uKind,uLeaves; uniform vec3 uTop,uLow,uLamp;
+  fragmentShader: `varying vec2 vUv; uniform float uPh,uCam,uSeed,uSnow,uRain,uKind,uLeaves; uniform vec3 uTop,uLow,uLamp;
     float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)) + uSeed*1.7)*43758.5453); }
     float n(float x){ float i=floor(x), f=fract(x); f=f*f*(3.-2.*f); return mix(h(vec2(i,0.)), h(vec2(i+1.,0.)), f); }
     void main(){
       vec2 uv=vUv; vec3 c=mix(uLow, uTop, smoothstep(.25,.95,uv.y));
       float horizon=.32 + (uKind==1.? .12*n(uv.x*9.)+.05*n(uv.x*31.) : uKind==2.? .0 : .06*n(uv.x*14.));
-      if(uKind==0.){ float b=step(uv.y, .28+.18*step(.5,h(vec2(floor(uv.x*26.),3.)))*h(vec2(floor(uv.x*26.),7.))); horizon=max(horizon*.0, .0); c=mix(c, uTop*.35, b); }
+      if(uKind==0.){
+        // three skyline layers; nearer layers slide further as the camera drifts (parallax) and sit darker,
+        // farther ones fade into the haze, so the view outside has depth instead of one flat backdrop
+        for(int l=0;l<3;l++){ float L=float(l); float x=uv.x+uCam*(.04+.09*L); float cols=14.+10.*(2.-L);
+          float id=floor(x*cols); float top=.16+.07*L+.16*h(vec2(id,3.+L))*step(.35,h(vec2(id,7.+L)));
+          top=top*(1.-.35*(2.-L)/2.);
+          float b=step(uv.y, top); vec3 bc=mix(uLow*.75, uTop*.25, L/2.);
+          c=mix(c, bc, b);
+          vec2 w=vec2(fract(x*cols)*5., uv.y*90.); vec2 wi=floor(w);   // lit windows, a few per building
+          vec2 fw=fract(w); float lit=step(.8,h(wi+id*13.+L))
+            *smoothstep(.1,.25,fw.x)*smoothstep(.8,.65,fw.x)*smoothstep(.25,.4,fw.y)*smoothstep(.85,.7,fw.y);
+          vec3 tint=mix(uLamp, vec3(1.,.75,.45), h(wi+5.));                    // some warmer, some paler rooms
+          c+=tint*lit*b*step(uv.y, top-.012)*(.14+.12*L)*(.85+.15*sin(6.2831*(uPh+h(wi))));
+        }
+        c=mix(c, uLow*1.15, smoothstep(.34,.0,uv.y)*.25);   // low haze over the city
+      }
       else c=mix(c, uTop*.3, step(uv.y, horizon));
       if(uKind==2.){ float sea=step(uv.y,.3); c=mix(c, uTop*.55 + .06*sin(uv.x*90.+uv.y*300.), sea); }
       // distant warm windows / lamps as soft bokeh
@@ -246,6 +261,9 @@ const grade = new ShaderPass({
   fragmentShader: `uniform sampler2D tDiffuse; uniform float uF, uFire; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))+uF*.618)*43758.5453); }
     void main(){ vec3 c=texture2D(tDiffuse,vUv).rgb; c=pow(c, vec3(.96,.98,1.04)); c+=vec3(.012,.006,0.);
+      float lum=dot(c, vec3(.2126,.7152,.0722)); c=mix(vec3(lum), c, .82);
+      c+=vec3(-.012,.0,.022)*(1.-smoothstep(.0,.35,lum)) + vec3(.02,.008,-.01)*smoothstep(.45,1.,lum);
+      c=(c-.5)*1.06+.5;
       float v=smoothstep(1.05,.35,length((vUv-.5)*vec2(1.1,1.))); c*=mix(.62,1.,v);
       // fireplace just out of frame on the left: a warm, breathing spill across the lower left of the room
       c+=vec3(.55,.2,.04)*uFire*smoothstep(.75,.0,length((vUv-vec2(-.08,.18))*vec2(1.,1.3)))*.42;
@@ -258,7 +276,8 @@ composer.addPass(grade);
 const camBase = new THREE.Vector3(-.05, 1.32, 2.55), look = new THREE.Vector3(0, 1.25, 0);
 function render(t) {
   const ph = ((t % LOOP) + LOOP) % LOOP / LOOP;
-  camera.position.set(camBase.x + .04 * Math.sin(TAU * ph), camBase.y + .015 * Math.sin(TAU * 2 * ph), camBase.z);
+  camera.position.set(camBase.x + .11 * Math.sin(TAU * ph), camBase.y + .025 * Math.sin(TAU * 2 * ph), camBase.z - .06 * Math.cos(TAU * ph));
+  outsideMat.uniforms.uCam.value = camera.position.x;
   camera.lookAt(look);
   outsideMat.uniforms.uPh.value = ph; glassMat.uniforms.uPh.value = ph; flameMat.uniforms.uPh.value = ph;
   const fl = flick(ph, 1);
