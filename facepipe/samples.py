@@ -9,6 +9,7 @@ Licences (checked on each repo's LICENSE file, 2026-11-04):
 - Wurlitzer EP200 by Greg Sullivan, mapped by kinwie: CC BY 3.0 -> credit line required (see credits()).
 - Sneakybass (double bass, finger) by Karoryfer Samples: CC0 1.0.
 - Virtuosity Drums by Versilian Studios and Karoryfer Samples: CC0 1.0.
+- Osiris Piano (upright, una corda, mic A) by Versilian Studios and Karoryfer Samples: CC0 1.0.
 """
 
 from __future__ import annotations
@@ -45,7 +46,14 @@ LIBS = {
                          "Samples/oh/snare/oh_snare_crossstick_*", "Samples/oh/kick/oh_kick_snoff_*", "LICENSE"],
                   licence="CC0 1.0",
                   credit="Drums: Virtuosity Drums by Versilian Studios and Karoryfer Samples (CC0)"),
+    "piano": dict(repo="https://github.com/sfzinstruments/Osiris_Piano.git",
+                  commit="18c6afccb60cff458edbf7c394571783e074e1e9",
+                  paths=["UC/A/*", "LICENSE"],
+                  licence="CC0 1.0",
+                  credit="Piano: Osiris Piano by Versilian Studios and Karoryfer Samples (CC0)"),
 }
+JAZZ = ("wurli", "bass", "drums")
+PIANO = ("piano",)
 
 
 def home() -> Path:
@@ -82,12 +90,12 @@ def fetch(names: list[str] | None = None, log=print) -> bool:
     return ok
 
 
-def available() -> bool:
-    return all(_ready(n) for n in LIBS)
+def available(names: tuple[str, ...] = JAZZ) -> bool:
+    return all(_ready(n) for n in names)
 
 
-def credits() -> list[str]:
-    return [LIBS[n]["credit"] for n in LIBS]
+def credits(names: tuple[str, ...] = JAZZ) -> list[str]:
+    return [LIBS[n]["credit"] for n in names]
 
 
 def _midi(name: str, octave: str) -> int:
@@ -152,6 +160,19 @@ class Kit:
 def _layers(found: dict[str, list]) -> dict[str, float]:
     keys = sorted(found)
     return {k: (i / (len(keys) - 1) if len(keys) > 1 else 0.5) for i, k in enumerate(keys)}
+
+
+@lru_cache(maxsize=1)
+def piano() -> Pitched:
+    """Soft upright piano. Osiris names notes the Yamaha way (A3 = 440 Hz = MIDI 69)."""
+    inst = Pitched(release=0.45, gain=1.0)
+    for p in sorted((home() / "piano" / "UC" / "A").glob("*.flac")):
+        m = re.fullmatch(r"Piano_UC_MicA_([A-G])(-?\d)_vl(\d)", p.stem)
+        if m:
+            inst.entries.append((12 * (int(m[2]) + 2) + PITCH[m[1].lower()], (int(m[3]) - 1) * 1.0, str(p)))
+    if not inst.entries:
+        raise RuntimeError("piano samples missing; run facepipe.samples.fetch(['piano'])")
+    return inst
 
 
 @lru_cache(maxsize=1)

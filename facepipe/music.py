@@ -123,13 +123,32 @@ def compose(key: str = "D", mode: str = "major", bpm: int = 66, bars: int = 64, 
     melody_scale = [root + 12 + s for s in scale] + [root + 24 + s for s in scale[:5]]
     last = len(melody_scale) // 2
     swing = beat * 2 / 3  # the "and" of each beat lands two thirds through it (swung eighths)
-    sampled = style == "jazz" and samples.available()
-    if sampled:
+    sampled = samples.available(samples.JAZZ if style == "jazz" else samples.PIANO)
+    if sampled and style == "jazz":
         wurli, bass, kit = samples.instruments()
+    elif sampled:
+        keys = samples.piano()
     for bar in range(bars):
         start = bar * 4 * beat
         chord = _chord(root, scale, prog[bar % len(prog)])
         nxt = _chord(root, scale, prog[(bar + 1) % len(prog)])
+        if sampled and style != "jazz":  # a real soft upright: bass note, rolled chord, sparse melody
+            def hum(t: float) -> float:
+                return t + rng.normal(0, 0.01)
+            add(keys.note(chord[0] - 12, 0.25, 4 * beat, rng) * 0.35, hum(start), 0.45)
+            for k, m in enumerate(chord[1:] + [chord[0] + 12]):
+                add(keys.note(m, 0.15 + 0.1 * rng.random(), 3.6 * beat, rng) * 0.2, hum(start + 0.05 + k * 0.07),
+                    0.35 + 0.1 * k)
+            if rng.random() < 0.5:
+                for k, m in enumerate(chord[1:]):
+                    add(keys.note(m, 0.1, 1.8 * beat, rng) * 0.16, hum(start + 2 * beat + k * 0.06), 0.6 - 0.1 * k)
+            if bar % 8 >= 2:
+                for b in range(4):
+                    if rng.random() < 0.42:
+                        last = int(np.clip(last + rng.choice([-2, -1, -1, 0, 1, 1, 2]), 0, len(melody_scale) - 1))
+                        add(keys.note(melody_scale[last], 0.3 + 0.3 * rng.random(), 2.5 * beat, rng) * 0.3,
+                            hum(start + b * beat), 0.3 + 0.4 * rng.random())
+            continue
         if sampled:  # real recorded Wurlitzer, double bass and kit; our notes, voicings and feel
             def hum(t: float) -> float:  # human timing: a few ms early or late
                 return t + rng.normal(0, 0.008)
