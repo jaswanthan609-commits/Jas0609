@@ -31,13 +31,8 @@ jobs:
       - name: Check the YouTube key is set
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-          SECRETS_JSON: ${{ toJSON(secrets) }}
         run: |
-          if [ -z "$YOUTUBE_API_KEY" ]; then
-            # Names only, never values, so a misnamed secret is easy to spot.
-            echo "Repository secrets this job can see: $(python -c 'import json,os; print(", ".join(sorted(json.loads(os.environ["SECRETS_JSON"]))))')"
-            echo "::error::YOUTUBE_API_KEY secret is missing"; exit 1
-          fi
+          if [ -z "$YOUTUBE_API_KEY" ]; then echo "::error::YOUTUBE_API_KEY secret is missing"; exit 1; fi
           curl -s -o /dev/null -w "YouTube API answered HTTP %{http_code}\n" \
             "https://www.googleapis.com/youtube/v3/videos?part=id&id=dQw4w9WgXcQ&key=$YOUTUBE_API_KEY"
       - name: Scan
