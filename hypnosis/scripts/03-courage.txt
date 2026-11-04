@@ -1,0 +1,81 @@
+# Session 3: Courage. Use when there's something you've been avoiding: a conversation, a call, a decision, a new step.
+# Techniques: hypnotic relaxation for anxiety (Valentine 2019), recalling past mastery (Bandura's self-efficacy),
+# step-by-step mental rehearsal (imagery exposure and mental practice), instructional self-talk, if-then plans.
+@title Steady Courage
+@subtitle A self-hypnosis session for acting despite fear
+@include _induction
+
+Courage isn't the absence of fear.
+It's moving toward what matters while the fear comes along for the ride.
+[pause 6]
+
+Let your mind drift back to a time when you were scared, and you did it anyway.
+It might be big or small.
+A first day somewhere new. Speaking up. Asking for something. Starting over after a setback.
+[pause 10]
+Let that memory become clearer.
+Where were you? Who was there?
+[pause 6]
+Remember how it felt just before. The nerves. The doubt.
+[pause 5]
+And then remember that you went ahead.
+[pause 4]
+Feel what that was like, afterwards.
+The relief. The quiet strength of knowing you did it.
+[pause 8]
+That strength didn't go anywhere.
+It's part of you, right now.
+[pause 6]
+
+Now press your thumb and first finger together, and breathe out slowly.
+Let the feeling from that memory flow into this anchor.
+Steady. Grounded. Capable.
+[pause 8]
+Release.
+[pause 3]
+
+Now bring to mind the thing you've been putting off.
+Just see it from a distance at first, like a picture across the room.
+[pause 6]
+Notice any tension in your body as you look at it.
+Breathe into that tension. Long, slow breath out.
+[pause 8]
+Now let the picture come a little closer.
+And breathe again, letting the body stay soft.
+[pause 8]
+
+Now imagine the very first step. Only the first one.
+Maybe it's opening the message. Picking up the phone. Walking through the door.
+[pause 5]
+See yourself doing that first step.
+Notice the nerves, and notice that you keep going anyway.
+Your feet move. Your voice works. Your hands do what they need to.
+[pause 10]
+Say to yourself, calmly, one step at a time.
+[pause 4]
+Breathe. Next step.
+[pause 4]
+See yourself take the next step. And the next.
+[pause 10]
+Things might not go perfectly in your picture, and that's fine.
+See yourself handling whatever happens, breathing, staying steady, and carrying on.
+[pause 10]
+Now see yourself finished.
+It's done. You did it.
+Feel that same relief and strength from your memory, here now as well.
+[pause 10]
+
+Let's set a plan.
+When the moment comes and I feel fear rising, then I press my thumb and finger, breathe out slowly, and take only the first step.
+[pause 6]
+See that plan running smoothly, on its own.
+[pause 6]
+
+Each time you act despite fear, the fear gets a little quieter, and you get a little stronger.
+That's how courage grows. One step at a time.
+[pause 4]
+You've done hard things before.
+[pause 3]
+You can do the next one.
+[pause 8]
+@include _emergence

@@ -1,0 +1,119 @@
+# Session 1: Quit smoking. Listen once a day from about a week before your quit day, and every day for the first month after.
+# Techniques: self-affirmation of values (Epton 2015), your own reasons for quitting (motivational interviewing), future-self imagery,
+# urge surfing (Bowen and Marlatt 2009), if-then plans (Gollwitzer and Sheeran 2006), a calm-breath anchor.
+# No disgust or fear suggestions: "modern" permissive hypnosis did better than classical forms (Flammer and Alladin 2007).
+@title Breathe Free
+@subtitle A self-hypnosis session for quitting smoking
+@include _induction
+
+From this calm place, think of something that matters deeply to you.
+Not about smoking. Something you value.
+Perhaps your family. Your health. Your freedom. Your work. The people who count on you.
+[pause 8]
+Let one of these come forward now.
+Notice why it matters to you.
+Maybe there's a moment, a face, or a feeling that goes with it.
+[pause 10]
+This is who you are.
+A person with things worth protecting, and the strength to protect them.
+[pause 6]
+
+Now, from that same place, let your own reasons for being smoke-free come to mind.
+Your reasons. Not anyone else's.
+[pause 4]
+Maybe it's breathing easily when you climb the stairs.
+Maybe it's the money you'll keep.
+Maybe it's tasting your food again, or waking up without that heavy chest.
+Maybe it's simply wanting to be free of something that has been deciding things for you.
+[pause 10]
+Let the most important reason grow clear and bright.
+Hold it for a moment.
+[pause 8]
+
+Now imagine yourself a few months from today.
+You have been smoke-free all this time.
+[pause 4]
+See where you are. See what you're wearing.
+Notice how you are standing. A little taller, perhaps. Lighter.
+[pause 6]
+Take a deep breath as that future you.
+Feel how clean and open that breath is.
+The air goes all the way down, and comes back out easily.
+[pause 8]
+Notice what you can smell. What you can taste.
+Notice the quiet pride of keeping a promise to yourself.
+[pause 8]
+That future you is not someone else.
+It is you, a little further along the same road.
+Every smoke-free hour is a step toward that person.
+[pause 6]
+
+Now let's prepare for the moments that used to bring a cigarette.
+Urges will come. That's normal. It isn't failure, and it isn't a sign that you need to smoke.
+An urge is like a wave.
+It rises, it peaks, and then, if you don't feed it, it falls away. Usually within a few minutes.
+[pause 6]
+Imagine an urge arriving now. Just a small one.
+Notice where you feel it. The chest, the throat, the hands.
+[pause 5]
+Instead of fighting it, get curious.
+Breathe into it, slowly.
+Watch it the way you would watch a wave out at sea.
+[pause 8]
+Rising.
+[pause 4]
+Peaking.
+[pause 4]
+And beginning to fall.
+[pause 6]
+You rode it. You didn't have to do anything else.
+You are the surfer, not the wave.
+[pause 6]
+
+Now we'll set your calm-breath anchor.
+Gently press your thumb and first finger together.
+[pause 3]
+As you press, take one slow breath in.
+And let a long breath out, longer than the breath in.
+[pause 6]
+Feel the calm that comes with it.
+From now on, whenever you press your thumb and finger together and breathe out slowly, this calm returns.
+It gets stronger every time you use it.
+[pause 4]
+Release your fingers.
+[pause 4]
+
+Now picture the moments that used to mean a cigarette.
+Perhaps the morning tea.
+Perhaps after a meal.
+Perhaps when work gets stressful, or when friends step outside to smoke.
+[pause 5]
+For each one, you have a plan.
+If I finish my tea and feel the pull, then I press my thumb and finger, breathe out slowly, and stand up to do something else.
+[pause 5]
+If stress rises at work, then I take three slow breaths and drink a glass of water.
+[pause 5]
+If friends offer me one, then I say, no thanks, I've quit, and I stay right where I am.
+[pause 5]
+See yourself doing each of these, easily.
+The plan runs on its own, like a well-worn path.
+[pause 8]
+
+And if you are using nicotine gum, lozenges, or patches, or medicine your doctor gave you, see yourself using them exactly as directed.
+They are tools on your side, working with you.
+[pause 6]
+
+You might notice, over the coming days, that the pull becomes weaker.
+That the gaps between urges grow longer.
+That you think about cigarettes less and less.
+[pause 5]
+And when you do think of them, it can be with a calm, settled feeling.
+That chapter is closing.
+[pause 6]
+You are someone who breathes freely.
+[pause 4]
+You protect what matters to you.
+[pause 4]
+And you can ride any wave.
+[pause 8]
+@include _emergence

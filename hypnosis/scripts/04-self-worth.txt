@@ -1,0 +1,92 @@
+# Session 4: Self-worth and confidence.
+# Techniques: values self-affirmation (Epton 2015; Cohen and Sherman 2014), compassionate-friend imagery (self-compassion,
+# Ferrari 2019 meta-analysis), evidence-based recall of real strengths, Best Possible Self imagery (Carrillo 2019 meta-analysis).
+# Deliberately avoids big "I am amazing" affirmations: those made people with low self-esteem feel worse (Wood, Perunovic and Lee 2009).
+# Uses evidence from your own life and kind self-talk instead.
+@title Quiet Confidence
+@subtitle A self-hypnosis session for self-worth
+@include _induction
+
+In this calm place, there's nothing you need to prove.
+You can simply be here, just as you are.
+[pause 6]
+
+Think of what you care about most.
+Maybe honesty. Loyalty. Family. Learning. Hard work. Kindness. Humour.
+[pause 6]
+Choose one value that feels most like you.
+[pause 5]
+Now remember a time you lived that value.
+A moment when you acted on it, even when it wasn't easy.
+[pause 10]
+See that moment clearly.
+That was you. That is you.
+Your worth shows up in moments like these, not in what anyone else says about you.
+[pause 8]
+
+Now think of a few things you have actually done.
+Things you got through. Skills you learned. People you helped.
+Not what you wish you'd done. What you really did.
+[pause 10]
+Let each one rise up and be counted.
+One.
+[pause 5]
+Another.
+[pause 5]
+And another.
+[pause 6]
+These are facts. They belong to you.
+[pause 6]
+
+Now imagine a good friend sitting beside you.
+Someone kind, who knows you well, and wants the best for you.
+[pause 6]
+Imagine you've had a hard day. Maybe you made a mistake, or you feel you've fallen short.
+[pause 5]
+Listen to what that friend says to you.
+Not criticism. Not empty praise. Just warmth and truth.
+Perhaps something like, you're doing your best, and that's enough for today.
+Or, everyone stumbles. It doesn't change who you are.
+[pause 10]
+Notice how it feels to be spoken to that way.
+[pause 6]
+Now, try saying those same words to yourself.
+In your own mind, in a kind voice.
+[pause 10]
+That voice is yours. You can use it any time.
+Especially when the old critical voice gets loud.
+[pause 6]
+
+Press your thumb and first finger together, and breathe out slowly.
+Let that warmth and steadiness link to this anchor.
+[pause 8]
+Release.
+[pause 3]
+
+Now imagine yourself one year from now.
+Everything has gone about as well as it realistically could.
+You've worked hard, and it's paying off.
+[pause 6]
+See how you carry yourself.
+See how you speak to people. Calm, direct, unhurried.
+You look people in the eye. You say what you think, kindly.
+[pause 10]
+Notice how you treat yourself when things go wrong.
+You don't tear yourself down. You learn, and you keep going.
+[pause 8]
+That future you didn't become someone new.
+They just kept choosing to act on their values, and to speak to themselves with respect.
+[pause 6]
+You can start that today.
+[pause 6]
+
+Confidence isn't feeling sure about everything.
+It's trusting that you can handle what comes, and that you're worth taking care of.
+[pause 5]
+You've handled hard things before.
+[pause 3]
+You have values you live by.
+[pause 3]
+And you deserve the same kindness you would give a friend.
+[pause 8]
+@include _emergence
