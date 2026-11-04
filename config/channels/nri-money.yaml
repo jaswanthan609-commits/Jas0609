@@ -5,6 +5,7 @@ language: en
 audience: "Indians working in the US, UK, Canada, Australia and the Gulf"
 tone: "calm, precise, trustworthy, explains rules step by step"
 voice_provider: edge       # free; switch to elevenlabs when income covers it
+fallback_voice: ""         # set an Edge voice here if you switch voice_provider to kokoro
 voice: en-IN-PrabhatNeural
 stock_sources: [pexels, pixabay]
 research_queries: ["nri tax", "nre nro account", "send money to india", "nri investment india"]   # YouTube searches for breakout research

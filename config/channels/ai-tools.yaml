@@ -5,6 +5,7 @@ language: en
 audience: "working professionals and freelancers in the US, UK and India who want to save time with AI"
 tone: "clear, practical, no hype, shows exactly where to click"
 voice_provider: edge       # free; switch to elevenlabs when income covers it
+fallback_voice: ""         # set an Edge voice here if you switch voice_provider to kokoro
 voice: en-US-AndrewNeural
 footage_dir: footage/ai-tools  # put your OBS screen recordings here; used before stock footage
 stock_sources: [pexels, pixabay]

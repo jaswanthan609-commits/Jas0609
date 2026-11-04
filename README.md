@@ -39,6 +39,7 @@ under `character_refs` so the characters look the same in every video.
 | Hindi/Tamil voice | [Sarvam Bulbul v3](https://docs.sarvam.ai/api-reference/text-to-speech/convert) | Rs 30 per 10,000 characters |
 | English voice | [ElevenLabs](https://elevenlabs.io) | from $5/month |
 | Free voice for testing | edge-tts (Microsoft neural voices) | free |
+| Better free voice | [Kokoro-82M](https://github.com/hexgrad/kokoro), open source, runs on the GitHub server; set `voice_provider: kokoro`, a Kokoro `voice` and an Edge `fallback_voice` | free |
 | Footage | your own clips, then [Pexels](https://www.pexels.com/api/), then [Pixabay](https://pixabay.com/api/docs/) | free |
 | Illustrations (kids channel) | [Google Nano Banana](https://ai.google.dev/gemini-api/docs/image-generation) image model, with character reference images | a few rupees per image |
 | Assembly, captions, music ducking, loudness | ffmpeg + libass | free |

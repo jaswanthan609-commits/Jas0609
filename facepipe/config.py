@@ -18,6 +18,9 @@ DEFAULT_VOICES = {
     # Sarvam Bulbul v3 speakers (lowercase). Best-rated for Hindi and Tamil.
     "sarvam": {"en": "shubh", "ta": "shubh", "hi": "shubh"},
     # ElevenLabs voice id. Replace with the voice you choose in the ElevenLabs voice library.
+    # Kokoro: free open-source voice model run on the GitHub server (English only here).
+    # American voices start "a" (af_heart, am_michael), British "b" (bf_emma, bm_george).
+    "kokoro": {"en": "am_michael", "ta": "", "hi": ""},
     "elevenlabs": {"en": "JBFqnCBsd6RMkjVDRZzb", "ta": "JBFqnCBsd6RMkjVDRZzb", "hi": "JBFqnCBsd6RMkjVDRZzb"},
 }
 
@@ -44,6 +47,7 @@ class ChannelConfig:
     audience: str = "18-35 year olds in India"
     tone: str = "energetic, simple, trustworthy"
     voice_provider: str = "edge"
+    fallback_voice: str = ""  # edge-tts voice used if the main provider fails (e.g. Kokoro not installed)
     voice: str | None = None
     voice_rate: float = 1.05  # 1.0 = normal speed
     font: str | None = None

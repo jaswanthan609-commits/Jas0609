@@ -27,6 +27,12 @@ jobs:
         run: |
           python -m facepipe --channel ai-tools make "3 free AI tools that save an hour a day" --format short --no-review
           python -m facepipe budget
+      - name: Kokoro voice works (free, better than Edge for long videos)
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y -qq espeak-ng
+          pip install -r requirements-kokoro.txt --extra-index-url https://download.pytorch.org/whl/cpu
+          python -c "from pathlib import Path; from facepipe import config, voice; c = config.load_config('ai-tools', voice_provider='kokoro', voice='am_michael'); print(voice.synthesize(c, 'Here are three free AI tools that save you an hour every day.', Path('kokoro-test.mp3')), 'seconds')"
       - name: Breakout research reaches YouTube
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
@@ -41,4 +47,5 @@ jobs:
             output/*/*/video.mp4
             output/*/*/thumbnail.jpg
             output/*/*/script.json
+            kokoro-test.mp3
           if-no-files-found: ignore

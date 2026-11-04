@@ -7,6 +7,7 @@ language: en
 audience: "children aged 3-7 and the parents who choose videos for them, mostly US, UK, Canada, Australia"
 tone: "warm, calm, gentle humour, simple words, slow pace, never scary"
 voice_provider: edge       # free; switch to elevenlabs when income covers it
+fallback_voice: ""         # set an Edge voice here if you switch voice_provider to kokoro
 voice: en-US-EmmaNeural
 voice_rate: 0.92
 visual_mode: ai_images

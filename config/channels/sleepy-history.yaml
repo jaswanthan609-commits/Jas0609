@@ -6,6 +6,7 @@ language: en
 audience: "adults in the US, UK, Canada and Australia who listen to calm long videos to fall asleep or relax"
 tone: "soft, slow, warm, descriptive, never dramatic"
 voice_provider: edge       # free; a calm ElevenLabs voice is the first upgrade once it earns
+fallback_voice: ""         # set an Edge voice here if you switch voice_provider to kokoro
 voice: en-GB-RyanNeural
 voice_rate: 0.85
 long_format: deep          # 30-minute videos

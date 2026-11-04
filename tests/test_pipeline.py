@@ -441,3 +441,13 @@ def test_duplicate_titles_detected():
 
     assert duplicate_of("5 Free AI Tools That Save Hours!", ["5 free AI tools that save hours"])
     assert duplicate_of("How NRIs pay less tax in 2027", ["5 free AI tools that save hours"]) is None
+
+
+def test_voice_falls_back_to_edge(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setitem(voice.PROVIDERS, "kokoro", lambda c, t, o: 1 / 0)
+    monkeypatch.setattr(voice, "_edge", lambda c, t, o: calls.append(c.voice_name) or o.write_bytes(b""))
+    monkeypatch.setattr(voice, "duration", lambda p: 1.5)
+    cfg = load_config("ai-tools", voice_provider="kokoro", voice="am_michael", fallback_voice="en-US-AndrewNeural")
+    assert voice.synthesize(cfg, "hi", tmp_path / "a.mp3") == 1.5
+    assert calls == ["en-US-AndrewNeural"]

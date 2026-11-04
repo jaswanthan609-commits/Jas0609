@@ -95,12 +95,45 @@ def _elevenlabs(cfg: ChannelConfig, text: str, out: Path) -> None:
     out.write_bytes(r.content)
 
 
-PROVIDERS = {"edge": _edge, "sarvam": _sarvam, "elevenlabs": _elevenlabs}
+_KOKORO = {}
+
+
+def _kokoro(cfg: ChannelConfig, text: str, out: Path) -> None:
+    """Kokoro-82M (Apache-2.0, github.com/hexgrad/kokoro) on CPU. Install requirements-kokoro.txt."""
+    import numpy as np
+    import soundfile as sf
+    from kokoro import KPipeline
+
+    voice = cfg.voice_name
+    lang = voice[0] if voice[:1] in {"a", "b"} else "a"
+    if lang not in _KOKORO:
+        _KOKORO[lang] = KPipeline(lang_code=lang)
+    chunks = [audio for _, _, audio in _KOKORO[lang](text, voice=voice, speed=cfg.voice_rate)]
+    if not chunks:
+        raise RuntimeError("Kokoro returned no audio")
+    wav = out.with_suffix(".wav")
+    sf.write(str(wav), np.concatenate([np.asarray(c) for c in chunks]), 24000)
+    _to_mp3([wav], out)
+
+
+PROVIDERS = {"edge": _edge, "sarvam": _sarvam, "elevenlabs": _elevenlabs, "kokoro": _kokoro}
 
 
 def synthesize(cfg: ChannelConfig, text: str, out: Path) -> float:
-    """Write an mp3 voiceover for `text` and return its length in seconds."""
-    PROVIDERS[cfg.voice_provider](cfg, text, out)
+    """Write an mp3 voiceover for `text` and return its length in seconds.
+
+    If the main provider fails and `fallback_voice` is set, the scene is voiced with that free
+    Edge voice instead of failing the whole video.
+    """
+    try:
+        PROVIDERS[cfg.voice_provider](cfg, text, out)
+    except Exception as exc:
+        if not cfg.fallback_voice or cfg.voice_provider == "edge":
+            raise
+        print(f"  {cfg.voice_provider} voice failed ({exc}); using {cfg.fallback_voice}")
+        from dataclasses import replace
+
+        _edge(replace(cfg, voice_provider="edge", voice=cfg.fallback_voice), text, out)
     return duration(out)
 
 
