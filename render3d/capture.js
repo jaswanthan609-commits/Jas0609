@@ -24,7 +24,7 @@ server.listen(0, '127.0.0.1', async () => {
     for (const t of stills.split(',')) { const d = await p.evaluate(`window.frame(${t})`); fs.writeFileSync(`still_${t}.jpg`, Buffer.from(d.split(',')[1], 'base64')); }
   } else {
     const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', String(fps), '-i', '-',
-      '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p', '-g', String(fps * 2), outp], { stdio: ['pipe', 'inherit', 'inherit'] });
+      '-c:v', 'libx264', '-preset', 'slow', '-crf', '23', '-pix_fmt', 'yuv420p', '-g', String(fps * 2), outp], { stdio: ['pipe', 'inherit', 'inherit'] });
     const N = Math.round(loop * fps), t0 = Date.now();
     for (let i = 0; i < N; i++) {
       const d = await p.evaluate(`window.frame(${i / fps})`);
