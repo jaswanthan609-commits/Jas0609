@@ -8,6 +8,7 @@ voice_provider: edge       # free; switch to elevenlabs when income covers it
 voice: en-US-AndrewNeural
 footage_dir: footage/ai-tools  # put your OBS screen recordings here; used before stock footage
 stock_sources: [pexels, pixabay]
+research_queries: ["best ai tools", "chatgpt tutorial", "ai tools for work", "claude ai tutorial"]   # YouTube searches for breakout research
 default_tags: ["ai tools", "chatgpt", "productivity", "tutorial"]
 category_id: "28"              # Science & Technology
 publish_times: ["19:30"]       # IST; lands in US morning

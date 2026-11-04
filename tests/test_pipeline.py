@@ -24,6 +24,9 @@ def isolated_ledger(tmp_path, monkeypatch):
     from facepipe import budget
 
     monkeypatch.setattr(budget, "LEDGER_DIR", tmp_path / "ledger")
+    from facepipe import breakout
+
+    monkeypatch.setattr(breakout, "RESEARCH_DIR", tmp_path / "research")
 
 
 def test_english_channels_load():
@@ -213,7 +216,7 @@ def test_daily_tops_up_ideas_and_drafts(tmp_path, monkeypatch):
     from facepipe import script as scriptmod
 
     monkeypatch.setattr(cli, "ROOT", tmp_path)
-    monkeypatch.setattr(scriptmod, "generate_ideas", lambda cfg, n, avoid=None: [f"Topic {i}" for i in range(n)])
+    monkeypatch.setattr(scriptmod, "generate_ideas", lambda cfg, n, avoid=None, **kw: [f"Topic {i}" for i in range(n)])
     drafted = []
     monkeypatch.setattr(pipeline, "draft_script", lambda cfg, topic, fmt: drafted.append((topic, fmt)))
     cli.main(["--channel", "ai-tools", "daily", "--long", "1", "--short", "1"])
@@ -283,3 +286,73 @@ def test_ci_writes_token_per_channel(tmp_path, monkeypatch):
     monkeypatch.setenv("SECRETS_JSON", json.dumps({"YT_TOKEN_SLEEPY_HISTORY": "{}", "YOUTUBE_CLIENT_SECRET_JSON": "{}"}))
     ci.main()
     assert (tmp_path / "tokens" / "sleepy-history.json").exists() and (tmp_path / "client_secret.json").exists()
+
+
+def _fake_youtube(monkeypatch, videos, subs):
+    from facepipe import breakout
+
+    def fake_get(path, **params):
+        if path == "search":
+            return {"items": [{"id": {"videoId": v}} for v in videos]}
+        if path == "videos":
+            ids = params["id"].split(",")
+            return {"items": [{"id": i, "snippet": {"title": videos[i][0], "channelId": videos[i][1],
+                                                    "publishedAt": videos[i][3]},
+                               "statistics": {"viewCount": str(videos[i][2])}} for i in ids if i in videos]}
+        if path == "channels":
+            return {"items": [{"id": c, "statistics": {"subscriberCount": str(n)}} for c, n in subs.items()]}
+        raise AssertionError(path)
+
+    monkeypatch.setattr(breakout, "_get", fake_get)
+
+
+def test_outliers_rank_by_views_per_subscriber(monkeypatch):
+    from facepipe import breakout
+
+    old = "2026-10-01T00:00:00Z"
+    _fake_youtube(monkeypatch, {"a": ("Big channel hit", "c1", 900_000, old), "b": ("Small channel breakout", "c2", 400_000, old)},
+                  {"c1": 2_000_000, "c2": 5_000})
+    cfg = load_config("ai-tools")
+    found = breakout.find_outliers(cfg)
+    assert [o["id"] for o in found] == ["b", "a"] and found[0]["score"] == 80.0
+    breakout.save_outliers(cfg, found)
+    assert not breakout.outliers_stale(cfg)
+    assert '"Small channel breakout": 400,000 views on a channel with 5,000 subscribers' in breakout.inspiration_text(found)
+
+
+def test_winner_gets_follow_ups_first(tmp_path, monkeypatch):
+    import facepipe.__main__ as cli
+    from facepipe import breakout, script as scriptmod
+
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setenv("YOUTUBE_API_KEY", "k")
+    cfg = load_config("nri-money", output_dir=str(tmp_path / "out"))
+    monkeypatch.setattr(cli, "load_config", lambda slug=None, **kw: cfg)
+    old = "2026-10-01T00:00:00Z"
+    videos = {}
+    for i, views in enumerate([100, 120, 90, 5000]):
+        folder = tmp_path / "out" / f"v{i}"
+        folder.mkdir(parents=True)
+        (folder / "metadata.json").write_text(json.dumps({"video_id": f"v{i}", "format": "long"}))
+        videos[f"v{i}"] = (f"Video {i}", "me", views, old)
+    _fake_youtube(monkeypatch, videos, {"me": 50})
+    monkeypatch.setattr(breakout, "outliers_stale", lambda c: False)
+    asked = []
+    monkeypatch.setattr(scriptmod, "follow_up_topics", lambda c, t, v, m: asked.append(t) or ["Part 2", "Deeper"])
+    topics = tmp_path / "topics" / "nri-money.txt"
+    topics.parent.mkdir()
+    topics.write_text("Old topic\n")
+    cli.main(["--channel", "nri-money", "breakout"])
+    assert asked == ["Video 3"]
+    assert topics.read_text().splitlines()[:3] == ["Part 2", "Deeper", "Old topic"]
+    cli.main(["--channel", "nri-money", "breakout"])  # already followed up: nothing new
+    assert asked == ["Video 3"]
+
+
+def test_ideas_prompt_uses_breakout_inspiration(monkeypatch):
+    from facepipe import script as scriptmod
+
+    seen = {}
+    monkeypatch.setattr(scriptmod, "_parse", lambda cfg, prompt, schema, max_tokens=0, model=None: seen.update(p=prompt) or scriptmod.TopicIdeas(topics=["x"]))
+    scriptmod.generate_ideas(load_config("ai-tools"), 5, inspiration='- "Hit": 1 views')
+    assert "proven angles" in seen["p"] and '"Hit"' in seen["p"]

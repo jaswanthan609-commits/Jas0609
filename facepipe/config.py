@@ -68,6 +68,7 @@ class ChannelConfig:
     publish_times: list[str] = field(default_factory=lambda: ["18:30"])  # local times, daily slots
     timezone: str = "Asia/Kolkata"
     monthly_target_inr: int = 0
+    research_queries: list[str] = field(default_factory=list)  # YouTube searches for breakout research
     long_format: str = "long"  # format used for this channel's long videos: long (9 min) or deep (30 min)
 
     @property

@@ -11,6 +11,7 @@ voice_rate: 0.85
 long_format: deep          # 30-minute videos
 stock_sources: [pexels, pixabay]
 music_volume: 0.18
+research_queries: ["history for sleep", "boring history to fall asleep", "sleep story history"]   # YouTube searches for breakout research
 default_tags: ["history for sleep", "sleep story", "boring history", "relaxing history", "fall asleep"]
 category_id: "27"          # Education
 publish_times: ["21:30"]   # IST; evening in Europe, afternoon in the US

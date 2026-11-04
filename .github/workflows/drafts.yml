@@ -28,19 +28,29 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
+      - name: Breakout research and follow-ups for our winners
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        # Weekly: proven breakout videos per niche -> research/. Daily: our videos with 3x the usual
+        # views get follow-up topics at the front of the queue.
+        run: python -m facepipe breakout --all
+
       - name: Draft what today's budget allows
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         # config/autopilot.yaml decides which channels draft today, from the money left.
         run: python -m facepipe autopilot
 
-      - name: Save the spending ledger to main
+      - name: Save the ledger and research to main
         if: always()
         run: |
           git config user.name "facepipe-bot"
           git config user.email "facepipe-bot@users.noreply.github.com"
-          git add ledger/ 2>/dev/null || true
-          git diff --cached --quiet || { git commit -m "Spending ledger $(date -u +%Y-%m-%d) [skip ci]" && git push origin HEAD:main; }
+          git add ledger/ research/ 2>/dev/null || true
+          git add -f output/*/*/metadata.json topics/*.txt 2>/dev/null || true
+          git reset -q -- topics/*.done.txt 2>/dev/null || true
+          git diff --cached --quiet || { git commit -m "Ledger and research $(date -u +%Y-%m-%d) [skip ci]" && git push origin HEAD:main; }
 
       - name: Open the review pull request
         env:
@@ -60,6 +70,11 @@ jobs:
           for f in sorted(f for f in files if f.endswith("script.json")):
               s = json.loads(pathlib.Path(f).read_text(encoding="utf-8"))
               print(f"### {s['title']}\n`{f}`\n")
+              if s.get("title_options"):
+                  print("Other titles (swap one in by editing the script before merging):")
+                  for t in s["title_options"]:
+                      print(f"- {t}")
+                  print()
               print("Facts to check:")
               for fact in s.get("facts_to_check", []) or ["(none listed)"]:
                   print(f"- [ ] {fact}")

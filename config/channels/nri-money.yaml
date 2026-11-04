@@ -7,6 +7,7 @@ tone: "calm, precise, trustworthy, explains rules step by step"
 voice_provider: edge       # free; switch to elevenlabs when income covers it
 voice: en-IN-PrabhatNeural
 stock_sources: [pexels, pixabay]
+research_queries: ["nri tax", "nre nro account", "send money to india", "nri investment india"]   # YouTube searches for breakout research
 default_tags: ["nri", "nri finance", "nre account", "send money to india"]
 category_id: "27"              # Education
 publish_times: ["20:30"]

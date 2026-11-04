@@ -26,6 +26,7 @@ extra_guidelines: |
 made_for_kids: true
 music_volume: 0.18
 stock_sources: []
+research_queries: ["bedtime stories for kids", "kids moral stories animated", "story for toddlers"]   # YouTube searches for breakout research
 default_tags: ["bedtime stories for kids", "kids stories", "preschool learning", "stories for toddlers"]
 category_id: "27"
 publish_times: ["18:30"]   # IST; US morning

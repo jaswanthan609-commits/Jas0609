@@ -159,8 +159,10 @@ def cmd_daily(cfg, args):
     path = _topics_file(cfg)
     need = args.long + args.short
     if len(_remaining_topics(cfg)) < need * 3:
+        from .breakout import inspiration_text, load_outliers
+
         existing = [t for t in path.read_text(encoding="utf-8").splitlines() if t.strip()] if path.exists() else []
-        ideas = generate_ideas(cfg, 20, avoid=existing)
+        ideas = generate_ideas(cfg, 20, avoid=existing, inspiration=inspiration_text(load_outliers(cfg)))
         with open(path, "a", encoding="utf-8") as f:
             f.write("\n".join(ideas) + "\n")
         print(f"[{cfg.slug}] added {len(ideas)} topic ideas")
@@ -171,6 +173,35 @@ def cmd_daily(cfg, args):
         draft_script(cfg, topic, fmt)
         with open(done_file, "a", encoding="utf-8") as f:
             f.write(topic + "\n")
+
+
+def cmd_breakout(cfg, args):
+    """Refresh breakout research (weekly) and queue follow-ups for our own winners (daily)."""
+    import os
+
+    from . import breakout
+    from .script import follow_up_topics
+
+    if not os.environ.get("YOUTUBE_API_KEY"):
+        print("breakout: no YOUTUBE_API_KEY, skipped")
+        return
+    slugs = list_channels() if args.all else [cfg.slug]
+    for slug in slugs:
+        c = load_config(slug)
+        try:
+            if args.force or breakout.outliers_stale(c):
+                found = breakout.find_outliers(c)
+                breakout.save_outliers(c, found)
+                top = found[0] if found else None
+                print(f"[{slug}] {len(found)} outliers saved" + (f"; top: {top['title']} ({top['score']}x)" if top else ""))
+            for w in breakout.find_winners(c):
+                topics = follow_up_topics(c, w["title"], w["views"], w["median"])
+                breakout.push_topics_first(_topics_file(c), topics)
+                breakout.mark_followed_up(w)
+                print(f"[{slug}] WINNER {w['title']}: {w['views']:,} views ({w['views'] / max(w['median'], 1):.0f}x median); "
+                      f"queued {len(topics)} follow-ups")
+        except Exception as exc:  # research must never block the day's drafts
+            print(f"[{slug}] breakout failed: {exc}", file=sys.stderr)
 
 
 def cmd_autopilot(cfg, args):
@@ -330,6 +361,11 @@ def main(argv=None):
     s.add_argument("--short", type=int, default=1, help="Shorts scripts to draft")
     s.set_defaults(func=cmd_daily)
 
+    s = sub.add_parser("breakout", help="Find breakout videos in the niche and follow up our own winners")
+    s.add_argument("--all", action="store_true", help="All channels")
+    s.add_argument("--force", action="store_true", help="Refresh outliers even if this week's are saved")
+    s.set_defaults(func=cmd_breakout)
+
     s = sub.add_parser("autopilot", help="Unattended: draft whatever today's budget allows, across all channels")
     s.add_argument("--dry-run", action="store_true", help="Show the plan without drafting")
     s.set_defaults(func=cmd_autopilot)
@@ -355,7 +391,7 @@ def main(argv=None):
 
     args = p.parse_args(argv)
     needs_channel = args.command not in {"channels", "autopilot", "budget"} and not (
-        args.command in {"stats", "publish-approved"} and args.all
+        args.command in {"stats", "publish-approved", "breakout"} and args.all
     )
     cfg = load_config(args.channel, language=args.language) if needs_channel else None
     args.func(cfg, args)

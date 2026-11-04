@@ -26,7 +26,11 @@ class VideoScript(BaseModel):
     title: str = Field(description="YouTube title, under 90 characters, curiosity-driven, no clickbait lies.")
     description: str = Field(description="YouTube description with a hook line, summary and 3-5 hashtags.")
     tags: list[str] = Field(description="10-15 YouTube search tags, mixing channel language and English.")
-    thumbnail_text: str = Field(description="2-4 punchy words for the thumbnail.")
+    title_options: list[str] = Field(
+        default_factory=list,
+        description="3 other strong titles for the same video, each a different angle, for the reviewer to swap in.",
+    )
+    thumbnail_text: str = Field(description="2-4 punchy words for the thumbnail that add to the title, not repeat it.")
     facts_to_check: list[str] = Field(
         description="Every number, rule, date or claim in the narration that a human must verify before publishing."
     )
@@ -74,6 +78,16 @@ FORMAT_BRIEF = {
         "flowing chronologically, in a soft, even, descriptive tone."
     ),
 }
+
+PACKAGING = (
+    " Packaging decides whether a video breaks out: the title and thumbnail earn the click, the first "
+    "30 seconds keep the viewer. Title: under 60 characters, one clear promise or curiosity gap, specific "
+    "(numbers, names, outcomes), and true to the video. The first scene must pay off the title's promise "
+    "straight away: no greeting, no channel intro, no 'in this video'. Then keep giving viewers a reason "
+    "to stay: tease what is coming next every minute or so."
+)
+FORMAT_BRIEF["short"] += PACKAGING
+FORMAT_BRIEF["long"] += PACKAGING
 
 WORDS_PER_SECOND = {"en": 2.5, "hi": 2.4, "ta": 2.0}
 DEEP_PACE = 0.8  # deep videos are read slower
@@ -141,14 +155,35 @@ def _parse(cfg: ChannelConfig, prompt: str, schema: type[BaseModel], max_tokens:
     return response.parsed_output
 
 
-def generate_ideas(cfg: ChannelConfig, count: int = 20, avoid: list[str] | None = None) -> list[str]:
+def generate_ideas(
+    cfg: ChannelConfig, count: int = 20, avoid: list[str] | None = None, inspiration: str = ""
+) -> list[str]:
     avoid_text = ""
     if avoid:
-        avoid_text = "\nDo not repeat these topics we already covered:\n- " + "\n- ".join(avoid)
+        avoid_text = "\nDo not repeat these topics we already covered:\n- " + "\n- ".join(avoid[-150:])
+    proven = ""
+    if inspiration:
+        proven = (
+            "\nThese recent videos in our niche got far more views than their channels' size, so their "
+            "topics and angles are proven to pull viewers:\n" + inspiration + "\nAt least half of the "
+            "topics should use one of these proven angles with our own original take: a different example, "
+            "a newer update, a deeper answer or the opposite view. Never copy a title."
+        )
     prompt = (
         f"Give {count} specific video topics for this channel that people actively search for "
         f"and that suit a faceless format. Write each topic as a one-line working title in "
-        f"{cfg.language_name}.{avoid_text}"
+        f"{cfg.language_name}.{proven}{avoid_text}"
+    )
+    return _parse(cfg, prompt, TopicIdeas, max_tokens=4000).topics
+
+
+def follow_up_topics(cfg: ChannelConfig, title: str, views: int, median: float, count: int = 3) -> list[str]:
+    """Topics that ride a video of ours that took off."""
+    prompt = (
+        f"Our video \"{title}\" got {views:,} views, {views / max(median, 1):.0f}x our usual. Give {count} "
+        f"follow-up video topics for the same viewers: a sequel or part 2, a deeper dive into the most "
+        f"interesting part, and the next question these viewers will ask. Each must stand on its own. "
+        f"Write each as a one-line working title in {cfg.language_name}."
     )
     return _parse(cfg, prompt, TopicIdeas, max_tokens=4000).topics
 

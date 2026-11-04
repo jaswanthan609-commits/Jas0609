@@ -102,7 +102,7 @@ publish, tick the facts, merge. Merging is the approval.
 
 One-time setup (repository Settings):
 
-1. **Secrets and variables > Actions > Secrets:** `ANTHROPIC_API_KEY`, `PEXELS_API_KEY`,
+1. **Secrets and variables > Actions > Secrets:** `ANTHROPIC_API_KEY`, `YOUTUBE_API_KEY`, `PEXELS_API_KEY`,
    `PIXABAY_API_KEY`, `GEMINI_API_KEY` (kids illustrations); later `YOUTUBE_CLIENT_SECRET_JSON`
    (the contents of client_secret.json) and one `YT_TOKEN_<CHANNEL>` per channel, e.g.
    `YT_TOKEN_AI_TOOLS`, `YT_TOKEN_SLEEPY_HISTORY` (the contents of tokens/<channel>.json after
@@ -110,6 +110,25 @@ One-time setup (repository Settings):
 2. **Variables:** `UPLOAD_ENABLED` = `true` once the YouTube secrets are in.
 3. **Actions > General:** allow GitHub Actions to create pull requests.
 4. **Anthropic Console > Limits:** set a monthly spend limit as a safety net.
+
+## Breakout engine
+
+Most of a channel's views come from a few videos that break out. `python -m facepipe breakout --all`
+runs every morning before drafting:
+
+1. **Copy what is proven (weekly).** It searches YouTube for each channel's `research_queries` and
+   ranks recent videos by views per subscriber. A video with 50x more views than its channel has
+   subscribers proves the topic, not the channel's size. The top 15 go to `research/<channel>.json`,
+   and Claude uses them as inspiration (same proven angle, our own take) when it writes topic ideas.
+2. **Package for the click.** Every script comes with a title under 60 characters, 3 other title
+   options listed in the drafts PR, thumbnail words that add to the title, and a first scene that
+   pays off the title straight away.
+3. **Double down on winners (daily).** When one of our videos reaches 3x the channel's median views
+   after 2 days, Claude writes 3 follow-ups (part 2, a deeper dive, the next question) and they jump
+   to the front of the topic queue.
+
+Needs a free `YOUTUBE_API_KEY` secret (Google Cloud > APIs > Credentials > API key, with YouTube
+Data API v3 enabled). Search uses about 1,400 of the free 10,000 daily quota units once a week.
 
 ## Self-funding budget
 
@@ -163,6 +182,7 @@ facepipe/captions.py    timed ASS captions for any script
 facepipe/assemble.py    ffmpeg scene clips, concat, music ducking, loudness, thumbnail
 facepipe/upload.py      YouTube OAuth per channel, resumable upload, scheduling
 facepipe/stats.py       YouTube Analytics: views, watch hours, revenue, RPM vs target
+facepipe/breakout.py    outlier research per niche, winner detection and follow-ups
 facepipe/budget.py      spend ledger, earnings, daily plan that keeps within the money left
 facepipe/ci.py          writes YouTube secrets for every channel in GitHub Actions
 config/autopilot.yaml   budget, reinvestment and which channel drafts on which day
