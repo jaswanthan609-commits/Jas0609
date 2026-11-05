@@ -1,0 +1,34 @@
+# NVIDIA SkillSpector (Apache-2.0, pinned) scans every skill in .claude/skills for prompt injection, data theft,
+# dangerous code and supply-chain risks whenever a skill is added or changed. Static checks only: no API key.
+# Fails when any skill scores above 50 (DANGEROUS); the full report is on the run's summary page.
+name: Skills scan
+
+on:
+  push:
+    paths: [".claude/skills/**", ".github/workflows/skills-scan.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv tool install "git+https://github.com/NVIDIA/SkillSpector.git@62c2fe8"
+      - name: Scan every skill
+        run: |
+          set +e
+          skillspector scan .claude/skills --recursive --max-skills 200 --no-llm --format markdown --output report.md
+          code=$?
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          exit $code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: skills-scan
+          path: report.md
+          if-no-files-found: ignore

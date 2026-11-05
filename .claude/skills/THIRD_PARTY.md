@@ -24,6 +24,8 @@ MIT (LICENSE in each folder):
 
 | skills | source | commit |
 | --- | --- | --- |
+| `agent-reach` (local only: needs the `agent-reach` CLI from GitHub, see local-toolkit/) | https://github.com/Panniantong/Agent-Reach | c62128a |
+| `lemo-opuscar` (local only: downloads its style library on first use) | https://github.com/lemomo-ai/lemo-opuscar | bebbbe1 |
 | `prompt-optimizer`, `verification-loop`, `agent-self-evaluation`, `eval-harness`, `santa-method`, `loop-design-check`, `continuous-agent-loop`, `video-editing`, `content-engine`, `cost-aware-llm-pipeline`, `prompt-caching-strategy`, `growth-log`, `skill-scout` (13 of the ECC set) | https://github.com/affaan-m/everything-claude-code | b38be6a |
 
 AGPL-3.0 (LICENSE in the folder; these files stay under AGPL):
