@@ -15,13 +15,13 @@ const server = http.createServer((req, res) => {
 server.listen(0, '127.0.0.1', async () => {
   const port = server.address().port;
   const b = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-  const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
+  const sp = JSON.parse(specJson); const p = await b.newPage({ viewport: { width: sp.w || 1920, height: sp.h || 1080 } });
   p.on('pageerror', e => console.log('ERR', e.message));
   await p.goto(`http://127.0.0.1:${port}/cozy.html?spec=${encodeURIComponent(specJson)}`);
   await p.waitForFunction('window.READY', null, { timeout: 180000 });
   const [loop, fps] = await p.evaluate('[window.LOOP, window.FPS]');
   if (outp === 'stills') {
-    for (const t of stills.split(',')) { const d = await p.evaluate(`window.frame(${t})`); fs.writeFileSync(`still_${t}.jpg`, Buffer.from(d.split(',')[1], 'base64')); }
+    for (const t of stills.split(',')) { const d = await p.evaluate(`window.frame(${t})`); fs.writeFileSync(`${process.env.STILL_PREFIX || 'still'}_${t}.jpg`, Buffer.from(d.split(',')[1], 'base64')); }
   } else {
     const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', String(fps), '-i', '-',
       '-c:v', 'libx264', '-preset', 'slow', '-crf', '23', '-pix_fmt', 'yuv420p', '-g', String(fps * 2), outp], { stdio: ['pipe', 'inherit', 'inherit'] });
