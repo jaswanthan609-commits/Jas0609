@@ -1,37 +1,87 @@
-# NVIDIA SkillSpector (Apache-2.0, pinned) scans every skill in .claude/skills for prompt injection, data theft,
+# NVIDIA SkillSpector (Apache-2.0, pinned) scans each skill in .claude/skills for prompt injection, data theft,
 # dangerous code and supply-chain risks whenever a skill is added or changed. Static checks only: no API key.
-# Fails when any skill scores above 50 (DANGEROUS); the full report is on the run's summary page.
+# A skill fails when it scores above 50 (DANGEROUS) on findings that nobody has reviewed. Findings that were read
+# and accepted live as exact fingerprints in .github/skillspector/baselines/ (see reviewed.txt for why); editing an
+# accepted skill brings its findings back, so it has to be reviewed again.
 name: Skills scan
 
 on:
   push:
-    paths: [".claude/skills/**", ".github/workflows/skills-scan.yml"]
+    paths: [".claude/skills/**", ".github/workflows/skills-scan.yml", ".github/skillspector/**"]
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "scan, or baseline (write fingerprints for the skills in .github/skillspector/reviewed.txt)"
+        default: scan
+        type: choice
+        options: [scan, baseline]
 
 permissions:
   contents: read
 
+env:
+  SKILLSPECTOR: "git+https://github.com/NVIDIA/SkillSpector.git@62c2fe8"
+
 jobs:
   scan:
+    if: github.event_name == 'push' || inputs.mode == 'scan'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: uv tool install "git+https://github.com/NVIDIA/SkillSpector.git@62c2fe8"
-      - name: Scan every skill
+      - run: uv tool install "$SKILLSPECTOR"
+      - name: Scan each skill
         run: |
-          set +e
-          skillspector scan .claude/skills --recursive --max-skills 200 --no-llm --format markdown --output report.md
-          code=$?
-          cat report.md >> "$GITHUB_STEP_SUMMARY"
-          # The log shows only the findings: each skill's name and its Issues section (the full report is above).
-          awk '/^--- .* ---$/{name=$0} /^## Issues \(/{show=($3!="(0)"); if(show) print "\n" name} /^## Inspection Completeness/{show=0} show' report.md
-          grep -A4 'Recursive Risk Assessment' report.md
-          exit $code
+          mkdir -p reports; failed=""
+          for dir in .claude/skills/*/; do
+            name=$(basename "$dir"); [ -f "$dir/SKILL.md" ] || continue
+            base=".github/skillspector/baselines/$name.yaml"; opt=""
+            [ -f "$base" ] && opt="--baseline $base"
+            set +e
+            skillspector scan "$dir" --no-llm $opt --format markdown --output "reports/$name.md" >/dev/null 2>&1
+            code=$?
+            set -e
+            score=$(grep -m1 '^| Score |' "reports/$name.md" | cut -d'|' -f3 | tr -d ' ')
+            echo "$name: ${score:-?} (exit $code)${opt:+, reviewed findings suppressed}"
+            if [ "$code" != 0 ]; then
+              failed="$failed $name"
+              { echo "## $name"; cat "reports/$name.md"; } >> "$GITHUB_STEP_SUMMARY"
+              awk '/^## Issues \(/{show=1} /^## Inspection Completeness/{show=0} show' "reports/$name.md"
+            fi
+          done
+          if [ -n "$failed" ]; then echo "::error::Unreviewed risky findings in:$failed"; exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: skills-scan
-          path: report.md
+          path: reports/
           if-no-files-found: ignore
+
+  baseline:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'baseline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv tool install "$SKILLSPECTOR"
+      - name: Write fingerprints for the reviewed skills
+        run: |
+          mkdir -p .github/skillspector/baselines
+          grep -v '^#' .github/skillspector/reviewed.txt | while IFS= read -r line; do
+            [ -n "$line" ] || continue
+            name=${line%%:*}; reason=${line#*: }
+            out=".github/skillspector/baselines/$name.yaml"
+            rm -f "$out"
+            skillspector baseline ".claude/skills/$name" -o "$out" --no-llm --reason "$reason"
+            echo "$name: $(grep -c 'hash:' "$out") findings accepted"
+          done
+      - name: Commit them
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/skillspector/baselines
+          git diff --cached --quiet || { git commit -m "Skills scan: fingerprints for the reviewed skills"; git push; }
