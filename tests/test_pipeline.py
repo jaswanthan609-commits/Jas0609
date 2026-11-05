@@ -617,3 +617,38 @@ def test_hooks_fall_back_to_description(tmp_path, monkeypatch):
          "about": "A rainy autumn night by the window with soft jazz, crackling fire and rain for sleep and study."}
     assert hooks.refresh([o]) == 1
     assert "describes itself as" in hooks.examples(["ambience"])
+
+
+def test_glowup_beats_follow_the_voice_and_sound_fits(tmp_path):
+    import subprocess
+    import soundfile as sf
+    from facepipe import glowup
+
+    lines = []
+    for i, secs in enumerate((1.0, 1.5)):
+        p = tmp_path / f"l{i}.mp3"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"sine=f=300:d={secs}", str(p)], check=True)
+        lines.append(p)
+    ep = {"day": 1, "beats": [{"text": "a", "action": "alarm"}, {"text": "b", "action": "glow"}]}
+    ep["duration"] = glowup.time_beats(ep, lines)
+    assert ep["beats"][0]["t"] == glowup.TITLE_SECONDS
+    assert ep["beats"][1]["t"] > ep["beats"][0]["t"] + 1.0
+    assert abs(ep["duration"] - (glowup.TITLE_SECONDS + 2.5 + 2 * glowup.GAP + glowup.ASK_SECONDS)) < .15
+    x, sr = sf.read(str(glowup.soundtrack(ep, lines, tmp_path / "s.wav")))
+    assert abs(len(x) / sr - ep["duration"]) < .05 and abs(x).max() <= .9
+
+
+def test_glowup_top_comment_picks_most_liked(monkeypatch):
+    from facepipe import glowup
+
+    class R:
+        def raise_for_status(self): pass
+        def json(self):
+            mk = lambda t, n: {"snippet": {"topLevelComment": {"snippet": {"textDisplay": t, "likeCount": n, "authorDisplayName": "@ana"}}}}
+            return {"items": [mk("make him shower", 1500), mk("see http://spam", 9000), mk("haircut please", 40)]}
+
+    import requests
+    monkeypatch.setattr(requests, "get", lambda *a, **k: R())
+    c = glowup.top_comment("vid", "key")
+    assert c["text"] == "make him shower" and c["likes"] == "1.5K" and c["user"] == "ana"
+    assert glowup.bible("gopal")["days_total"] == 30
