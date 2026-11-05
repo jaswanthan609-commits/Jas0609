@@ -589,3 +589,31 @@ def test_lint_command_exit_codes(tmp_path):
     with pytest.raises(SystemExit) as e:
         main(["lint", str(bad)])
     assert e.value.code == 1
+
+
+def test_short_scan_merges_instead_of_shrinking(tmp_path, monkeypatch):
+    import json
+    from datetime import date
+    from facepipe import scan
+
+    monkeypatch.setattr(scan, "SCAN_FILE", tmp_path / "scan.json")
+    monkeypatch.setattr(scan, "RESEARCH_DIR", tmp_path)
+    today = date.today().isoformat()
+    row = lambda i, seed, views: {"id": i, "seed": seed, "title": i, "views": views, "seconds": 600, "long": True,
+                                  "young": True, "published": today, "subscribers": 1000}
+    scan.save(scan._rank([row("a", "ambience", 10), row("b", "lofi", 20)], 90, 3000))
+    scan.save(scan._rank([row("a", "ambience", 99)], 90, 300))   # quota cut the second run short
+    d = json.loads((tmp_path / "scan.json").read_text())
+    assert d["videos_checked"] == 3000
+    assert {o["id"]: o["views"] for o in d["outliers"]} == {"a": 99, "b": 20}
+
+
+def test_hooks_fall_back_to_description(tmp_path, monkeypatch):
+    from facepipe import hooks
+
+    monkeypatch.setattr(hooks, "HOOKS_FILE", tmp_path / "hooks.json")
+    monkeypatch.setattr(hooks, "opening", lambda vid: None)
+    o = {"id": "x", "seed": "ambience", "title": "Rainy night", "views": 5, "subscribers": 10, "long": True,
+         "about": "A rainy autumn night by the window with soft jazz, crackling fire and rain for sleep and study."}
+    assert hooks.refresh([o]) == 1
+    assert "describes itself as" in hooks.examples(["ambience"])

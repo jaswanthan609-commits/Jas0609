@@ -6,7 +6,9 @@ scan_topics, the first ~45 seconds of their captions are saved to research/hooks
 Claude as examples of structure (never to copy). Same idea as transcribing top posts' openings in
 Instagram research tools, done for YouTube on public captions.
 
-Caption fetching can be refused from cloud IPs; then the library just keeps last week's entries.
+YouTube refuses caption requests from GitHub's runners (RequestBlocked), so when captions can't be read the
+entry keeps the video's own description opening instead, marked kind="description". It shows the promise the
+video makes, not its spoken first lines, and the prompt says so.
 """
 
 from __future__ import annotations
@@ -44,10 +46,12 @@ def refresh(outliers: list[dict], per_run: int = 12) -> int:
     for o in sorted((o for o in outliers if o.get("long") and o["id"] not in have), key=lambda o: -o["views"]):
         if added >= per_run:
             break
-        text = opening(o["id"])
+        text, kind = opening(o["id"]), "spoken"
+        if not text and len(o.get("about", "")) >= 60:
+            text, kind = o["about"], "description"
         if text:
             data["hooks"].append({"id": o["id"], "seed": o["seed"], "title": o["title"], "views": o["views"],
-                                  "subscribers": o["subscribers"], "opening": text})
+                                  "subscribers": o["subscribers"], "opening": text, "kind": kind})
             added += 1
     data["hooks"] = sorted(data["hooks"], key=lambda h: -h["views"])[:200]
     data["updated"] = datetime.now(timezone.utc).date().isoformat()
@@ -61,8 +65,10 @@ def examples(topics: list[str], limit: int = 5) -> str:
     picked = [h for h in load()["hooks"] if h["seed"].lower() in wanted][:limit]
     if not picked:
         return ""
-    lines = [f"- \"{h['title']}\" ({h['views']:,} views on a {h['subscribers']:,}-subscriber channel) opened with: "
-             f"\"{h['opening'][:400]}\"" for h in picked]
-    return ("These are the real first 45 seconds of recent breakout videos in this area. Study how they open "
+    lines = [f"- \"{h['title']}\" ({h['views']:,} views on a {h['subscribers']:,}-subscriber channel) "
+             + ("opened with" if h.get("kind", "spoken") == "spoken" else "describes itself as")
+             + f": \"{h['opening'][:400]}\"" for h in picked]
+    return ("These are the openings (first 45 seconds, or the video's own description where captions were not "
+            "available) of recent breakout videos in this area. Study how they open "
             "(where they drop the viewer, what detail comes first, when the question lands) and use the same "
             "kind of structure for our own story. Never copy their words or topic.\n" + "\n".join(lines))
