@@ -1,0 +1,7 @@
+node_modules/
+st/
+*.mp4
+*.wav
+parts.txt
+log*.txt
+run.log
