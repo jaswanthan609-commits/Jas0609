@@ -1,0 +1,60 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:5d5309e3af9b3cadb29dd970c041681d292e2d86f8a677054fbbd7e4b6f0f566
+  rule_id: AST4
+  file: eval-viewer/generate_review.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:791f56481df2418b483b0db5a182f56f91f8a42e8956c5636f573eb741776134
+  rule_id: AST4
+  file: scripts/improve_description.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:03375f53592227b3d21fa4365061b7563a5d9c04d4e35b6e8f9be1751dbcf109
+  rule_id: AST4
+  file: scripts/run_eval.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:9ea96715b7b6c9c0b67e7642e48bdf4a649a5ede9bcceabd32dd16f6d04e73da
+  rule_id: LP3
+  file: SKILL.md
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:8eac5720cd431b65f04695b0f63cda938a79ad4a2cf936e5560af7f678958e47
+  rule_id: AS1
+  file: scripts/run_eval.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:6925549013c48a43afd4ecb061f1d67884ab1b60b8f347a6d5f431813d372dec
+  rule_id: E2
+  file: scripts/improve_description.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:cf70540cd917da41af824a347a21840670f065d8e82e1edaf3c21f881edd5750
+  rule_id: E2
+  file: scripts/run_eval.py
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:ca15b64c0ead7355b951d0ed6990d7fbc2de0a8bb8601dd2769cec88354fe673
+  rule_id: RA2
+  file: SKILL.md
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+- hash: sha256:02832e27fd293e34367f6652db792663f1269db9e7757b2792003cd72ac31b75
+  rule_id: AE1
+  file: SKILL.md
+  reason: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE
+    to run claude -p; the .claude lookup finds the project root; subprocess calls
+    use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.

@@ -1,0 +1,132 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:2bc621e15fa59412f000a2e9d16d6990a1f073a357abf8dc5514843bf7874426
+  rule_id: AST4
+  file: scripts/analyze.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:845445b75e0681f72615cb520599f34cd667c0f8fb8b66602a33ff1bd8cd1fda
+  rule_id: AST4
+  file: scripts/analyze.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:5b0b830ac8e56a1fec6b1fb468841aae8b6684c2185344ebe12ddddf5918a554
+  rule_id: AST4
+  file: scripts/analyze.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:16f1b49b73d8a3d93861bae0e4a6ded8ef521f6c39e5d21501589489687421dc
+  rule_id: AST4
+  file: scripts/arrange.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:3e46e21b3f60ecd5331d5b211af85592c6f65c30ffdee091348e90aac369867c
+  rule_id: AST4
+  file: scripts/audit.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:9a77bf49ed7d9a0e0330d579caee10f2593bb14eb624b26079bc07a93a490953
+  rule_id: AST4
+  file: scripts/audit.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:1d7ab515f74b8d24fe4b7c7ec1916cfb7621f1307790ee9fa2b23cc271fac5e1
+  rule_id: AST4
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:428794983455f02bc4f70faacd86d20f5bfaea5ebe04a1e64a1bb9048f2c890c
+  rule_id: AST4
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:90c266a8d96754afd0b1c6c28fbc853da6bcaed3175da11501b2d0b681d89bad
+  rule_id: AST4
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:5b676ad336ef178cdb752f6148081aaf538cecce29cd700c25a1b3b44429ccba
+  rule_id: AST4
+  file: scripts/variant.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:876182bf1bb4bab0173adaeb89d45f6fcc5217e5f10fbe607c89acf3d6b8f28a
+  rule_id: AST4
+  file: scripts/variant.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:f6f0d26bf774f0477b8741aaa9e96ac3b65c540c04a320fc00b71d7b9250f8c5
+  rule_id: TT2
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:37c916e041ed319d91bacbf0a988a01458a4e3f774db7f2ec488d55f85c6aaed
+  rule_id: TT2
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:9cd85d3e13c61d523627eeb6fbeba0be8725336e13b55c30ae4ab49c89520f92
+  rule_id: TT2
+  file: scripts/mix.py
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:32dcd643a8334b4f14f86a932f5fb4dfd6aee89ddd29dce57310c85dd3cfdfa9
+  rule_id: LP3
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:e6343a394b49ee1fec396a393cd44ccc9d8bf208216677419cd7ca7d1416db27
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:04bde368192733e78c7f46803b593fc59efe5ddcfe80dbd7dd4f0f29438eb6de
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:f340ac22f928fcb5f3987a22b9e6b53f030ca7faa46414c564acb858646e2e8a
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:3a6fc6603c97dd56be525218e7d05d67a6784e97a60fa986c245815ac7c2283d
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:75899c67cd50df1af655fc4399da79a7d7b1c149d6c8e0689ed8bd8d7172a26a
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+- hash: sha256:be3d359ccd2fc6f1f1c4e6215cc02e88243a07ceb3c6c9fd3d179bd02266e5f9
+  rule_id: AE1
+  file: SKILL.md
+  reason: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists
+    on local media paths; the uninspected references are its own scripts and the earshot
+    CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.

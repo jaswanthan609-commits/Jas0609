@@ -1,0 +1,1122 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:a1e79f5c7aae06cfb08c16c65393774a95681c6ac453acb27da39bec58206d9c
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4d49869f24743b7d3d37b4caf996c7491924975b3baf0cb5ef896926da9e2f67
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1664292cf13a3568bfb98fcd36473ea7cd676eee14cbe488043bbb1d798d8034
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:45d9b3e387b07e967c5112818236bde3b363c23ffd907b1e1cec84dec56619bf
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:de904661ebcf80e8a39cb0ee76576b95cc85b63885b64fb9d5c3312578a6ba1b
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7a9524c7a4cb75c08cf6eefbbb701a429ee90308bb92516c5d10a33997cc3e4c
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6bc95fa349fa59b4c925af9b75563003ae9c16f731cd3ad7a2e51e2a507cc0e5
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:3254946b91bdfc6b8145cb89e1fc6589addcebe1cabd7d9dac37025ee9a1eb0b
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2c5dc38e381f5d0d70223e40e9f60e63fdaa18363ead854fd4a79b80fb576b1e
+  rule_id: RP1
+  file: SKILL.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:687572e1e67b911fd6fcb4f6b2bd2be7f9efff9947914ca9e3115f46cc113fde
+  rule_id: RP1
+  file: references/beats.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9c2a08bd67838f79815e08cc16a503c5578bdea65f3d3d6c0df67f10ae02953f
+  rule_id: RP1
+  file: references/beats.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:fccf0da373308cb55d2742cf59cf810afc9990f29394232924631901d699aa32
+  rule_id: RP1
+  file: references/beats.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:38ecd18a14a0faea82350214469242761bd49ec51a404f35644c62e27a312511
+  rule_id: RP1
+  file: references/beats.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a3b311b08a7e07e0d9719e695b4d53915c38080820bf086526db50b5af8f0ef4
+  rule_id: RP1
+  file: references/beats.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9cdeb8d544dc7e5afac90e851870c0bbbfd65728a71180aeda731dd422b722b0
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:29e0f868e7fe2bdc218af2b2bcce89c767c0b4b67ebd8579d7577265d6837bdb
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:29796d1f0653bef9e64779134f8133ca5f559f3a13d637762092845e16887703
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2b79c8d4374704b70bcfd35a8d7a0524248d523722c7da96de9c0383d879d073
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:369695c5240bc74c10100f1c4b94fcade0efe32328b7eb7dba3f36753b4ee6ee
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:decd9ac33f323ea1c0dea7d3f6136b7b9047a2546b17cc0340ff87628f060f67
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:21b136722cd0cb9703b2c67dfb2aa9ae7001577a86f0e54982f0a7b3e3916879
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a9b201904ea758364052b864eac9528641fd7b74384ecbf46db3de145885186e
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:aac3b58d48e6291a3277a5d47ee40acfb71ffd03e2b431b41923a2c0a8fcca37
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:689ec94e1033ba3d6af8c458f572aa819ce13e181817b2dbc462ec46214cb10d
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:024dc92c5e5b0e2cc2e43ae161bb1f2c646970dd4c667b67739c873a07607080
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:b86cd5c7ee022e3fbaa724486621fab02b61384fb2362be466a998daff79180f
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:97541919fbac1125a8739149a8318a79f59e791e8a307deaf069ad4382ca4ca1
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c816180e608fae2dbd4fd742c5859bc8a6d8ca0acf8a171d1a68d5b194d71516
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a7c1b64b64fb76fa8c3aae5474e285d226a1734559ea9c8efe717b425742da98
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f9a2a0ddffe3fd788afb5cc463e81d957a1cad723cbdc53f94885fc4623f830e
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:723aa77f8ba1263e20384adfec296b867e5baaa44262448eca39195980bffc9c
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4c6fffc93975c784dccbc81a3b605e6ac7ed111e7dc9c23ead7d5d6ded04cc95
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7ce54a79e5f87c568d91fce52e34aa8b56c7e9fec9c55ab868c73885afcbbbc3
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d43b62c4ee69cffca9dc5ed865f4a3dcb2de8aaeac4329927cfd1739e176efc3
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:0c0e499b6cef218015f1f458355fbf37fe52b1d72ebc5ba425bc2e8cb2c55d07
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c4f9c8ba15ff9dabd2a5b508c1dbabfa5b795e596d21eef1db55a78ef9cbe8c2
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:19092b38bf209d8aa785c3252198b030a712f0b5fc9461f62884f5aa28bd0589
+  rule_id: RP1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1bd1391d9b9122eb7e830857ac16f04dc7931491ff968651dcaea33192d89d61
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e51fc2e0bab64151b636f77d1111f07e61e19ab518ff2acff183fb6f590e6528
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:895c29d6532a804f35948edaa34b043d90b3a4d01a33dce2d9f2fbb6667d6aa4
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:73de06eeea1e23553707f3544a3c2ce1b6c59552a7a62361cdf37e4e55cdf1df
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d30b580150279585840348b619349e38f71fbff969ba718019c226c4dee8b4ff
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e4bdd8885eb409d6f417e2653bdd0e4c6329d30b6b3285b00bc954a70fd53ff2
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2aebd46e877ed94b1d740d884d03acde74f9d5c42deaa2615b3f13160bf4d0bd
+  rule_id: RP1
+  file: references/cloudrun.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7047e4ca7ea308976a685d118ef12a30d962a9ae44af92f9399a83e38d3214f2
+  rule_id: RP1
+  file: references/compare-and-batch.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:db29e5c5b55fe72e6df0a60320bc1a5acc4c322a1226617ffe4c13247bb103c2
+  rule_id: RP1
+  file: references/compare-and-batch.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:879948edf14cf39fb1acf86bb99803dad790a773d09f5727a77b73a1c15b7c22
+  rule_id: RP1
+  file: references/compare-and-batch.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a75b677c927b51ec920756fe5e9f3ce216103e9c54ac2137211027de4d3f3f49
+  rule_id: RP1
+  file: references/compare-and-batch.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4673e065722eba1b8b7b016916c75a112431f32c8941addbceb3259f49927d83
+  rule_id: RP1
+  file: references/conventions.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:b0e2fb57738b2f95cbb908436aafa3ff4a677ea0ce31f337e7ed54ebe7445d36
+  rule_id: RP1
+  file: references/conventions.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7a6c6f3b0bd8de92f70d8ec271559e6d21ac0de6d0883a7fac0c0f71ffd21817
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9bf263022647f9e2cb1cf59d57477090532a048af51f98fdb23a3d9f2e050542
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:aee6295fa56f69a69a7579e818f1505b2bf98c29b20467a2d950812be6b784ce
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f8bf2dcbbdf76935e88cb37d3fd8b3e9423dee8141100167e832b475b2777685
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7f8ed31f00b35883b046e0092551385cdde9bc27eaaad921cb81220c7ac3a532
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7ddd7ea26cbcb1aceae0b42b95044ecc5885508e099c2d2ef5a6d8630486a8be
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a88e861f6e08c0330a26c3668c79268891d113dac87544ab4135a5c7671a7580
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:cc6513af8264ec2f95ab3109b5b6e5b88652fc7f479f093384f835e32a233017
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6392138dc94296b212c1e09b38d38e7b046ceda895e9aab02ca5975023f6a14d
+  rule_id: RP1
+  file: references/doctor-browser.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ab479faec13752be7e0c60e300b8ef0652195497e102af17d823d0859907d70e
+  rule_id: RP1
+  file: references/feedback.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a8bb5c2c68712d751e942d680c6201bc46457c5bd9dfc95027ddb2e5fd119c68
+  rule_id: RP1
+  file: references/feedback.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6a7830eae1c13414b41f9ad62333ee194aecf11cd5f8bcb6d1521984726d8a30
+  rule_id: RP1
+  file: references/feedback.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a232b29836ffa4c21581816a25dc39d807badaef99efdbc01a41af84e5005fbe
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2bec6a02eea6400fbb20a74367046f15d7efb1d9a1e89ea74a822d4d1922a20a
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:51749e5935fefc1857c2a55bbf648a90c54b89981942fc400932b0a2d17fdf42
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f685c4f085e32c0a435df87ba0b1d06d3d3d263dab20a209429cbde879286e4a
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e5a53088291532525a2f7a57e02799f1fd0623eeb9e195a0bee0b14e435168e1
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4bf1c7bdba5de24b6e2c6d19a162de6b849134b73ef4aa374625fdc2065c78f0
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:85ca96e12c9a2d3fd06eeac5587923508f1cca59eb911b642ba5d3bfe0b0ec9a
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:67c4245b74c0eabf3f440cde8123f74d200f9a3bbcd4ea1d587277274ad16255
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:caaf1075dbca8b88101407eb3aa16bbf1ee7d694342715e9884a379122728ba9
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e475d0d0f9d3716983313fadc702d096899a9b4546ed20db8e94b97d83264895
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:46e23a56b25d2584890679423507c871ec0b91581e78edd0301f72429eddbfb3
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f872891ce70bc1abdbec7740914f271c09a0bd42a7ac755c165c49508165d6fa
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d26167bfca0bbd26ea9a1179a63c5bb04569cecaa1ea8cdc991348728fccc0e5
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8bb03f88a130dda2e532e243bbbd1e8ed4d426e6e5397dfedff0591c323b9deb
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d171602cc3980b6e3791eadad78864a358caec4f7d6a3119ec72de1e5b1ae397
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:56cbedb9baee316479c54a531cb2b279a3dd904e523f912a68071464bfe5c1cd
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:3b1a650ce1f983297168330db5052bfb2e6777a648cbeda77283afc314761baf
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e6f5b6a3e5828fb721ffc7cdb26987ff7da80696096c62a1770ca870bf4d896d
+  rule_id: RP1
+  file: references/init-and-scaffold.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8ff676c7741ec98a46c4f32e824c704f68bfd601350069b440170f1f64ef2eab
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:04f332334bae657bc360b8cfd6b74bbf4bcb540b8e3b062380a4dc42ec37fd80
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:cdbcdb7a2b21476f07d4a081f5bdb080929ecaf06298e8bef9b24ef07649b743
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5816b3c42346c1cf12b93851f6323208cf7808ab0f366c1395fe732e0490b3f8
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6566b8188f5b93a5f1f6cea6471f86d41396e26ff6fee28eee292357ffb26d0f
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:3cb9c1177254f096c00b55fe5081fc2ab470b12babfa27d7be904be21b192908
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:3e744544628ceef732769878d0f658326b9d633c901b5db45f25550661eac1d3
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5de02bd6feee552eae0f2e49fa3968bf8df634736bc59143964e4b5a3fc6059a
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d8a4630c0097a8dba02873b2582449b5be8e355195e939d6f29747c42ff1e60b
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1b6f6fe7f15260d0515998a2f4dae5098da57adff7a217859cb6e42308836a0d
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:df607ce67ebea0bc79b14edc1eccc7ec125493a822c249fc230da6c819ea8add
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8fd3818853da862ff33baccb4d13e2855f0de2fe2a5707128d76102c3c3c7bb0
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2f31e8d8d7b22057f96ceedf041640923d0a37b67e0ce052693542da6d81df8a
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:dd15b11c92f8378c8851fcb4b2c3871eeb99927c808e7632cdf8fc0f11201e07
+  rule_id: RP1
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:aee439cf78094f45c4d6532235494d45e629f7f0e4be6ebd2106bc3d03c14966
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1fcdaeb47691e0c11ede2020db5ee4333c9c120de25c0a6e15087f073d46d27b
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ca4ad18621686e4760df7ad7acbd50fca62bf338c81bdd3e116c51a150caf75a
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1b42dbf472ebc74766d133d916f07288beb43693372b3b3e62be707c0831d9c5
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6a97ec50c4abea6d97028e64819856b4cd11890f51e358c2746b509e16836f36
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:48fb99324347fcfcc7a93024404f10698f3e0bfe3cac900ec538e642a07921ba
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a26f891a85970d2f0a55d3492bd2f2afef481b1c2b1889e34de2c00bb4aeb963
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c3c52e7b343a0a789060dac0f81d0c0cbce6491044da45cbe15af3761552869e
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f55635d5553436abd236977ec82b95c385654a5b0cb02e0b54e9e82726622002
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5569abc771e32a680c9d61344ff1a37f069c90ecb725e4ee31d0bd421ee27563
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:74a23397961a4f381cada65b21e1dcb93eb1fb445cdfc721afd1d65a66598308
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:42cd9e5935fb2775ddcf3f080c3a291f91f4015d45482f805b9249120957c8fd
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:1cdd359f5f324e810891194f6c1208867942a2432261b33a2de4a37769eba8a7
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:338cbe99f33512292845703e8747eb7aaa470c23b11bcd3b4b761ebd0b743e60
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:557770747ce72f557b7a11b9d73f85a60d4d3d89b0ac0adace1e411f97cfd107
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:de4982c6734a82f424cedb3f052061e62fecb39b68347aab6f1b7ae4fd6ae9ae
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a7a0e5bd8286d95848a5b9fb979cb34d09b08cdf8d9b706170a8515a0fd487c3
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a0e311210f184853e7edb35dff7bae8123b11268c90d99e80b89b7400b9a8393
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:94a116f25a5aab959bfef64b0ecf603de6dc8b6f2935bb43715bd393fe2d6349
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ad8f4e04b4644637d85f9ad84439e51515310227f88df07780f919d2df194be0
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:62544a8ef2f7c9f2c092d0d15e2ef8de763ea117dbb0cad00e741333be34d1ad
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:195495f55331b2e000036fc9e6a94c12b75db726d0a5828f36fddd164b2f63ee
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:e65821db4b883965ae50c1a0a09eccd823f7e8c936ad5e04b0c99b6bb7daff89
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d9abcc5ff832e38fc96eb06ce5fcad52494eabbdf420947e3eac8c17810ee063
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4735445c2fc974b4237aaebeab01309a616e99c12b021b8d6828336a3689c4c5
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:186542278bfad8760b7d8c1db4367b8e4e2f2546f8243b1d467930adaf732976
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2f19d43284c428c572c8c1cf6752d9609640907d3be607bdf3915dce3228a2cb
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9bb452171828675d99f2f3ae3a01083800389a08380b86944398db3ff33757ff
+  rule_id: RP1
+  file: references/lint-validate-inspect.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5ec5a66270159b20e423d49240dd2544506a7259cb1f94ec126683be5fac3429
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d5dcb2bc77db8aea78e30780b0c31cca95ba87a5e506b879d359dfb319764379
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8c3ecad7704637c3be681c55975f358861c7c6ca9b118d003fb6278b88d3a7fa
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ee9f5fee444be8ec80011415216dca09c70dac45204dce3e4e11d94a8f68665f
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ff9ee13c0eb6f98a2d1f1bc4365467948e92c0a817232ac934c21ea9adac4871
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:169028142b31d177d310900bd022603cd7beaf45c12f0157bd834b898df2dd4e
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:dad48d28492f7a55ebeee3fed01c7a621c9bafc7a7f7cf5a360f14c840be8a26
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8fb0b3157a9edc40f1291e1a3c42c4b5c05f6c90c852a4d81b24b2ff20b66625
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a96bcd13a6d1c48d6e8183d984007108063ac1d06257ece4165e4327ac26ff74
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:43eb58ec273b8b4941b7bbe08bf8b58efe8c0ff4718dc963a725b023242e6874
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:3bfc4c535b2bb106bbb8a1e04bbbc34a28d678c0bfd9ff576ba25df379e01355
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c2b811ab5077b8fd6089d643c038a55906de04b3073b21719780ca99a97bbce1
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f4cf57923579bbdc91bd7bf34befc1aa81aa2a8416130e7e38e7494f11e36676
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:cf1bf724842dfd6c749ff6a8045633b1685b3c34bdffe5c4bfe8829f4081fe4e
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:0a9e8e904d1b7b08d2c79401be4a16484b9d3b5d9e75d4f8d4d6aae28a181e1e
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:f4e995c2b56f6143e0a388c1d3e73d16739202492b9d9e7f26ff6671b9abc9e5
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:525e0f326e08e6b025decdb9fc307c87ddc0b95b3d0fcf0a214376f480390812
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9aa8a90bc77674969574ab68e4af6f0ba3a77c7b1b34b729dd14160ac3c8a6fe
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:737b3bafdfbfd76be4681d6fe442a29ff746891544e3178912a00e355bfd4994
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5b448a5f9e0bd46446a4d0c60f8a759046274ec242ee7170b91573dfbd257bb3
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:dc65d1b420eb10f1996749fc61af8cd1708aa7be8fb21c86d9ab2a8eaffb8d22
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:144843f3410ab7165fe0760d19a85fd847ca602d6606400a4fc956b57fc07050
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:074230787eac1ff8f58769b2465ba4e1f71de77f6c87037e21050ef81dd89f60
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d743caf81757060db271a13ed01138c8075259e24fb593c11b250a636b13678c
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:6a4fe4eb2d495870cc7dcaa406444779030c4abc3283ccc217e9e610b2756fa6
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:86e41c7ceb865a9e5e2d59f285a6f61b8d57dab4a44cef8c78a664b58edb6e4c
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c073fa1d74e0376e48bb3705926eb3358c1898d9112b762915c4d9ef82c93ad3
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:77b52244f18d45fa525382f0ec56e53410de85a6684f82440ddea4249e035cd7
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:882bd31f7b624a337f7f39eed516d0aa7be770c7bc4062fe55070e29ee34f8e3
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:26e1aeb3c2bf11c486c31af26f5918c558dad0dd2fe100853e0475245a4cdbc2
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:a8302ee7ad4af833f2ecb674f409a7862ef484729bf05ad5025ea4239c79c8c6
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:dc29ab96b091576ff8f15b387d1615c090dd05bdc751c5d19257874d73d841c6
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:86d5d6d97dda3cbf05906e093181cffea4413fa2e434ad35287174ac179e262d
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:823f1dc66fe7a0e2e99d7039b48616b34158f90caa5a252fc0d8eb8b767984db
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:4589d6801f09e76f965cc33bc3dc53661d4342092d07c9db0d5c8f04d0137869
+  rule_id: RP1
+  file: references/preview-render.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:64b0902098bff70519cd718d54a02e2b87291ceadfd66e8e50bfcf4a3593a4e3
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c8c9568b6c6ee70cd886497c58608a62482e96d6a84a08b461c66db4dc66a0da
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:799a5bf4fd6b6e425713f9ae1d7bf26a53fd482040137cd44acfbab51678fb9b
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:ee37e55ee17b7862f0f18c1c80513d1362c583f0b33ad60a4290bb91e561769e
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:fe3bfdfa9dbc2c2ff11600a11c0154624fd53028b6538e8240353c6c686a1db9
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:cbf2a24b43b228bd84ca998c1f773b15c72ecf73a7084fcbad25980c5a86d810
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:23609d91db2d04cbabbb03deb2f0e9714a05b60c2b249ab1d13ee1ed4677512d
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:dabf7483e1b6f59a1720b12d51201b5f0d3567ad19e67de0e4e584c01fc4ef6d
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:da8902cf4d4ea87289d5c59195b78382111cbcf00b55849d480579e9f5b86161
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c62e876786449ce9fa4d10cd7c45bcf9460178111101ff2724dbc6cf17fb5786
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:d8547c37d0aff43f8f6d5205215f06af0af75521d4f320c91e77ea1ea5751682
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5221bdd2d8274c924fe93a267e76a17ab3cb0c0e363c25588caac970dee8d63e
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:9b89aac2d27521d56aa041cb460317f8c146693253f2dc763be92549585f6465
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2f0d8ef06e79f53f7a3e181f3dd3a06b39ddd9d4b654724deb3a8f89409e86ce
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:b9ce1d2f6f7c42e84d93883fbf1b0dd41df42d2fb3024b664ca1364d612a2156
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:8c1c17307f0a2a841f89c9c9d2a486e82f89d916b21f5b68b292cf53b756f647
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:2e735b727404ecdaf58caa3b3b870fce343d5fe6e1bc6fec3690415e2ba0fcc4
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:5f72ac80e74ffde92091a12158afec0ef35891bf85618e20f14c80448de579bb
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:47069c0afe2db8ddac56ba80e4c5ac96a22bee502f72063137ab59810f4ef455
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7872574cb23a3d291ec1844d605301cce2fda35452c6bb09db8afa1439c54ee0
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:7704421e9b454638a8effb15b6073452c3f956ccc7e77c0c7c7a276674163f0a
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:743c8cd0a904c77c9f544cc92622fb5e0b68091a85be86001b539e11f383d1b4
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:256e2cd3beeb1694a897a11c9f3acce665b4bf303390079fe2a5b2b94f5e6fb6
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:daa80968e4ce03aab3f9d0f081f03ba2aa12fa6a80fa2d5282bf5e36d452a9db
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:347421f185c6364866e8e2a484e4629b601538267690d974d2cdc4eeffd0670c
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:c50ab3bb6ebf9c4f33c549a3ea4ead7edffb8ed53f2c0630c9877f0574484410
+  rule_id: RP1
+  file: references/upgrade-info-misc.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:015234d640117ad4127e9a822b9fae08e9f1e3c1498f25d5900c393a10e824f7
+  rule_id: EA2
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:88f928d568f8d7a4241f4abcfde8b388e4a9fafbbbc89c3aea39b847781bf39b
+  rule_id: PE3
+  file: references/lambda.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.
+- hash: sha256:b354e02cb02d6c62dfa9647f673ec801dddec26a1d95a5ffe8467230da6cd16d
+  rule_id: TM1
+  file: references/cloud.md
+  reason: HyperFrames CLI reference. Credential access is a prerequisites line (AWS
+    credentials for Lambda renders, which we do not use); tool abuse is the documented
+    cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.

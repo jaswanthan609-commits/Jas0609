@@ -1,0 +1,342 @@
+# SkillSpector baseline — findings listed here are suppressed on future scans.
+# Edit 'reason' fields and add glob 'rules' as needed. See docs/SUPPRESSION.md.
+version: 2
+scanner_version: 2.12.0
+rules: []
+fingerprints:
+- hash: sha256:a5a5615731c0e6c097a3aea7797d696ad401392864a3d97208f524f161d54d1b
+  rule_id: LP3
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:be16696993cf5004052b582b5b71360cb7d25434515b7132452027b159d9d39b
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:1f26bf7536f34507257b066ccd0353db4417e1aaedd88ba36e2496ecf35e3a72
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:a8e6c7277c7df64d985884e1f3f95495b88569453846088e152f278397be6e39
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:f743ea2e8e5a131019d802157f717898f7bb1e0e8a02e518ad02a24bc826d5be
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:cbdd002dc429544fb493bc044a9595e261c92f566dcec92bd87156263b03a1f2
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:0a1de775f4c410506708d5e116b89c38acc44df28f3fc0a815069e6746cd802e
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:179964d524d10169e1c14f24e355e675f6c2326ca9cced91c01928bddd621a0d
+  rule_id: RP1
+  file: SKILL.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:b73dc0ee304010f84e07d0d788cbeaec3061b2d3c588f39b1d069f3ec972cde7
+  rule_id: RP1
+  file: references/captions.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:ebc94be8b3a30810e09bdf690520516c8b8746a3e01114a03d0a576a1340e367
+  rule_id: RP1
+  file: references/captions.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:d8e96fe473e3e3e50dd0e3311a7f77a508d09666419e91515dc8770b17aebb99
+  rule_id: RP1
+  file: references/captions.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:954511a2ba39f703cac87e8d28850048fb037972ffe66624cd0343dea024cf9a
+  rule_id: RP1
+  file: references/captions.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:c055526cef8e03ace2514b619e4b2b57b6595417f810fe83695b1b959038a7b1
+  rule_id: RP1
+  file: references/film.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:ebe1bbcee32da7881501918cdfa306bd291140cdd0fb93790fe0c82921b9d713
+  rule_id: RP1
+  file: references/film.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:4ccfdca1acd3c8152f50fc8ca1b520cd3068d95cd6c645cb230bed9d9eb17b61
+  rule_id: RP1
+  file: references/film.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:8496a192ccd6cccf8594a368d6131e1c4cf219fb7f1bb7071afe715654a49129
+  rule_id: RP1
+  file: references/format.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:6896c8550b2189df7e527cf18b940b75d87d390b36ddf9995647ee6c79af2384
+  rule_id: RP1
+  file: references/format.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:b0ed6f84e07f9842ef84ae2ae8b850c982533ec7c61f661e4a33b45553107d5b
+  rule_id: RP1
+  file: references/look.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:e4ebe437d986898217e45c78b6fce1aaa53a3c6c0a16f60e8690d9e8b72eacdc
+  rule_id: RP1
+  file: references/look.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:b248acb7e4c6fe32598a39c79fa4f8cf7db73f77abab57da30f3d1d5adff5f10
+  rule_id: RP1
+  file: references/motion.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:9a3682e4d0cb201ba434d427963ac42dff9b9f7a21eea68912d35e6cc5e8fd05
+  rule_id: RP1
+  file: references/motion.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:d010bf23cfb4c0067c3498b793f26a154e5c4c15ec7c123c74ec509e85e553a3
+  rule_id: RP1
+  file: references/motion.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:4fd2e4c2fead2781d8b210b87ed414dc1effaba05547df1fbe0c2e5c5998e399
+  rule_id: RP1
+  file: references/motion.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:f5c79f7b5c8ac945a7a8741feff20ea68cafc669f23fb01b038f292f6375b1a9
+  rule_id: RP1
+  file: references/motion.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:99c22fd78055d92986d07ad5457d70991783c3c2c0eee01d9cbdb4a2faa2cbbe
+  rule_id: RP1
+  file: references/plugin-installation.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:72cdcd5cc68ba046c83242a4efcb6a455addb271d6bcc0b4e2c9d82982b5c006
+  rule_id: RP1
+  file: references/plugin-installation.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:fe06015d6b67345c15a41b6e58b97569461144cd0b7a787c8aa526f40e738909
+  rule_id: RP1
+  file: references/plugin-installation.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:48410c0617db9890a4b087c7063637682bf127360706574f40dc23f91dfd3491
+  rule_id: RP1
+  file: references/review.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:eee34efc0dc81b6692700ea4d96d96215d7455c0ccadb0c9315028c55fee5165
+  rule_id: RP1
+  file: references/review.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:f75e7f9cb992f0b321dc1dbff42d1868041b82da7e05dfba32ef3aabbdff5c1b
+  rule_id: RP1
+  file: references/review.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:5844a0872b9f7bcf18560e506f069e6f44723351f870e15d89fc8d85e2fd92f1
+  rule_id: RP1
+  file: references/runtimes.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:82bef3aee2e9da658a6c6872bf4a9e7c3e06480e6f4a7316bced66acfcb7a6c0
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:3588ed7c01023bb99b60747273456eb5a0f0872d14650507f8cbb3d27dcbc262
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:af7e47ef2d528ea0c8eaa4856cfbc8107db464476a21bb233ddd9bc27513fdd2
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:5fb5384d6e0c23852607cefe59c51f9dab00522acbd14b8d6b99d1b8b0273aac
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:b6fa5cf7f67cf1baffdfe7e279b96de1c8f887875e79e368e69268a6da867377
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:5f595f5a1bf1ed40a8303ddf7676cc4164d2056e8fbb80a0c1edf7656e1011cf
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:252063a2f5a5393269d142570a272311c60030a8ebe0fc1b2f155cab513c67ba
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:ceefe7cf96cbe95cac364383f12bb8f935d4be7ecdecde25b0d8e80427d6f17c
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:09527ac02700d29aaa4320a9a454f10ad65923db110a29197b8e61abcb695ff5
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:f928ee20a1c5bf394b9614413fb553b5d865dbc6a32dbbe513ca919117d556f7
+  rule_id: RP1
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:68caea965de07632fa56fd7baff1712e8f829a69c56d5adeb56a7699bcb89210
+  rule_id: RP1
+  file: references/sound.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:cc1b0725f138e016c87bbbacc31c3febe281af267cdffb6e86cf366d6897e610
+  rule_id: RP1
+  file: references/sound.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:aeb7c6ae9924d5b2a63b719610ef46ab5c65625c236a0c7259e5699545d69a0d
+  rule_id: RP1
+  file: references/sound.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:4acaed6e351876e01cfcd4f22a9e8bf57f3a2aecc8111f960d1a57f2094b74f8
+  rule_id: RP1
+  file: references/storyboard.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:62e3267632798128007769a7f2218093ff648c0f5b2e46c4f9b6efabd7afcb81
+  rule_id: RP1
+  file: references/types/data.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:52ee0555542d38fced84dff1e469c5cca1af71c0cff4158346c86fb5f2c02acb
+  rule_id: RP1
+  file: references/types/launch.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:f8bbd73280d18662e0da3e7d0a7c6c5ed4cd8a3b8f13ad58a7509165bcbf810f
+  rule_id: RP1
+  file: references/types/music.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:fb77ed28ada8167700d46b75829ffb1089b2e808e23b15c4b96e022d92ea4733
+  rule_id: RP1
+  file: scripts/bake-basemap.mjs
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:87f3b3a9bdcce06df3108dc310868021f889b5a2e2aaf0bc0ae4ab26b020c699
+  rule_id: RP1
+  file: scripts/plugin-cli.mjs
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:42287bb336de88a5a95ac0235cfbb9d2e6f7e2c5dded59ab28efa101d33d35f4
+  rule_id: RP1
+  file: scripts/plugin-cli.test.mjs
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:fb5787a87e72ff1bc4a56618246cb09ddcbaac5097c7b343900500369979cb2c
+  rule_id: AR2
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:0a82c5ff68f95bef9ad0671e8f351e40bf171ae2a4283c8af61090bd60098c82
+  rule_id: EA2
+  file: references/skill-lifecycle.md
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:fa623bde90c3ea675904621b6bd2fadb994c7765ab6c486e4d5d31529b8739e2
+  rule_id: P2
+  file: assets/frame-presets/blue-professional/caption-skin.html
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:226f5688f0b2f913d7561a2f7b958c7ce9b6e1cdfce4ca455b0afbb11fc1825b
+  rule_id: P2
+  file: assets/frame-presets/bold-poster/caption-skin.html
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+- hash: sha256:52a55f14f98c830f1ac706aa8203712b13379689afcf20b4b5ad2c7a6ea11386
+  rule_id: P2
+  file: assets/frame-presets/editorial-forest/caption-skin.html
+  reason: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments
+    in caption presets; npx hyperframes is the vendor CLI (projects pin its version);
+    the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
