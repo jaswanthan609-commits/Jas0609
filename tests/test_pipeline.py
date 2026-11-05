@@ -621,7 +621,8 @@ def test_hooks_fall_back_to_description(tmp_path, monkeypatch):
 
 def test_glowup_beats_follow_the_voice_and_sound_fits(tmp_path):
     import subprocess
-    import soundfile as sf
+    import wave
+    import numpy as np
     from facepipe import glowup
 
     lines = []
@@ -634,8 +635,9 @@ def test_glowup_beats_follow_the_voice_and_sound_fits(tmp_path):
     assert ep["beats"][0]["t"] == glowup.TITLE_SECONDS
     assert ep["beats"][1]["t"] > ep["beats"][0]["t"] + 1.0
     assert abs(ep["duration"] - (glowup.TITLE_SECONDS + 2.5 + 2 * glowup.GAP + glowup.ASK_SECONDS)) < .15
-    x, sr = sf.read(str(glowup.soundtrack(ep, lines, tmp_path / "s.wav")))
-    assert abs(len(x) / sr - ep["duration"]) < .05 and abs(x).max() <= .9
+    with wave.open(str(glowup.soundtrack(ep, lines, tmp_path / "s.wav"))) as w:
+        sr, x = w.getframerate(), np.frombuffer(w.readframes(w.getnframes()), dtype="<i2") / 32767
+    assert abs(len(x) / 2 / sr - ep["duration"]) < .05 and abs(x).max() <= .9
 
 
 def test_glowup_top_comment_picks_most_liked(monkeypatch):

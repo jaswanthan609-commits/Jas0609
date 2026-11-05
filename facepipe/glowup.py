@@ -183,7 +183,7 @@ def time_beats(ep: dict, lines: list[Path]) -> float:
 
 
 def soundtrack(ep: dict, lines: list[Path], out: Path, seed: int = 1) -> Path:
-    import soundfile as sf
+    import wave
 
     rng = np.random.default_rng(seed)
     n = int(ep["duration"] * SR)
@@ -201,7 +201,9 @@ def soundtrack(ep: dict, lines: list[Path], out: Path, seed: int = 1) -> Path:
     _place(fx, ep["duration"] - ASK_SECONDS, _pop(900), .5)
     mix = voice + fx + _bed(n, rng)
     mix = mix / max(1e-9, np.abs(mix).max()) * .89
-    sf.write(str(out), np.stack([mix, mix], axis=1).astype(np.float32), SR)
+    pcm = (np.stack([mix, mix], axis=1) * 32767).astype("<i2")
+    with wave.open(str(out), "wb") as w:          # stdlib only, so no extra dependency
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())
     return out
 
 
