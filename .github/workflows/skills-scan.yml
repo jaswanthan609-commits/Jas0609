@@ -25,7 +25,9 @@ jobs:
           skillspector scan .claude/skills --recursive --max-skills 200 --no-llm --format markdown --output report.md
           code=$?
           cat report.md >> "$GITHUB_STEP_SUMMARY"
-          cat report.md
+          # The log shows only the findings: each skill's name and its Issues section (the full report is above).
+          awk '/^--- .* ---$/{name=$0} /^## Issues \(/{show=($3!="(0)"); if(show) print "\n" name} /^## Inspection Completeness/{show=0} show' report.md
+          grep -A4 'Recursive Risk Assessment' report.md
           exit $code
       - uses: actions/upload-artifact@v4
         if: always()
