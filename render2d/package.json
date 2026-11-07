@@ -1,0 +1,11 @@
+{
+  "name": "render2d",
+  "private": true,
+  "description": "Glow-up cartoon Shorts: an SVG character and score bar animated with GSAP, captured frame by frame in headless Chromium.",
+  "dependencies": {
+    "gsap": "3.12.5",
+    "@fontsource/anton": "5.0.20",
+    "@fontsource/inter": "5.0.20",
+    "playwright": "1.56.1"
+  }
+}

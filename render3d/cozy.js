@@ -10,7 +10,6 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const q = new URLSearchParams(location.search);
-const W = +(q.get('w') || 1920), H = +(q.get('h') || 1080);
 const spec = Object.assign({
   weather: 'rain',        // rain | snow | clear | autumn | autumn_rain
   time: 'night',          // night | dusk | dawn
@@ -20,7 +19,10 @@ const spec = Object.assign({
   wall: '#3b2b25', accent: '#8a3b2a', wood: '#5a3a22',
   props: ['books', 'mug', 'plant'],
   seed: 1, loop: 12, fps: 24,
+  mess: 0,                // 0 = the finished nook, 1 = a dark, cluttered room (30 Days to Cozy, day 1)
+  w: 1920, h: 1080,       // 1080x1920 for Shorts
 }, JSON.parse(q.get('spec') || '{}'));
+const W = +(q.get('w') || spec.w), H = +(q.get('h') || spec.h), PORTRAIT = H > W;
 const LOOP = spec.loop, TAU = Math.PI * 2;
 window.LOOP = LOOP; window.FPS = spec.fps;
 
@@ -39,7 +41,7 @@ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadow
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050407);
-const camera = new THREE.PerspectiveCamera(36, W / H, 0.05, 60);
+const camera = new THREE.PerspectiveCamera(PORTRAIT ? 64 : 36, W / H, 0.05, 60);
 
 function canvasTex(w, h, draw, srgb = true, rep = [1, 1]) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
@@ -84,7 +86,7 @@ const DESK = .82;
 box(2.9, .07, .8, woodMat, 0, DESK, .42);
 box(.08, DESK, .7, woodMat, -1.35, DESK / 2, .42); box(.08, DESK, .7, woodMat, 1.35, DESK / 2, .42);
 // curtains, softly folded, in the accent colour
-const curtainMat = new THREE.MeshStandardMaterial({ color: col(spec.accent), roughness: 1, side: THREE.DoubleSide });
+const curtainMat = new THREE.MeshStandardMaterial({ color: col(spec.accent).lerp(col('#4a4a4e'), spec.mess), roughness: 1, side: THREE.DoubleSide });
 for (const sx of [-1, 1]) {
   const g = new THREE.PlaneGeometry(.55, 2.3, 40, 1); const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 28) * .03);
@@ -195,7 +197,7 @@ if (spec.light === 'candle') {
   dish.position.set(cx, DESK + .045, .48); scene.add(dish);
   FLAME.set(cx, DESK + .29, .48);
   flame = new THREE.Mesh(new THREE.PlaneGeometry(.07, .16), flameMat); scene.add(flame);
-} else {
+} else if (spec.light === 'lamp') {
   const lx = .5 + rnd() * .2;
   const base = new THREE.Mesh(new THREE.CylinderGeometry(.03, .06, .24, 24), new THREE.MeshStandardMaterial({ color: 0x6a5030, metalness: .4, roughness: .4 }));
   base.position.set(lx, DESK + .155, .4); scene.add(base);
@@ -242,8 +244,26 @@ const motes = []; const moteMat = new THREE.SpriteMaterial({ map: softDot, color
 for (let i = 0; i < 40; i++) { const m = new THREE.Sprite(moteMat.clone()); m.scale.setScalar(.008 + rnd() * .01);
   m.userData = { c: new THREE.Vector3(FLAME.x + (rnd() - .5) * 1.2, DESK + .2 + rnd() * .9, .4 + rnd() * .9), r: .03 + rnd() * .06, o: rnd() }; scene.add(m); motes.push(m); }
 
+// ---------- clutter (30 Days to Cozy): boxes, laundry, takeaway, paper; fewer of them as mess falls ----------
+if (spec.mess > 0) {
+  const n = Math.round(spec.mess * 14);
+  const card = new THREE.MeshStandardMaterial({ color: 0x8a6a42, roughness: .95 });
+  const cloth = [0x3d4a5a, 0x5a3a3a, 0x6a6a6a, 0x2e3a2e].map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 1 }));
+  const paper = new THREE.MeshStandardMaterial({ color: 0xd8d4c8, roughness: .9 });
+  const can = new THREE.MeshStandardMaterial({ color: 0xb03030, metalness: .7, roughness: .3 });
+  for (let i = 0; i < n; i++) {
+    const k = i % 4, x = (rnd() - .5) * 2.6, z = .9 + rnd() * 1.1;
+    if (k === 0) { const b = box(.3 + rnd() * .25, .2 + rnd() * .2, .3 + rnd() * .2, card, x, 0, z); b.position.y = b.geometry.parameters.height / 2; b.rotation.y = rnd() * 1.5; }
+    else if (k === 1) { const m = new THREE.Mesh(new THREE.SphereGeometry(.22, 20, 12), cloth[i % 4]); m.scale.set(1.2, .32, .9); m.position.set(x, .06, z); m.rotation.y = rnd() * 3; m.castShadow = m.receiveShadow = true; scene.add(m); }
+    else if (k === 2) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(.045, 0), paper); m.position.set((rnd() - .5) * 2.4, DESK + .075, .3 + rnd() * .35); m.castShadow = true; scene.add(m); }
+    else { const m = new THREE.Mesh(new THREE.CylinderGeometry(.033, .033, .12, 16), can); m.position.set((rnd() - .5) * 2.2, DESK + .095, .3 + rnd() * .3); if (rnd() < .5) { m.rotation.z = Math.PI / 2; m.position.y = DESK + .07; } m.castShadow = true; scene.add(m); }
+  }
+  if (spec.mess > .5) { const pz = box(.42, .05, .42, card, -.45, DESK + .06, .45); pz.rotation.y = .3; }   // takeaway box
+}
+
 // ---------- lights ----------
-scene.add(new THREE.AmbientLight(0x1a1a2a, .35));
+scene.add(new THREE.AmbientLight(0x1a1a2a, .35 + .5 * spec.mess));
+const bulb = new THREE.PointLight(0xc8d6ff, 9 * spec.mess, 9, 1.2); bulb.position.set(.3, 2.6, 2.1); bulb.castShadow = spec.mess > 0; scene.add(bulb);   // bare cold ceiling bulb
 const moon = new THREE.DirectionalLight(spec.time === 'night' ? 0x6070a0 : 0xd09070, spec.time === 'night' ? .35 : .6);
 moon.position.set(.5, 3, -4); moon.target.position.set(0, .8, .8); moon.castShadow = true; moon.shadow.mapSize.set(1024, 1024);
 scene.add(moon, moon.target);
@@ -256,12 +276,12 @@ composer.addPass(new BokehPass(scene, camera, { focus: 2.15, aperture: .0035, ma
 composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), .5, .7, .78));
 composer.addPass(new OutputPass());
 const grade = new ShaderPass({
-  uniforms: { tDiffuse: { value: null }, uF: { value: 0 }, uFire: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, uF: { value: 0 }, uFire: { value: 0 }, uMess: { value: spec.mess } },
   vertexShader: `varying vec2 vUv; void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float uF, uFire; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float uF, uFire, uMess; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))+uF*.618)*43758.5453); }
     void main(){ vec3 c=texture2D(tDiffuse,vUv).rgb; c=pow(c, vec3(.96,.98,1.04)); c+=vec3(.012,.006,0.);
-      float lum=dot(c, vec3(.2126,.7152,.0722)); c=mix(vec3(lum), c, .82);
+      float lum=dot(c, vec3(.2126,.7152,.0722)); c=mix(vec3(lum), c, .82-.45*uMess);
       c+=vec3(-.012,.0,.022)*(1.-smoothstep(.0,.35,lum)) + vec3(.02,.008,-.01)*smoothstep(.45,1.,lum);
       c=(c-.5)*1.06+.5;
       float v=smoothstep(1.05,.35,length((vUv-.5)*vec2(1.1,1.))); c*=mix(.62,1.,v);
@@ -273,7 +293,8 @@ const grade = new ShaderPass({
 composer.addPass(grade);
 
 // ---------- frame ----------
-const camBase = new THREE.Vector3(-.05, 1.32, 2.55), look = new THREE.Vector3(0, 1.25, 0);
+const camBase = PORTRAIT ? new THREE.Vector3(-.05, 1.7, 2.45) : new THREE.Vector3(-.05, 1.32, 2.55),
+  look = PORTRAIT ? new THREE.Vector3(0, 1.0, .2) : new THREE.Vector3(0, 1.25, 0);
 function render(t) {
   const ph = ((t % LOOP) + LOOP) % LOOP / LOOP;
   camera.position.set(camBase.x + .11 * Math.sin(TAU * ph), camBase.y + .025 * Math.sin(TAU * 2 * ph), camBase.z - .06 * Math.cos(TAU * ph));
@@ -282,7 +303,7 @@ function render(t) {
   outsideMat.uniforms.uPh.value = ph; glassMat.uniforms.uPh.value = ph; flameMat.uniforms.uPh.value = ph;
   const fl = flick(ph, 1);
   warm.position.copy(FLAME).add(new THREE.Vector3(.01 * fl, .03, .02));
-  warm.intensity = spec.light === 'candle' ? 2.2 + .35 * fl : 3.2 + .05 * fl;
+  warm.intensity = spec.light === 'none' ? 0 : spec.light === 'candle' ? 2.2 + .35 * fl : 3.2 + .05 * fl;
   fire.intensity = spec.fire ? 6.5 + 2.2 * flick(ph, 5) : 0;
   grade.uniforms.uFire.value = spec.fire ? .75 + .25 * flick(ph, 7) : 0;
   if (flame) { flame.position.copy(FLAME); flame.quaternion.copy(camera.quaternion); flame.scale.set(1, 1 + .06 * fl, 1); }

@@ -12,6 +12,7 @@ Typical week for one channel:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -153,6 +154,11 @@ def _remaining_topics(cfg) -> list[str]:
 
 def cmd_daily(cfg, args):
     """Unattended daily run (GitHub Actions): top up topic ideas, then draft today's scripts."""
+    if cfg.visual_mode == "glowup":  # a series: the next episode, picked by the last one's top comment
+        from . import glowup
+
+        glowup.daily(cfg)
+        return
     from .pipeline import draft_script
     from .script import generate_ideas
 
@@ -354,7 +360,11 @@ def cmd_lint(cfg, args):
         topic = folder / "topic.txt"
         fmt = topic.read_text(encoding="utf-8").split("\n", 1)[0].strip() if topic.exists() else "long"
         script = load_script(folder / "script.json")
-        if fmt == "ambience":
+        if (folder / "episode.json").exists():   # a glow-up episode: the beats are the script
+            from .glowup import lint_episode
+
+            problems = lint_episode(json.loads((folder / "episode.json").read_text(encoding="utf-8")))
+        elif fmt == "ambience":
             problems = [f"The title is {len(script.title)} characters; keep it 60-95."] \
                 if not 60 <= len(script.title) <= 95 else []
         else:

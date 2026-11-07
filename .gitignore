@@ -15,3 +15,4 @@ footage/
 topics/*.done.txt
 render3d/node_modules
 .cache/
+render2d/node_modules

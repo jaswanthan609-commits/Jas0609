@@ -30,8 +30,9 @@ def isolated_ledger(tmp_path, monkeypatch):
 
 
 def test_english_channels_load():
-    assert list_channels() == ["ai-tools", "cozy-hours", "kids-stories", "nri-money", "sleepy-history",
+    assert list_channels() == ["ai-tools", "cozy-hours", "gopal-glowup", "kids-stories", "nri-money", "sleepy-history",
                                "what-really-happened"]
+    assert load_config("gopal-glowup").visual_mode == "glowup" and load_config("gopal-glowup").series == "gopal"
     assert load_config("sleepy-history").long_format == "sleep"
     assert {load_config(c).language for c in list_channels()} == {"en"}
     kids = load_config("kids-stories")
@@ -242,17 +243,17 @@ def test_budget_plan_by_weekday_and_unlock():
     ap = _autopilot()
     # 2026-11-04 line-up from the cross-niche scan; NRI money paused.
     monday = budget.plan(ap, today=date(2026, 11, 9))
-    assert monday.jobs == [("sleepy-history", 1, 0)]
+    assert monday.jobs == [("sleepy-history", 1, 0), ("gopal-glowup", 0, 1)]
     tuesday = budget.plan(ap, today=date(2026, 11, 10))
-    assert tuesday.jobs == [("what-really-happened", 1, 1), ("cozy-hours", 1, 0)]
+    assert tuesday.jobs == [("what-really-happened", 1, 1), ("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
     sunday = budget.plan(ap, today=date(2026, 11, 15))
-    assert sunday.jobs == [("cozy-hours", 1, 0)]
-    assert budget.active_channels(ap) == ["sleepy-history", "what-really-happened", "cozy-hours"]
+    assert sunday.jobs == [("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
+    assert budget.active_channels(ap) == ["sleepy-history", "what-really-happened", "cozy-hours", "gopal-glowup"]
     assert "kids-stories" not in [ch.slug for ch in ap.channels]
 
     # Earnings gates still work if a channel sets one.
     ap.channels[0].unlock_at_usd = 50
-    assert budget.plan(ap, today=date(2026, 11, 9)).jobs == []
+    assert budget.plan(ap, today=date(2026, 11, 9)).jobs == [("gopal-glowup", 0, 1)]
     budget.save_revenue("nri-money", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
     assert ("sleepy-history", 1, 0) in budget.plan(ap, today=date(2026, 11, 9)).jobs
     assert budget.available(ap) == pytest.approx(130)
@@ -270,7 +271,7 @@ def test_budget_slows_down_and_stops():
     budget.record("claude", "nri-money", 69.0)  # $1 left -> about $0.12 a week
     tight = budget.plan(ap, today=date(2026, 11, 10), now=later)
     # the expensive long video is dropped first; the Short and the near-free ambience video stay
-    assert tight.jobs == [("what-really-happened", 0, 1), ("cozy-hours", 1, 0)]
+    assert tight.jobs == [("what-really-happened", 0, 1), ("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
     budget.record("claude", "nri-money", 5.0)
     broke = budget.plan(ap, today=date(2026, 11, 10), now=later)
     assert broke.jobs == [] and "out of money" in broke.notes[-1]
@@ -589,3 +590,116 @@ def test_lint_command_exit_codes(tmp_path):
     with pytest.raises(SystemExit) as e:
         main(["lint", str(bad)])
     assert e.value.code == 1
+
+
+def test_short_scan_merges_instead_of_shrinking(tmp_path, monkeypatch):
+    import json
+    from datetime import date
+    from facepipe import scan
+
+    monkeypatch.setattr(scan, "SCAN_FILE", tmp_path / "scan.json")
+    monkeypatch.setattr(scan, "RESEARCH_DIR", tmp_path)
+    today = date.today().isoformat()
+    row = lambda i, seed, views: {"id": i, "seed": seed, "title": i, "views": views, "seconds": 600, "long": True,
+                                  "young": True, "published": today, "subscribers": 1000}
+    scan.save(scan._rank([row("a", "ambience", 10), row("b", "lofi", 20)], 90, 3000))
+    scan.save(scan._rank([row("a", "ambience", 99)], 90, 300))   # quota cut the second run short
+    d = json.loads((tmp_path / "scan.json").read_text())
+    assert d["videos_checked"] == 3000
+    assert {o["id"]: o["views"] for o in d["outliers"]} == {"a": 99, "b": 20}
+
+
+def test_hooks_fall_back_to_description(tmp_path, monkeypatch):
+    from facepipe import hooks
+
+    monkeypatch.setattr(hooks, "HOOKS_FILE", tmp_path / "hooks.json")
+    monkeypatch.setattr(hooks, "opening", lambda vid: None)
+    o = {"id": "x", "seed": "ambience", "title": "Rainy night", "views": 5, "subscribers": 10, "long": True,
+         "about": "A rainy autumn night by the window with soft jazz, crackling fire and rain for sleep and study."}
+    assert hooks.refresh([o]) == 1
+    assert "describes itself as" in hooks.examples(["ambience"])
+
+
+def test_glowup_beats_follow_the_voice_and_sound_fits(tmp_path):
+    import subprocess
+    import wave
+    import numpy as np
+    from facepipe import glowup
+
+    lines = []
+    for i, secs in enumerate((1.0, 1.5)):
+        p = tmp_path / f"l{i}.mp3"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"sine=f=300:d={secs}", str(p)], check=True)
+        lines.append(p)
+    ep = {"day": 1, "beats": [{"text": "a", "action": "alarm"}, {"text": "b", "action": "glow"}]}
+    ep["duration"] = glowup.time_beats(ep, lines)
+    assert ep["beats"][0]["t"] == glowup.TITLE_SECONDS
+    assert ep["beats"][1]["t"] > ep["beats"][0]["t"] + 1.0
+    assert abs(ep["duration"] - (glowup.TITLE_SECONDS + 2.5 + 2 * glowup.GAP + glowup.ASK_SECONDS)) < .15
+    with wave.open(str(glowup.soundtrack(ep, lines, tmp_path / "s.wav"))) as w:
+        sr, x = w.getframerate(), np.frombuffer(w.readframes(w.getnframes()), dtype="<i2") / 32767
+    assert abs(len(x) / 2 / sr - ep["duration"]) < .05 and abs(x).max() <= .9
+
+
+def test_glowup_top_comment_picks_most_liked(monkeypatch):
+    from facepipe import glowup
+
+    class R:
+        def raise_for_status(self): pass
+        def json(self):
+            mk = lambda t, n: {"snippet": {"topLevelComment": {"snippet": {"textDisplay": t, "likeCount": n, "authorDisplayName": "@ana"}}}}
+            return {"items": [mk("make him shower", 1500), mk("see http://spam", 9000), mk("haircut please", 40)]}
+
+    import requests
+    monkeypatch.setattr(requests, "get", lambda *a, **k: R())
+    c = glowup.top_comment("vid", "key")
+    assert c["text"] == "make him shower" and c["likes"] == "1.5K" and c["user"] == "ana"
+    assert glowup.bible("gopal")["days_total"] == 30
+
+
+def test_glowup_daily_waits_for_the_last_episode_then_drafts_from_its_comment(tmp_path, monkeypatch):
+    import json
+    from facepipe import glowup
+    from facepipe.config import load_config
+
+    cfg = load_config("gopal-glowup")
+    monkeypatch.setattr(type(cfg), "output_path", property(lambda self: tmp_path / "out"))
+    monkeypatch.setattr(glowup, "ROOT", tmp_path)
+    (tmp_path / "out").mkdir()
+    drafted = []
+
+    def fake_draft(c, slug, folder, comment):
+        drafted.append(comment)
+        data = {"day": glowup.state(tmp_path / "out")["day"] + 1, "title": "HE DID IT", "glow": .05}
+        (folder / "episode.json").write_text(json.dumps(data))
+        return data
+
+    monkeypatch.setattr(glowup, "draft", fake_draft)
+    monkeypatch.setattr(glowup, "top_comment", lambda vid, key, skip=(): {"text": "make him shave", "user": "a", "likes": "9"})
+    monkeypatch.setenv("YOUTUBE_API_KEY", "k")
+    assert glowup.daily(cfg, log=lambda *_: None) is not None and drafted == [None]       # day 1: no comment yet
+    assert glowup.daily(cfg, log=lambda *_: None) is None                                 # day 1 not uploaded yet
+    day1 = next((tmp_path / "out").glob("*/episode.json")).parent
+    (day1 / "metadata.json").write_text(json.dumps({"rendered_at": "2026-01-01T10:00:00"}))   # uploaded by hand
+    (tmp_path / "topics" / "gopal-glowup.series.json").unlink()                            # day 1 was approved
+    assert glowup.daily(cfg, log=lambda *_: None) is not None and drafted[-1] is None     # moves on, no comment
+    for f in (tmp_path / "out").glob("*/episode.json"):
+        if f.parent != day1:
+            import shutil
+            shutil.rmtree(f.parent)                                                    # (that draft was not merged)
+    (tmp_path / "topics" / "gopal-glowup.series.json").unlink()
+    (day1 / "metadata.json").write_text(json.dumps({"video_id": "abc"}))
+    assert glowup.daily(cfg, log=lambda *_: None) is not None
+    assert drafted[-1]["text"] == "make him shave"
+
+
+def test_glowup_lint_catches_weak_episodes():
+    from facepipe import glowup
+
+    ep = {"title": "HE SHAVED", "sign": "BEARD: EVICTED", "ask": "What next?", "comment": {"text": "please shave him"},
+          "beats": [{"text": "You said: shave him, please.", "action": "none"}, {"text": "The razor looked scared.", "action": "jolt"},
+                    {"text": "Then the mirror looked scared.", "action": "none"}, {"text": "Gopal has a chin now.", "action": "glow"}]}
+    assert glowup.lint_episode(ep) == []
+    ep["beats"][3]["action"] = "none"
+    ep["sign"] = "A VERY LONG SIGN WITHOUT A COLON"
+    assert len(glowup.lint_episode(ep)) == 2

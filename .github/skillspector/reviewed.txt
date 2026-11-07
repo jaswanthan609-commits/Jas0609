@@ -1,0 +1,8 @@
+# Skills that SkillSpector scores above 50 and that were read by hand. Format: <skill>: <why its findings are accepted>
+# Running the "Skills scan" workflow with mode=baseline writes exact fingerprint baselines for these skills into
+# .github/skillspector/baselines/. Fingerprints are bound to the file contents and the scanner version, so any edit
+# to one of these skills brings its findings back and the scan fails until it is reviewed again.
+skill-creator: Anthropic's own skill. Env "harvesting" only copies os.environ minus CLAUDECODE to run claude -p; the .claude lookup finds the project root; subprocess calls use argument lists; the HTML is the eval viewer. Reviewed 2026-11-05.
+real-sound: Our audio skill. subprocess calls are ffmpeg/ffprobe with argument lists on local media paths; the uninspected references are its own scripts and the earshot CLI; urllib only downloads licensed sound files. Reviewed 2026-11-05.
+hyperframes: HeyGen HyperFrames docs. The hidden instructions are HTML developer comments in caption presets; npx hyperframes is the vendor CLI (projects pin its version); the anti-refusal hit is a QA rule about blank renders. Reviewed 2026-11-05.
+hyperframes-cli: HyperFrames CLI reference. Credential access is a prerequisites line (AWS credentials for Lambda renders, which we do not use); tool abuse is the documented cloud delete command; npx hyperframes is the vendor CLI. Reviewed 2026-11-05.

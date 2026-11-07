@@ -42,6 +42,13 @@ channels:
     short_days: []
     est_long_usd: 0.01
 
+  # Gopal's Glow Up: one original cartoon Short a day (one Claude call, Kokoro voice, rendered for free).
+  # The next day is only drafted once the last one is on YouTube, so the top comment can pick it.
+  - slug: gopal-glowup
+    long_days: []
+    short_days: [mon, tue, wed, thu, fri, sat, sun]
+    est_short_usd: 0.03
+
   - slug: nri-money
     paused: true
     long_days: [tue, thu, sat]

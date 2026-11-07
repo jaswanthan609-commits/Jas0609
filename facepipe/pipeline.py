@@ -142,6 +142,8 @@ def render(
             'then set "reviewed": true (or pass --no-review).'
         )
     folder = script_path.parent
+    if cfg.visual_mode == "glowup":
+        return _render_glowup(cfg, folder, vs, log)
     topic_file = folder / "topic.txt"
     if fmt is None:
         fmt = topic_file.read_text(encoding="utf-8").split("\n")[0] if topic_file.exists() else "short"
@@ -226,6 +228,21 @@ def _render_ambience(cfg: ChannelConfig, folder: Path, vs, offline: bool, log) -
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     log(f"  Done: {video}")
     return Result(folder=folder, video=video, thumbnail=thumb, script=vs)
+
+
+def _render_glowup(cfg: ChannelConfig, folder: Path, vs, log) -> Result:
+    from . import glowup
+
+    video = glowup.render(folder, lambda text, out: voice.synthesize(cfg, text, out), log=log)
+    ep = json.loads((folder / "episode.json").read_text(encoding="utf-8"))
+    meta_path = folder / "metadata.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    meta.update(channel=cfg.slug, title=vs.title, description=vs.description, tags=vs.tags, format="short",
+                language=cfg.language, duration=ep.get("duration"), day=ep["day"],
+                rendered_at=datetime.now().isoformat(timespec="seconds"), offline=False)
+    meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    log(f"  Done: {video}")
+    return Result(folder=folder, video=video, thumbnail=folder / "thumbnail.jpg", script=vs)
 
 
 def make_offline(cfg: ChannelConfig, fmt: str = "short", log=print) -> Result:

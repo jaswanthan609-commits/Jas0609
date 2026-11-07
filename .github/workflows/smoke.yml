@@ -38,7 +38,8 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: python -c "from facepipe import breakout, config; o = breakout.find_outliers(config.load_config('ai-tools'), keep=3); print([(x['title'], x['score']) for x in o])"
       - name: Market data reaches Yahoo Finance
-        run: python -c "from trader import bot; h, last = bot.fetch_history(['NIFTYBEES.NS', 'ITC.NS']); print(last, {t: s[-1] for t, s in h.items()})"
+        run: |
+          python -c "from trader import bot; h, last = bot.fetch_history(['NIFTYBEES.NS', 'ITC.NS']); print(last, {t: s[-1] for t, s in h.items()})"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

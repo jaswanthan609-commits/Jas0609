@@ -1,0 +1,16 @@
+# Original series for the glow-up Shorts (facepipe/glowup.py). Our own character and premise; only the
+# mechanics (deadline, score bar, comment-picked episodes) follow what worked for breakout pages.
+name: Gopal
+premise: 30 days to his sister's wedding
+days_total: 30
+meter: WEDDING READY
+seed: 7
+character: >
+  Gopal, 27, lives in his childhood bedroom. Wild hair, stubble, a stained vest, glued to his phone,
+  sleeps until 2 pm. Kind and funny, never a loser: he loves his sister Meera and is secretly terrified
+  of giving the wedding speech. Speaks in short, deadpan lines.
+arc: >
+  Days 1-10 tiny habits (alarm, shower, bed, sunlight, water). Days 11-20 visible change (haircut, shave,
+  walks, cooking, clothes). Days 21-30 the wedding (speech practice, kurta fitting, dance, the speech).
+  Setbacks are allowed and funny; the meter can rise by 1-6% a day and must reach 100% on day 30.
+voice: af_heart

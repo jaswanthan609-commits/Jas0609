@@ -62,7 +62,8 @@ def scan(days: int | None = None, seeds: list[str] | None = None) -> dict:
             rows[v["id"]].update(
                 title=v["snippet"]["title"], channel=v["snippet"].get("channelTitle", ""),
                 channel_id=v["snippet"]["channelId"], published=v["snippet"]["publishedAt"][:10],
-                views=int(v["statistics"].get("viewCount", 0)), seconds=_seconds(v["contentDetails"].get("duration")))
+                views=int(v["statistics"].get("viewCount", 0)), seconds=_seconds(v["contentDetails"].get("duration")),
+                about=" ".join(v["snippet"].get("description", "").split())[:300])
     channels: dict[str, dict] = {}
     ids = sorted({r["channel_id"] for r in rows.values() if "channel_id" in r})
     for chunk in _chunks(ids):
@@ -80,7 +81,11 @@ def scan(days: int | None = None, seeds: list[str] | None = None) -> dict:
         r["long"] = r["seconds"] >= 180
         if r["views"] >= MIN_VIEWS and r["score"] >= MIN_RATIO and r["subscribers"] < MAX_SUBS:
             outliers.append(r)
-    outliers.sort(key=lambda r: r["views"], reverse=True)
+    return _rank(outliers, days, len(rows))
+
+
+def _rank(outliers: list[dict], days: int, checked: int) -> dict:
+    outliers = sorted(outliers, key=lambda r: r["views"], reverse=True)
     by_seed = defaultdict(list)
     for r in outliers:
         by_seed[r["seed"]].append(r)
@@ -89,12 +94,24 @@ def scan(days: int | None = None, seeds: list[str] | None = None) -> dict:
           "median_minutes": sorted(r["seconds"] for r in v)[len(v) // 2] // 60,
           "top": v[0]["title"], "top_views": v[0]["views"]} for s, v in by_seed.items()),
         key=lambda x: (x["young"] + x["long"], x["outliers"]), reverse=True)
-    return {"updated": datetime.now(timezone.utc).date().isoformat(), "days": days, "videos_checked": len(rows),
+    return {"updated": datetime.now(timezone.utc).date().isoformat(), "days": days, "videos_checked": checked,
             "ranking": ranking, "outliers": [o for v in by_seed.values() for o in v[:40]]}
 
 
 def save(result: dict) -> None:
+    """Merge with the last scan so a run cut short by the API quota never shrinks the research: outliers
+    still inside the window are kept unless this run saw them again (then the fresh numbers win)."""
     RESEARCH_DIR.mkdir(exist_ok=True)
+    if SCAN_FILE.exists():
+        old = json.loads(SCAN_FILE.read_text(encoding="utf-8"))
+        since = (datetime.now(timezone.utc) - timedelta(days=result["days"])).date().isoformat()
+        fresh = {o["id"] for o in result["outliers"]}
+        kept = [o for o in old.get("outliers", []) if o["id"] not in fresh and o.get("published", "") >= since]
+        if kept:
+            merged = _rank(result["outliers"] + kept, result["days"],
+                           max(result["videos_checked"], old.get("videos_checked", 0)))
+            merged["updated"] = result["updated"]
+            result.clear(); result.update(merged)
     SCAN_FILE.write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 

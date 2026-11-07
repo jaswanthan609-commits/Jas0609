@@ -47,6 +47,7 @@ jobs:
       - name: Draft what today's budget allows
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}   # the top comment that picks the next glow-up episode
         # config/autopilot.yaml decides which channels draft today, from the money left.
         run: python -m facepipe autopilot
 
@@ -69,7 +70,7 @@ jobs:
           set -e
           branch="drafts/$(date -u +%Y-%m-%d)"
           git checkout -b "$branch"
-          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json output/*/*/ambience.json; do
+          for f in output/*/*/script.json output/*/*/topic.txt output/*/*/critic.json output/*/*/ambience.json output/*/*/episode.json; do
             [ -e "$f" ] && git add -f "$f"
           done
           if git diff --cached --quiet; then echo "Nothing drafted today"; exit 0; fi
@@ -92,6 +93,16 @@ jobs:
                   for t in s["title_options"]:
                       print(f"- {t}")
                   print()
+              e = pathlib.Path(f).with_name("episode.json")
+              if e.exists():
+                  ep = json.loads(e.read_text(encoding="utf-8"))
+                  if ep.get("comment"):
+                      print(f"Answers the top comment: \"{ep['comment']['text']}\" ({ep['comment']['likes']} likes)\n")
+                  print(f"Place: {ep.get('place')}. Sign: **{ep.get('sign')}**. Meter {round(ep['glow_before'] * 100)}% to {round(ep['glow'] * 100)}%.\n")
+                  for b in ep["beats"]:
+                      print(f"> {b['text']}")
+                  print()
+                  continue
               print("Facts to check:")
               for fact in s.get("facts_to_check", []) or ["(none listed)"]:
                   print(f"- [ ] {fact}")
@@ -140,6 +151,9 @@ jobs:
                The close must invite the next video in one line, not beg for subscribes.
             3. Titles and thumbnail_text: check with .claude/skills/yt-package. Keep each title under 95 characters.
             4. Facts: every claim in facts_to_check stays in the list; never invent a source.
+               Glow-up episodes (a folder with episode.json): the beats are the script. Check that the first beat names
+               yesterday's top comment, every line lands a joke or a turn, the title is the outcome as a poster line and
+               the sign is a kind, deadpan "THING: VERDICT" gag. Never copy another page's captions or character.
             5. Fix what fails by editing the JSON in place, keeping the schema. Run `python -m facepipe lint <folder>`
                on every folder until it prints ok. Do not touch anything outside output/.
             6. Commit as "Editor pass" and push to ${{ needs.drafts.outputs.branch }}.
