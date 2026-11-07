@@ -1,0 +1,23 @@
+# Channel: Gopal's Glow Up. An original cartoon Shorts series: Gopal has 30 days to get ready for his sister's
+# wedding, one small change a day, and the top comment on yesterday's Short picks today's change.
+# Format evidence (2026-11-05 and 2026-11-07): the Instagram page 30daystofix reached 264K followers with 7 reels
+# (1.3M-8.4M views each) on the same mechanics: a deadline, a days-left + % meter HUD, the outcome as a big poster
+# title on the cover, a sign gag, a new place each episode and the top comment driving the plot. We use the
+# mechanics only; the character, premise, art and jokes are ours (config/series/gopal.yaml).
+name: "Gopal's Glow Up"
+niche: "an original animated comedy series: a lovable slacker has 30 days to get ready for his sister's wedding, one change a day, chosen by the comments"
+language: en
+audience: "Shorts viewers worldwide, 16-35, who follow animated challenge and glow-up stories"
+tone: "warm, deadpan, funny, never cruel"
+visual_mode: glowup
+series: gopal
+voice_provider: kokoro
+voice: af_heart
+fallback_voice: en-US-AriaNeural
+voice_rate: 1.08
+default_tags: ["glow up", "animation", "cartoon", "30 days", "challenge", "shorts"]
+category_id: "23"          # Comedy
+publish_times: ["18:30"]   # IST; the next morning's 06:00 draft reads ~12 hours of comments
+research_queries: ["glow up animation", "30 days glow up", "animated story shorts"]
+claude_model: claude-sonnet-5-5
+claude_effort: medium

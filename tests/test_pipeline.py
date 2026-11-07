@@ -30,8 +30,9 @@ def isolated_ledger(tmp_path, monkeypatch):
 
 
 def test_english_channels_load():
-    assert list_channels() == ["ai-tools", "cozy-hours", "kids-stories", "nri-money", "sleepy-history",
+    assert list_channels() == ["ai-tools", "cozy-hours", "gopal-glowup", "kids-stories", "nri-money", "sleepy-history",
                                "what-really-happened"]
+    assert load_config("gopal-glowup").visual_mode == "glowup" and load_config("gopal-glowup").series == "gopal"
     assert load_config("sleepy-history").long_format == "sleep"
     assert {load_config(c).language for c in list_channels()} == {"en"}
     kids = load_config("kids-stories")
@@ -242,17 +243,17 @@ def test_budget_plan_by_weekday_and_unlock():
     ap = _autopilot()
     # 2026-11-04 line-up from the cross-niche scan; NRI money paused.
     monday = budget.plan(ap, today=date(2026, 11, 9))
-    assert monday.jobs == [("sleepy-history", 1, 0)]
+    assert monday.jobs == [("sleepy-history", 1, 0), ("gopal-glowup", 0, 1)]
     tuesday = budget.plan(ap, today=date(2026, 11, 10))
-    assert tuesday.jobs == [("what-really-happened", 1, 1), ("cozy-hours", 1, 0)]
+    assert tuesday.jobs == [("what-really-happened", 1, 1), ("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
     sunday = budget.plan(ap, today=date(2026, 11, 15))
-    assert sunday.jobs == [("cozy-hours", 1, 0)]
-    assert budget.active_channels(ap) == ["sleepy-history", "what-really-happened", "cozy-hours"]
+    assert sunday.jobs == [("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
+    assert budget.active_channels(ap) == ["sleepy-history", "what-really-happened", "cozy-hours", "gopal-glowup"]
     assert "kids-stories" not in [ch.slug for ch in ap.channels]
 
     # Earnings gates still work if a channel sets one.
     ap.channels[0].unlock_at_usd = 50
-    assert budget.plan(ap, today=date(2026, 11, 9)).jobs == []
+    assert budget.plan(ap, today=date(2026, 11, 9)).jobs == [("gopal-glowup", 0, 1)]
     budget.save_revenue("nri-money", 60 * ap.usd_inr, "2026-11-04", "2026-12-20")
     assert ("sleepy-history", 1, 0) in budget.plan(ap, today=date(2026, 11, 9)).jobs
     assert budget.available(ap) == pytest.approx(130)
@@ -270,7 +271,7 @@ def test_budget_slows_down_and_stops():
     budget.record("claude", "nri-money", 69.0)  # $1 left -> about $0.12 a week
     tight = budget.plan(ap, today=date(2026, 11, 10), now=later)
     # the expensive long video is dropped first; the Short and the near-free ambience video stay
-    assert tight.jobs == [("what-really-happened", 0, 1), ("cozy-hours", 1, 0)]
+    assert tight.jobs == [("what-really-happened", 0, 1), ("cozy-hours", 1, 0), ("gopal-glowup", 0, 1)]
     budget.record("claude", "nri-money", 5.0)
     broke = budget.plan(ap, today=date(2026, 11, 10), now=later)
     assert broke.jobs == [] and "out of money" in broke.notes[-1]
@@ -654,3 +655,43 @@ def test_glowup_top_comment_picks_most_liked(monkeypatch):
     c = glowup.top_comment("vid", "key")
     assert c["text"] == "make him shower" and c["likes"] == "1.5K" and c["user"] == "ana"
     assert glowup.bible("gopal")["days_total"] == 30
+
+
+def test_glowup_daily_waits_for_the_last_episode_then_drafts_from_its_comment(tmp_path, monkeypatch):
+    import json
+    from facepipe import glowup
+    from facepipe.config import load_config
+
+    cfg = load_config("gopal-glowup")
+    monkeypatch.setattr(type(cfg), "output_path", property(lambda self: tmp_path / "out"))
+    monkeypatch.setattr(glowup, "ROOT", tmp_path)
+    (tmp_path / "out").mkdir()
+    drafted = []
+
+    def fake_draft(c, slug, folder, comment):
+        drafted.append(comment)
+        data = {"day": glowup.state(tmp_path / "out")["day"] + 1, "title": "HE DID IT", "glow": .05}
+        (folder / "episode.json").write_text(json.dumps(data))
+        return data
+
+    monkeypatch.setattr(glowup, "draft", fake_draft)
+    monkeypatch.setattr(glowup, "top_comment", lambda vid, key, skip=(): {"text": "make him shave", "user": "a", "likes": "9"})
+    monkeypatch.setenv("YOUTUBE_API_KEY", "k")
+    assert glowup.daily(cfg, log=lambda *_: None) is not None and drafted == [None]       # day 1: no comment yet
+    assert glowup.daily(cfg, log=lambda *_: None) is None                                 # day 1 not uploaded yet
+    day1 = next((tmp_path / "out").glob("*/episode.json")).parent
+    (day1 / "metadata.json").write_text(json.dumps({"video_id": "abc"}))
+    assert glowup.daily(cfg, log=lambda *_: None) is not None
+    assert drafted[-1]["text"] == "make him shave"
+
+
+def test_glowup_lint_catches_weak_episodes():
+    from facepipe import glowup
+
+    ep = {"title": "HE SHAVED", "sign": "BEARD: EVICTED", "ask": "What next?", "comment": {"text": "please shave him"},
+          "beats": [{"text": "You said: shave him, please.", "action": "none"}, {"text": "The razor looked scared.", "action": "jolt"},
+                    {"text": "Then the mirror looked scared.", "action": "none"}, {"text": "Gopal has a chin now.", "action": "glow"}]}
+    assert glowup.lint_episode(ep) == []
+    ep["beats"][3]["action"] = "none"
+    ep["sign"] = "A VERY LONG SIGN WITHOUT A COLON"
+    assert len(glowup.lint_episode(ep)) == 2

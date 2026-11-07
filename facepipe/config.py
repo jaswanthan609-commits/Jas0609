@@ -39,7 +39,7 @@ FORMATS = {
     "sleep": (1920, 1080, 7200),  # 2-hour sleep videos, written chapter by chapter
     "ambience": (1920, 1080, 7800),  # 130-minute cozy scene + original music (breakout median: 129 min)
 }
-VISUAL_MODES = {"stock", "ai_images", "public_art", "ambience"}
+VISUAL_MODES = {"stock", "ai_images", "public_art", "ambience", "glowup"}
 LONG_FORMATS = [f for f in FORMATS if f != "short"]
 
 
@@ -86,6 +86,7 @@ class ChannelConfig:
     # Affiliate or referral links added to matching video descriptions (see facepipe/affiliate.py).
     # Each item: {label, url, keywords: [...], always: false}. Empty urls are skipped.
     affiliate_links: list[dict] = field(default_factory=list)
+    series: str = ""  # visual_mode glowup: the series bible in config/series/<series>.yaml
 
     @property
     def voice_name(self) -> str:

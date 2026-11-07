@@ -43,6 +43,13 @@ jobs:
             npx --prefix render3d playwright install --with-deps chromium
           fi
 
+      - name: Install the 2D cartoon renderer if a channel uses it
+        run: |
+          if grep -q "visual_mode: glowup" config/channels/*.yaml; then
+            npm install --prefix render2d --no-audit --no-fund
+            npx --prefix render2d playwright install --with-deps chromium
+          fi
+
       - uses: actions/cache@v4
         with:
           path: .earshot

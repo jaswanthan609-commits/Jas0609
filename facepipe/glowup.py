@@ -36,6 +36,7 @@ ASK_SECONDS = 3.4       # the "what should he fix tomorrow?" card at the end
 
 Mood = Literal["sleep", "sad", "shock", "neutral", "happy", "proud"]
 Action = Literal["none", "alarm", "jolt", "glow"]
+Place = Literal["bedroom", "bathroom", "gym", "shop", "kitchen", "barber", "outside"]
 
 
 class Beat(BaseModel):
@@ -50,6 +51,10 @@ class Episode(BaseModel):
     title: str = Field(description="The outcome in 2-5 words, upper case, past tense, e.g. 'HE WOKE UP BEFORE NOON'.")
     beats: list[Beat] = Field(description="4-6 beats, 12-18 seconds of narration in total.")
     glow_gain: float = Field(description="How much the meter rises today, 0.01-0.06. Bigger changes earn more.")
+    place: Place = Field("bedroom", description="Where today's change happens; the set changes with it.")
+    sign: str = Field(description="The sign gag he holds up, 'THING: VERDICT', max 18 characters, funny and kind, "
+                      "e.g. 'BREATH: LEGAL', 'HAIR: SURRENDERED', 'SLEEP: 14 HOURS'.")
+    sign_good: bool = Field(True, description="True for a green win sign, False for a red setback sign.")
     ask: str = Field(description="The closing question that invites tomorrow's comment, under 40 characters.")
     tags: list[str] = Field(default_factory=list)
 
@@ -58,16 +63,66 @@ def bible(slug: str) -> dict:
     return yaml.safe_load((SERIES_DIR / f"{slug}.yaml").read_text(encoding="utf-8"))
 
 
-def state(slug: str) -> dict:
-    """Where the series stands: the last day drafted and the meter, from the episodes on disk."""
+def state(out: Path) -> dict:
+    """Where the series stands, from the approved episodes on disk (a drafts branch that was never merged
+    leaves nothing on main): the last day, its meter, its folder and the story so far."""
     days = []
-    for f in (ROOT / "output" / slug).glob("*/episode.json"):
+    for f in out.glob("*/episode.json"):
         ep = json.loads(f.read_text(encoding="utf-8"))
+        ep["_folder"] = f.parent
         days.append(ep)
     if not days:
-        return {"day": 0, "glow": 0.0, "story": []}
+        return {"day": 0, "glow": 0.0, "story": [], "folder": None}
     days.sort(key=lambda e: e["day"])
-    return {"day": days[-1]["day"], "glow": days[-1]["glow"], "story": [f"Day {e['day']}: {e['title']}" for e in days]}
+    last = days[-1]
+    return {"day": last["day"], "glow": last["glow"], "folder": last["_folder"],
+            "story": [f"Day {e['day']}: {e['title']} ({e.get('place', 'bedroom')}; sign: {e.get('sign', '')})" for e in days]}
+
+
+PENDING_DAYS = 3   # a drafted episode waits this long for approval before the day is drafted again
+
+
+def daily(cfg, log=print) -> Path | None:
+    """The autopilot's daily step for a series channel: draft the next episode once the last one is out.
+
+    Day N+1 is only written after Day N is uploaded, so its top comment can pick the change. Returns the
+    new script.json path, or None when there is nothing to do today (and says why)."""
+    import os
+    from datetime import date, datetime
+
+    slug = cfg.series
+    b, st = bible(slug), state(cfg.output_path)
+    marker = ROOT / "topics" / f"{cfg.slug}.series.json"
+    pending = json.loads(marker.read_text(encoding="utf-8")) if marker.exists() else {}
+    if st["day"] >= b["days_total"]:
+        log(f"[{cfg.slug}] the series is finished ({st['day']} days)")
+        return None
+    if pending.get("day", 0) > st["day"] and \
+            (date.today() - date.fromisoformat(pending["drafted"])).days < PENDING_DAYS:
+        log(f"[{cfg.slug}] Day {pending['day']} is waiting for approval; nothing new today")
+        return None
+    comment = None
+    if st["day"]:
+        meta_path = st["folder"] / "metadata.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+        if not meta.get("video_id"):
+            log(f"[{cfg.slug}] Day {st['day']} is not on YouTube yet; Day {st['day'] + 1} waits for its top comment")
+            return None
+        key = os.environ.get("YOUTUBE_API_KEY")
+        if key:
+            try:
+                comment = top_comment(meta["video_id"], key, skip=tuple(b.get("skip_words", [])))
+            except Exception as exc:  # no comment is fine: the bible's arc picks the change instead
+                log(f"[{cfg.slug}] top comment unavailable: {exc}")
+    day = st["day"] + 1
+    folder = cfg.output_path / f"{datetime.now():%Y%m%d-%H%M%S}-short-day-{day:02d}"
+    folder.mkdir(parents=True, exist_ok=True)
+    data = draft(cfg, slug, folder, comment)
+    (folder / "topic.txt").write_text(f"short\nDay {day}: {data['title']}\n", encoding="utf-8")
+    marker.parent.mkdir(exist_ok=True)
+    marker.write_text(json.dumps({"day": day, "drafted": date.today().isoformat()}), encoding="utf-8")
+    log(f"[{cfg.slug}] Day {day}: {data['title']}" + (f" (from the comment \"{comment['text']}\")" if comment else ""))
+    return folder / "script.json"
 
 
 def top_comment(video_id: str, api_key: str, skip: tuple[str, ...] = ()) -> dict | None:
@@ -92,10 +147,36 @@ def top_comment(video_id: str, api_key: str, skip: tuple[str, ...] = ()) -> dict
     return best
 
 
+def lint_episode(ep: dict) -> list[str]:
+    """Free rule checks for a drafted episode (the Claude Code editor pass fixes what this lists)."""
+    problems = []
+    beats = ep.get("beats", [])
+    if not 4 <= len(beats) <= 6:
+        problems.append(f"{len(beats)} beats; write 4-6.")
+    for i, b in enumerate(beats, 1):
+        n = len(b["text"].split())
+        if not 3 <= n <= 10:
+            problems.append(f"Beat {i} has {n} words; keep each line 3-9 words: \"{b['text']}\"")
+    glows = sum(b.get("action") == "glow" for b in beats)
+    if glows != 1:
+        problems.append(f"{glows} beats have action glow; exactly one (the win) should.")
+    if not 2 <= len(ep.get("title", "").split()) <= 6:
+        problems.append(f"Title \"{ep.get('title')}\" should be the outcome in 2-5 words.")
+    sign = ep.get("sign", "")
+    if ":" not in sign or len(sign) > 22:
+        problems.append(f"Sign \"{sign}\" should read 'THING: VERDICT' in at most 18 characters.")
+    if len(ep.get("ask", "")) > 40:
+        problems.append("The closing question is over 40 characters.")
+    if ep.get("comment") and not any(w.lower() in " ".join(b["text"] for b in beats).lower()
+                                     for w in ep["comment"]["text"].split() if len(w) > 4):
+        problems.append("The episode never answers yesterday's top comment; the first beat should name it.")
+    return problems
+
+
 def draft(cfg, slug: str, folder: Path, comment: dict | None = None) -> dict:
     from .script import VideoScript, _parse, save_script
 
-    b, st = bible(slug), state(slug)
+    b, st = bible(slug), state(cfg.output_path)
     day = st["day"] + 1
     prompt = (f"Write Day {day} of {b['days_total']} of our original cartoon Shorts series.\n\n"
               f"Series bible:\n{yaml.safe_dump(b, allow_unicode=True)}\n"
@@ -103,12 +184,15 @@ def draft(cfg, slug: str, folder: Path, comment: dict | None = None) -> dict:
               f"\nMeter now: {round(st['glow'] * 100)}%.\n" +
               (f"\nThe top comment on yesterday's episode, which today's change must answer: \"{comment['text']}\"\n"
                if comment else "") +
+              "\nThe title is the outcome, as a big poster line ('HE TOUCHED GRASS'). Pick the place where the change "
+              "happens. The sign is a deadpan label gag on the result. "
               "\nOne small, visible change today. Funny, warm, never cruel; he is likeable even at his worst. "
               "Narration is short spoken lines that land a joke or a turn every 3 seconds.")
     ep = _parse(cfg, prompt, Episode, max_tokens=3000)
     data = {"series": slug, "name": b["name"], "day": day, "days_total": b["days_total"], "meter": b["meter"],
             "premise": b["premise"], "glow_before": st["glow"], "glow": round(min(1.0, st["glow"] + ep.glow_gain), 3),
             "title": ep.title, "beats": [x.model_dump() for x in ep.beats], "comment": comment, "ask": ep.ask,
+            "place": ep.place, "sign": ep.sign.upper()[:22], "sign_good": ep.sign_good,
             "seed": b.get("seed", 1)}
     (folder / "episode.json").write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     title = f"Day {day}: {ep.title.title()} | {b['premise'].title()}"
@@ -227,4 +311,10 @@ def render(folder: Path, synth: Callable[[str, Path], float], log=print) -> Path
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(work / "picture.mp4"), "-i", str(work / "sound.wav"),
                     "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-af", "loudnorm=I=-14:TP=-1.5", "-c:a", "aac",
                     "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(video)], check=True)
+    # the cover (DAY N + the outcome + the sign) is the first frame; keep it as the thumbnail too
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(work / "picture.mp4"), "-frames:v", "1", "-q:v", "3",
+                    str(folder / "thumbnail.jpg")], check=True)
+    ep_out = json.loads((folder / "episode.json").read_text(encoding="utf-8"))
+    ep_out["duration"] = ep["duration"]
+    (folder / "episode.json").write_text(json.dumps(ep_out, indent=2, ensure_ascii=False), encoding="utf-8")
     return video
