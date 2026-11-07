@@ -680,6 +680,14 @@ def test_glowup_daily_waits_for_the_last_episode_then_drafts_from_its_comment(tm
     assert glowup.daily(cfg, log=lambda *_: None) is not None and drafted == [None]       # day 1: no comment yet
     assert glowup.daily(cfg, log=lambda *_: None) is None                                 # day 1 not uploaded yet
     day1 = next((tmp_path / "out").glob("*/episode.json")).parent
+    (day1 / "metadata.json").write_text(json.dumps({"rendered_at": "2026-01-01T10:00:00"}))   # uploaded by hand
+    (tmp_path / "topics" / "gopal-glowup.series.json").unlink()                            # day 1 was approved
+    assert glowup.daily(cfg, log=lambda *_: None) is not None and drafted[-1] is None     # moves on, no comment
+    for f in (tmp_path / "out").glob("*/episode.json"):
+        if f.parent != day1:
+            import shutil
+            shutil.rmtree(f.parent)                                                    # (that draft was not merged)
+    (tmp_path / "topics" / "gopal-glowup.series.json").unlink()
     (day1 / "metadata.json").write_text(json.dumps({"video_id": "abc"}))
     assert glowup.daily(cfg, log=lambda *_: None) is not None
     assert drafted[-1]["text"] == "make him shave"

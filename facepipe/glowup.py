@@ -105,11 +105,15 @@ def daily(cfg, log=print) -> Path | None:
     if st["day"]:
         meta_path = st["folder"] / "metadata.json"
         meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+        rendered = meta.get("rendered_at")
         if not meta.get("video_id"):
-            log(f"[{cfg.slug}] Day {st['day']} is not on YouTube yet; Day {st['day'] + 1} waits for its top comment")
-            return None
+            # Uploaded by hand (no video id here) or uploads not switched on: wait a day for a comment to be
+            # read, then keep the series moving without one.
+            if not rendered or (datetime.now() - datetime.fromisoformat(rendered)).days < 1:
+                log(f"[{cfg.slug}] Day {st['day']} is not on YouTube yet; Day {st['day'] + 1} waits for its top comment")
+                return None
         key = os.environ.get("YOUTUBE_API_KEY")
-        if key:
+        if key and meta.get("video_id"):
             try:
                 comment = top_comment(meta["video_id"], key, skip=tuple(b.get("skip_words", [])))
             except Exception as exc:  # no comment is fine: the bible's arc picks the change instead
